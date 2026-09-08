@@ -61,7 +61,7 @@ export function ListView({ owner, members, selfId, emptyHint }: Props) {
 
   return (
     <>
-      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginBottom: 18 }}>
+      <div className="list-toolbar">
         <div className="seg">
           {(["all", "movie", "tv"] as TypeFilter[]).map((t) => (
             <button key={t} aria-pressed={type === t} onClick={() => setType(t)}>

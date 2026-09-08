@@ -450,7 +450,7 @@ h3 {
 
 /* ---------- inputs ---------- */
 .input,
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])),
 textarea,
 select {
   width: 100%;

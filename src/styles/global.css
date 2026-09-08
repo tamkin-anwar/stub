@@ -1463,13 +1463,15 @@ dialog::backdrop {
   }
   .landing-bg,
   .auth-shell {
-    padding-top: max(40px, env(safe-area-inset-top));
+    /* always clear the status bar / Dynamic Island, and add more when
+       the device actually reports an inset */
+    padding-top: max(60px, calc(env(safe-area-inset-top) + 22px));
   }
 
   /* app nav: one row. Brand and avatar stay put, the section links
      become a horizontal scroll strip in between. */
   .nav {
-    padding-top: env(safe-area-inset-top);
+    padding-top: max(18px, env(safe-area-inset-top));
   }
   .nav .nav-inner {
     gap: 12px;

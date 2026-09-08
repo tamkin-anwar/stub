@@ -136,6 +136,24 @@ h3 {
   margin: 0;
 }
 
+/* Instrument Serif runs tight and narrow at display sizes; give every
+   serif heading a little tracking and vertical air so it doesn't read
+   as cramped. */
+.display,
+.page-title,
+.brand,
+.hero h1,
+.feature h3,
+.detail-hero h1,
+.d-body h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0.014em;
+}
+.display {
+  font-weight: 400;
+  line-height: 1.14;
+}
+
 /* ---------- layout ---------- */
 .wrap {
   max-width: 1180px;
@@ -157,7 +175,7 @@ h3 {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: 0.005em;
+  line-height: 1.1;
 }
 .page-sub {
   color: var(--dim);
@@ -369,22 +387,17 @@ h3 {
 
 /* ---------- inputs ---------- */
 .input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="month"],
-input[type="number"],
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
 textarea,
 select {
   width: 100%;
   background: var(--surface-2);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 11px;
   color: var(--text);
   font: inherit;
-  font-size: 14px;
-  padding: 10px 12px;
+  font-size: 14.5px;
+  padding: 11px 13px;
   outline: none;
 }
 textarea {
@@ -397,15 +410,15 @@ select:focus {
   border-color: var(--accent);
 }
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 17px;
 }
 .field > label {
   display: block;
   font-size: 11px;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--dim);
-  margin-bottom: 7px;
+  margin-bottom: 9px;
 }
 .search-box {
   display: flex;
@@ -713,21 +726,23 @@ dialog::backdrop {
 
 /* ---------- landing ---------- */
 .hero {
-  padding: 8vh 0 6vh;
+  padding: 9vh 0 6vh;
   text-align: center;
 }
 .hero h1 {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(40px, 8vw, 84px);
-  line-height: 1;
-  letter-spacing: 0.01em;
+  line-height: 1.06;
+  letter-spacing: 0.016em;
+  text-wrap: balance;
 }
 .hero p {
-  max-width: 44ch;
-  margin: 18px auto 28px;
+  max-width: 46ch;
+  margin: 22px auto 30px;
   color: var(--dim);
   font-size: clamp(15px, 2.4vw, 18px);
+  line-height: 1.62;
 }
 .hero .cta {
   display: inline-flex;
@@ -744,23 +759,25 @@ dialog::backdrop {
 .feature {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 22px 22px 24px;
   background: var(--surface);
 }
 .feature h3 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 22px;
-  margin-bottom: 6px;
+  font-size: 23px;
+  line-height: 1.16;
+  margin-bottom: 8px;
 }
 .feature p {
   color: var(--dim);
-  font-size: 13.5px;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 /* ---------- auth ---------- */
 .auth-shell {
-  max-width: 380px;
+  max-width: 410px;
   margin: 9vh auto;
   padding: 0 20px;
 }
@@ -768,7 +785,7 @@ dialog::backdrop {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 26px;
+  padding: 32px 34px;
   box-shadow: var(--shadow);
 }
 

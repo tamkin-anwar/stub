@@ -46,7 +46,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
         Stub
       </Link>
       <div className="auth-card">
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, marginBottom: 4 }}>
+        <h1 className="display" style={{ fontSize: 29, marginBottom: 6 }}>
           {mode === "signup" ? "Create your account" : "Welcome back"}
         </h1>
         <p className="muted" style={{ fontSize: 13.5, marginBottom: 18 }}>

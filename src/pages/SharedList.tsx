@@ -90,7 +90,7 @@ export function SharedList() {
         </>
       ) : (
         <div className="card" style={{ maxWidth: 460 }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 22, marginBottom: 6 }}>
+          <h3 className="display" style={{ fontSize: 23, marginBottom: 8 }}>
             Start a shared list
           </h3>
           <p className="muted" style={{ fontSize: 13.5, marginBottom: 14 }}>

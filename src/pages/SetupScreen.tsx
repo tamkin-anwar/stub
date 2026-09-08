@@ -8,7 +8,7 @@ export function SetupScreen() {
         Stub
       </span>
       <div className="auth-card">
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 26, marginBottom: 8 }}>
+        <h1 className="display" style={{ fontSize: 27, marginBottom: 8 }}>
           Almost there
         </h1>
         <p className="muted" style={{ fontSize: 14, marginBottom: 14 }}>

@@ -82,7 +82,7 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
         </div>
 
         <div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 27 }}>
+          <h2 className="display" style={{ fontSize: 27 }}>
             {entry.title.name}
           </h2>
           <div className="page-sub" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>

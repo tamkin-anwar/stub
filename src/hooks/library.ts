@@ -1,10 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   airingShows,
+  browseTitles,
   nowPlayingMovies,
   searchTitles,
   titleDetail,
   trendingTitles,
+  type BrowseFeed,
+  type MediaFilter,
 } from "../lib/tmdb";
 import type { MediaType } from "../lib/types";
 
@@ -18,6 +21,28 @@ export function useNowPlaying() {
 
 export function useAiringShows() {
   return useQuery({ queryKey: ["tmdb", "airing"], queryFn: airingShows, staleTime: 30 * 60_000 });
+}
+
+export function useBrowse(params: {
+  feed: BrowseFeed;
+  media: MediaFilter;
+  movieGenre?: number;
+  tvGenre?: number;
+}) {
+  return useInfiniteQuery({
+    queryKey: [
+      "tmdb",
+      "browse",
+      params.feed,
+      params.media,
+      params.movieGenre ?? null,
+      params.tvGenre ?? null,
+    ],
+    queryFn: ({ pageParam }) => browseTitles({ ...params, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    staleTime: 15 * 60_000,
+  });
 }
 
 export function useTmdbSearch(term: string) {

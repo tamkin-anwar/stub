@@ -50,6 +50,14 @@ interface RawResult {
   release_date?: string;
   first_air_date?: string;
   vote_average?: number;
+  vote_count?: number;
+  popularity?: number;
+}
+
+interface RawPage {
+  results: RawResult[];
+  page: number;
+  total_pages: number;
 }
 
 function normalize(raw: RawResult, forced?: MediaType): TmdbTitle | null {
@@ -86,6 +94,122 @@ export async function nowPlayingMovies(): Promise<TmdbTitle[]> {
 export async function airingShows(): Promise<TmdbTitle[]> {
   const data = await tmdb<{ results: RawResult[] }>("/tv/on_the_air");
   return data.results.map((r) => normalize(r, "tv")).filter((x): x is TmdbTitle => x !== null);
+}
+
+// ---------------------------------------------------------------------------
+// Browse: paginated feeds and genre filtering for the Library
+// ---------------------------------------------------------------------------
+export type BrowseFeed = "trending" | "popular" | "top_rated" | "now_playing" | "on_air";
+export type MediaFilter = "all" | MediaType;
+
+export interface GenreOption {
+  name: string;
+  movieId?: number;
+  tvId?: number;
+}
+
+/** Curated genres with the TMDB ids for each side. Some are movie- or tv-only. */
+export const GENRES: GenreOption[] = [
+  { name: "Action", movieId: 28, tvId: 10759 },
+  { name: "Comedy", movieId: 35, tvId: 35 },
+  { name: "Drama", movieId: 18, tvId: 18 },
+  { name: "Crime", movieId: 80, tvId: 80 },
+  { name: "Thriller", movieId: 53 },
+  { name: "Mystery", movieId: 9648, tvId: 9648 },
+  { name: "Sci-Fi", movieId: 878, tvId: 10765 },
+  { name: "Fantasy", movieId: 14, tvId: 10765 },
+  { name: "Horror", movieId: 27 },
+  { name: "Romance", movieId: 10749 },
+  { name: "Adventure", movieId: 12, tvId: 10759 },
+  { name: "Animation", movieId: 16, tvId: 16 },
+  { name: "Documentary", movieId: 99, tvId: 99 },
+  { name: "Family", movieId: 10751, tvId: 10751 },
+  { name: "History", movieId: 36 },
+  { name: "War", movieId: 10752, tvId: 10768 },
+  { name: "Western", movieId: 37, tvId: 37 },
+];
+
+export interface BrowsePage {
+  items: TmdbTitle[];
+  page: number;
+  totalPages: number;
+}
+
+export interface BrowseParams {
+  feed: BrowseFeed;
+  media: MediaFilter;
+  movieGenre?: number;
+  tvGenre?: number;
+  page: number;
+}
+
+async function discover(
+  media: MediaType,
+  page: number,
+  sortBy: string,
+  genre: number | undefined,
+  extra: Record<string, string | number>,
+): Promise<RawPage> {
+  const params: Record<string, string | number> = {
+    page,
+    sort_by: sortBy,
+    include_adult: "false",
+    ...extra,
+  };
+  if (genre !== undefined) params.with_genres = genre;
+  return tmdb<RawPage>(`/discover/${media}`, params);
+}
+
+export async function browseTitles(p: BrowseParams): Promise<BrowsePage> {
+  const { feed, media, movieGenre, tvGenre, page } = p;
+  const genreActive = movieGenre !== undefined || tvGenre !== undefined;
+
+  if (!genreActive && feed === "trending") {
+    const d = await tmdb<RawPage>("/trending/all/week", { page });
+    let items = d.results.map((r) => normalize(r)).filter((x): x is TmdbTitle => x !== null);
+    if (media !== "all") items = items.filter((i) => i.mediaType === media);
+    return { items, page: d.page, totalPages: Math.min(d.total_pages, 500) };
+  }
+  if (!genreActive && feed === "now_playing") {
+    const d = await tmdb<RawPage>("/movie/now_playing", { page, region: "US" });
+    return {
+      items: d.results.map((r) => normalize(r, "movie")).filter((x): x is TmdbTitle => x !== null),
+      page: d.page,
+      totalPages: Math.min(d.total_pages, 500),
+    };
+  }
+  if (!genreActive && feed === "on_air") {
+    const d = await tmdb<RawPage>("/tv/on_the_air", { page });
+    return {
+      items: d.results.map((r) => normalize(r, "tv")).filter((x): x is TmdbTitle => x !== null),
+      page: d.page,
+      totalPages: Math.min(d.total_pages, 500),
+    };
+  }
+
+  // discover-based: popular, top rated, or any genre filter
+  const sortBy = feed === "top_rated" ? "vote_average.desc" : "popularity.desc";
+  const extra: Record<string, string | number> = feed === "top_rated" ? { "vote_count.gte": 300 } : {};
+  const sortKey: keyof RawResult = feed === "top_rated" ? "vote_average" : "popularity";
+
+  const jobs: Promise<{ raw: RawPage; m: MediaType }>[] = [];
+  if ((media === "all" || media === "movie") && (!genreActive || movieGenre !== undefined)) {
+    jobs.push(discover("movie", page, sortBy, movieGenre, extra).then((raw) => ({ raw, m: "movie" as const })));
+  }
+  if ((media === "all" || media === "tv") && (!genreActive || tvGenre !== undefined)) {
+    jobs.push(discover("tv", page, sortBy, tvGenre, extra).then((raw) => ({ raw, m: "tv" as const })));
+  }
+  if (jobs.length === 0) return { items: [], page, totalPages: 1 };
+
+  const parts = await Promise.all(jobs);
+  const merged = parts
+    .flatMap((part) => part.raw.results.map((r) => ({ r, m: part.m })))
+    .sort((a, b) => ((b.r[sortKey] as number) ?? 0) - ((a.r[sortKey] as number) ?? 0));
+  const items = merged
+    .map(({ r, m }) => normalize(r, m))
+    .filter((x): x is TmdbTitle => x !== null);
+  const totalPages = Math.min(...parts.map((part) => part.raw.total_pages), 500);
+  return { items, page, totalPages };
 }
 
 interface RawDetail extends RawResult {

@@ -91,6 +91,7 @@ export interface TmdbTitle {
   mediaType: MediaType;
   name: string;
   year: number | null;
+  date: string | null;
   overview: string;
   posterPath: string | null;
   backdropPath: string | null;

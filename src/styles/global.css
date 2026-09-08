@@ -659,23 +659,52 @@ select:focus {
 .scores {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: -0.01em;
+  line-height: 1;
 }
 .scores .imdb {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--text);
-  font-weight: 500;
 }
-.scores a.imdb:hover {
+.scores a.imdb:hover .imdb-val {
   color: var(--accent-text);
 }
+.scores .imdb-badge {
+  background: #f5c518;
+  color: #0c0c0c;
+  font-weight: 700;
+  font-size: 8.5px;
+  letter-spacing: 0.01em;
+  padding: 2px 3px;
+  border-radius: 2px;
+}
+.scores .imdb-val {
+  font-weight: 500;
+}
 .scores .rt {
-  color: #e0603f;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--dim);
+  font-weight: 500;
+}
+.scores .rt-icon {
+  width: 12px;
+  height: 12px;
+  flex: none;
 }
 .scores .mc {
-  color: var(--dim);
+  color: #0c0c0c;
+  font-weight: 700;
+  padding: 2px 3px;
+  border-radius: 2px;
+  min-width: 15px;
+  text-align: center;
 }
 .scores .tmdb {
   color: var(--dim);
@@ -842,6 +871,77 @@ dialog::backdrop {
   color: var(--dim);
   font-size: 13.5px;
   line-height: 1.58;
+}
+
+/* ---------- home: article cards ---------- */
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+.article {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.article:hover {
+  border-color: var(--accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .article:hover {
+    transform: translateY(-2px);
+  }
+}
+.article-thumb {
+  flex: none;
+  width: 96px;
+  height: 96px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.article-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.article-body {
+  min-width: 0;
+}
+.article-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 5px;
+}
+.article-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.article-trail {
+  margin: 5px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ---------- auth ---------- */

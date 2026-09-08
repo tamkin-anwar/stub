@@ -2,12 +2,14 @@ const url = import.meta.env.VITE_SUPABASE_URL?.trim();
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 const tmdbToken = import.meta.env.VITE_TMDB_ACCESS_TOKEN?.trim();
 const omdbKey = import.meta.env.VITE_OMDB_API_KEY?.trim();
+const guardianKey = import.meta.env.VITE_GUARDIAN_API_KEY?.trim();
 
 export const env = {
   supabaseUrl: url ?? "",
   supabaseAnonKey: anonKey ?? "",
   tmdbToken: tmdbToken ?? "",
   omdbKey: omdbKey ?? "",
+  guardianKey: guardianKey ?? "",
 };
 
 // Reject the .env.example placeholders, which are otherwise long enough to look real.
@@ -23,6 +25,8 @@ export const tmdbReady = Boolean(
 );
 // OMDb keys are short (8 hex-ish chars). Optional: IMDb/RT scores just don't show without it.
 export const omdbReady = Boolean(!isPlaceholder(omdbKey) && omdbKey!.length >= 6);
+// Guardian Open Platform key. Optional: the home page's articles section needs it.
+export const guardianReady = Boolean(!isPlaceholder(guardianKey) && guardianKey!.length >= 8);
 
 export const missingConfig: string[] = [
   ...(supabaseReady ? [] : ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY"]),

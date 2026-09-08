@@ -2,13 +2,16 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   airingShows,
   browseTitles,
+  classicFilms,
   nowPlayingMovies,
   searchTitles,
   titleDetail,
   trendingTitles,
+  upcomingMovies,
   type BrowseFeed,
   type MediaFilter,
 } from "../lib/tmdb";
+import { guardianArticles } from "../lib/guardian";
 import { omdbScores } from "../lib/omdb";
 import { omdbReady } from "../lib/env";
 import type { MediaType } from "../lib/types";
@@ -23,6 +26,22 @@ export function useNowPlaying() {
 
 export function useAiringShows() {
   return useQuery({ queryKey: ["tmdb", "airing"], queryFn: airingShows, staleTime: 30 * 60_000 });
+}
+
+export function useUpcoming() {
+  return useQuery({ queryKey: ["tmdb", "upcoming"], queryFn: upcomingMovies, staleTime: 60 * 60_000 });
+}
+
+export function useClassics() {
+  return useQuery({ queryKey: ["tmdb", "classics"], queryFn: classicFilms, staleTime: 12 * 60 * 60_000 });
+}
+
+export function useArticles() {
+  return useQuery({
+    queryKey: ["guardian", "film-tv"],
+    queryFn: () => guardianArticles(12),
+    staleTime: 30 * 60_000,
+  });
 }
 
 export function useBrowse(params: {

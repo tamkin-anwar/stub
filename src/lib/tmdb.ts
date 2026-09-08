@@ -68,6 +68,7 @@ function normalize(raw: RawResult, forced?: MediaType): TmdbTitle | null {
     mediaType,
     name: raw.title ?? raw.name ?? raw.original_title ?? raw.original_name ?? "Untitled",
     year: yearOf(raw.release_date ?? raw.first_air_date),
+    date: raw.release_date ?? raw.first_air_date ?? null,
     overview: raw.overview ?? "",
     posterPath: raw.poster_path ?? null,
     backdropPath: raw.backdrop_path ?? null,
@@ -94,6 +95,33 @@ export async function nowPlayingMovies(): Promise<TmdbTitle[]> {
 export async function airingShows(): Promise<TmdbTitle[]> {
   const data = await tmdb<{ results: RawResult[] }>("/tv/on_the_air");
   return data.results.map((r) => normalize(r, "tv")).filter((x): x is TmdbTitle => x !== null);
+}
+
+/** Movies with a release date still ahead, soonest first. */
+export async function upcomingMovies(): Promise<TmdbTitle[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = await tmdb<RawPage>("/discover/movie", {
+    "primary_release_date.gte": today,
+    sort_by: "popularity.desc",
+    "vote_count.gte": 0,
+    region: "US",
+    page: 1,
+  });
+  return data.results
+    .map((r) => normalize(r, "movie"))
+    .filter((x): x is TmdbTitle => x !== null && !!x.year && x.year >= new Date().getFullYear());
+}
+
+/** Highly rated films at least a decade old — the "worth revisiting" shelf. */
+export async function classicFilms(): Promise<TmdbTitle[]> {
+  const tenYearsAgo = `${new Date().getFullYear() - 10}-12-31`;
+  const data = await tmdb<RawPage>("/discover/movie", {
+    sort_by: "vote_average.desc",
+    "vote_count.gte": 4000,
+    "primary_release_date.lte": tenYearsAgo,
+    page: 1,
+  });
+  return data.results.map((r) => normalize(r, "movie")).filter((x): x is TmdbTitle => x !== null);
 }
 
 // ---------------------------------------------------------------------------

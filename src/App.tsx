@@ -6,6 +6,7 @@ import { Nav } from "./components/Nav";
 import { Landing } from "./pages/Landing";
 import { AuthPage } from "./pages/Auth";
 import { SetupScreen } from "./pages/SetupScreen";
+import { Home } from "./pages/Home";
 import { MyList } from "./pages/MyList";
 import { Library } from "./pages/Library";
 import { SharedList } from "./pages/SharedList";
@@ -46,7 +47,8 @@ export function App() {
         <Route path="/login" element={<AuthPage mode="login" />} />
         <Route path="/signup" element={<AuthPage mode="signup" />} />
         <Route path="/app" element={<AppLayout />}>
-          <Route index element={<MyList />} />
+          <Route index element={<Home />} />
+          <Route path="list" element={<MyList />} />
           <Route path="library" element={<Library />} />
           <Route path="shared" element={<SharedList />} />
           <Route path="friends" element={<Friends />} />

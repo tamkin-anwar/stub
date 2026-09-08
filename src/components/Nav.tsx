@@ -16,6 +16,9 @@ export function Nav() {
         </NavLink>
         <nav className="nav-links">
           <NavLink to="/app" end className={({ isActive }) => (isActive ? "active" : "")}>
+            Home
+          </NavLink>
+          <NavLink to="/app/list" className={({ isActive }) => (isActive ? "active" : "")}>
             My list
           </NavLink>
           <NavLink to="/app/library" className={({ isActive }) => (isActive ? "active" : "")}>

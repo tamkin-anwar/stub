@@ -25,6 +25,7 @@ export function Landing() {
   if (!loading && user) return <Navigate to="/app" replace />;
 
   return (
+    <div className="landing-bg">
     <div className="wrap">
       <header className="nav-inner" style={{ borderBottom: "1px solid var(--line-2)" }}>
         <span className="brand">
@@ -84,6 +85,7 @@ export function Landing() {
           Source
         </a>
       </footer>
+    </div>
     </div>
   );
 }

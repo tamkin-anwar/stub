@@ -2,12 +2,12 @@ import { missingConfig } from "../lib/env";
 
 export function SetupScreen() {
   return (
-    <div className="auth-shell" style={{ maxWidth: 520 }}>
-      <span className="brand" style={{ display: "inline-flex", marginBottom: 20 }}>
+    <div className="auth-shell">
+      <span className="brand auth-brand">
         <span className="dot" />
         Stub
       </span>
-      <div className="auth-card">
+      <div className="auth-card auth-card-wide">
         <h1 className="display" style={{ fontSize: 27, marginBottom: 8 }}>
           Almost there
         </h1>

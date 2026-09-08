@@ -1256,6 +1256,20 @@ dialog::backdrop {
   font-size: 23px;
   margin-bottom: 26px;
 }
+/* same top-down warmth on the public landing page */
+.landing-bg {
+  min-height: 100dvh;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 7%, var(--bg)) 0px,
+    color-mix(in srgb, var(--accent) 3%, var(--bg)) 160px,
+    color-mix(in srgb, var(--accent) 0.8%, var(--bg)) 340px,
+    var(--bg) 580px
+  );
+}
+.auth-card.auth-card-wide {
+  max-width: 480px;
+}
 .auth-card {
   width: 100%;
   max-width: 400px;

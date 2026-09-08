@@ -1,5 +1,13 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="t">
+      <path d="M84 132h344a30 30 0 0 1 30 30v20a80 80 0 1 0 0 160v20a30 30 0 0 1-30 30H84a30 30 0 0 1-30-30v-20a80 80 0 1 0 0-160v-20a30 30 0 0 1 30-30Z"/>
+    </clipPath>
+  </defs>
   <rect width="512" height="512" rx="120" fill="#151412"/>
-  <path d="M84 122h344a30 30 0 0 1 30 30v40a62 62 0 1 0 0 128v40a30 30 0 0 1-30 30H84a30 30 0 0 1-30-30v-40a62 62 0 1 0 0-128v-40a30 30 0 0 1 30-30Z" fill="#F2ECE1"/>
-  <circle cx="256" cy="256" r="84" fill="#B34156"/>
+  <g clip-path="url(#t)">
+    <rect x="36" y="120" width="440" height="272" fill="#F2ECE1"/>
+    <rect x="316" y="120" width="160" height="272" fill="#B34156"/>
+    <rect x="304" y="120" width="12" height="272" fill="#151412"/>
+  </g>
 </svg>

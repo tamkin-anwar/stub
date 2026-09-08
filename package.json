@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "description": "A watch tracker you keep with the people you watch with. Personal lists, shared couple lists, friends, and a live library of what is new.",
+  "author": "Anwar Creative Studio",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

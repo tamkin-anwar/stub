@@ -56,7 +56,7 @@ export function Landing() {
         </div>
       </section>
 
-      <section className="feature-grid" style={{ marginBottom: "14vh" }}>
+      <section className="feature-grid" style={{ marginBottom: "10vh" }}>
         {FEATURES.map((f) => (
           <div className="feature" key={f.t}>
             <h3>{f.t}</h3>
@@ -64,6 +64,26 @@ export function Landing() {
           </div>
         ))}
       </section>
+
+      <footer className="site-foot">
+        <span className="brand-mini">
+          <span className="dot" />
+          Stub
+        </span>
+        <span className="site-foot-by">
+          by{" "}
+          <a
+            href="https://tamkin-anwar.github.io/anwar-creative-studio-portfolio/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Anwar Creative Studio
+          </a>
+        </span>
+        <a href="https://github.com/tamkin-anwar/stub" target="_blank" rel="noreferrer">
+          Source
+        </a>
+      </footer>
     </div>
   );
 }

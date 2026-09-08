@@ -122,6 +122,16 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
           )}
         </p>
       </div>
+      <p className="auth-by">
+        by{" "}
+        <a
+          href="https://tamkin-anwar.github.io/anwar-creative-studio-portfolio/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Anwar Creative Studio
+        </a>
+      </p>
     </div>
   );
 }

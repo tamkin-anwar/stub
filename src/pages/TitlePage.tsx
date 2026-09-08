@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
-import { useTitleDetail } from "../hooks/library";
-import { useEntries } from "../hooks/lists";
+import { useOmdb, useTitleDetail } from "../hooks/library";
+import { entriesKey, useEntries } from "../hooks/lists";
+import { refreshTitleScores } from "../data/lists";
 import { useSpaces } from "../hooks/social";
 import { AddMenu, type AddTarget } from "../components/AddMenu";
 import { EntrySheet } from "../components/EntrySheet";
@@ -17,8 +19,10 @@ export function TitlePage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { data: detail, isLoading, error } = useTitleDetail(mediaType, idNum || undefined);
+  const { data: omdb } = useOmdb(detail?.imdbId);
   const { data: personal } = useEntries(profile ? { type: "user", id: profile.id } : null);
   const { data: spaces } = useSpaces(profile?.id);
+  const qc = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const targets = useMemo<AddTarget[]>(() => {
@@ -32,6 +36,15 @@ export function TitlePage() {
     () => (personal ?? []).find((e) => e.title.tmdb_id === idNum && e.title.media_type === mediaType) ?? null,
     [personal, idNum, mediaType],
   );
+
+  // Backfill OMDb scores onto the cached title row once, so lists show them too.
+  useEffect(() => {
+    if (onMyList && !onMyList.title.omdb_checked_at && onMyList.title.imdb_id && profile) {
+      void refreshTitleScores(onMyList.title.id, onMyList.title.imdb_id).then(() =>
+        qc.invalidateQueries({ queryKey: entriesKey({ type: "user", id: profile.id }) }),
+      );
+    }
+  }, [onMyList, profile, qc]);
 
   if (!profile) return null;
   if (isLoading) return <p className="center-note">Loading…</p>;
@@ -84,7 +97,13 @@ export function TitlePage() {
           <div className="page-sub" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}>
             {runtimeLabel(detail.runtime, detail.mediaType) && <span>{runtimeLabel(detail.runtime, detail.mediaType)}</span>}
             {detail.genres.length > 0 && <span>{detail.genres.join(", ")}</span>}
-            <ScorePills tmdb={detail.voteAverage} imdbId={detail.imdbId} />
+            <ScorePills
+              imdb={omdb?.imdb ?? onMyList?.title.imdb_rating}
+              rt={omdb?.rt ?? onMyList?.title.rt_rating}
+              metacritic={omdb?.metacritic ?? onMyList?.title.metacritic}
+              tmdb={detail.voteAverage}
+              imdbId={detail.imdbId}
+            />
           </div>
           <p style={{ fontSize: 15, lineHeight: 1.6, maxWidth: "62ch" }}>{detail.overview || "No synopsis yet."}</p>
 

@@ -9,6 +9,8 @@ import {
   type BrowseFeed,
   type MediaFilter,
 } from "../lib/tmdb";
+import { omdbScores } from "../lib/omdb";
+import { omdbReady } from "../lib/env";
 import type { MediaType } from "../lib/types";
 
 export function useTrending() {
@@ -51,6 +53,16 @@ export function useTmdbSearch(term: string) {
     queryFn: () => searchTitles(term),
     enabled: term.trim().length >= 2,
     staleTime: 10 * 60_000,
+  });
+}
+
+export function useOmdb(imdbId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["omdb", imdbId],
+    queryFn: () => omdbScores(imdbId),
+    enabled: !!imdbId && omdbReady,
+    staleTime: 24 * 60 * 60_000,
+    gcTime: 24 * 60 * 60_000,
   });
 }
 

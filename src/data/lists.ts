@@ -1,5 +1,6 @@
 import { requireSupabase } from "../lib/supabase";
 import { titleDetail } from "../lib/tmdb";
+import { omdbScores } from "../lib/omdb";
 import type {
   ListEntry,
   ListStatus,
@@ -19,6 +20,7 @@ export interface ListOwner {
 export async function cacheTitle(mediaType: MediaType, tmdbId: number): Promise<TitleRow> {
   const sb = requireSupabase();
   const d = await titleDetail(mediaType, tmdbId);
+  const scores = await omdbScores(d.imdbId).catch(() => null);
   const { data, error } = await sb
     .from("titles")
     .upsert(
@@ -34,6 +36,11 @@ export async function cacheTitle(mediaType: MediaType, tmdbId: number): Promise<
         genres: d.genres,
         tmdb_rating: d.voteAverage,
         imdb_id: d.imdbId,
+        imdb_rating: scores?.imdb ?? null,
+        imdb_votes: scores?.imdbVotes ?? null,
+        rt_rating: scores?.rt ?? null,
+        metacritic: scores?.metacritic ?? null,
+        omdb_checked_at: scores ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "tmdb_id,media_type" },
@@ -42,6 +49,24 @@ export async function cacheTitle(mediaType: MediaType, tmdbId: number): Promise<
     .single();
   if (error) throw error;
   return data as TitleRow;
+}
+
+/** Backfill OMDb scores onto an already-cached title (used from the title page). */
+export async function refreshTitleScores(titleId: number, imdbId: string | null): Promise<void> {
+  if (!imdbId) return;
+  const s = await omdbScores(imdbId).catch(() => null);
+  if (!s || (s.imdb === null && s.rt === null && s.metacritic === null)) return;
+  const sb = requireSupabase();
+  await sb
+    .from("titles")
+    .update({
+      imdb_rating: s.imdb,
+      imdb_votes: s.imdbVotes,
+      rt_rating: s.rt,
+      metacritic: s.metacritic,
+      omdb_checked_at: new Date().toISOString(),
+    })
+    .eq("id", titleId);
 }
 
 export async function fetchEntries(owner: ListOwner): Promise<ListEntry[]> {

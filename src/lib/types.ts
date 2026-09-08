@@ -23,6 +23,11 @@ export interface TitleRow {
   genres: string[];
   tmdb_rating: number | null;
   imdb_id: string | null;
+  imdb_rating: number | null;
+  imdb_votes: number | null;
+  rt_rating: number | null;
+  metacritic: number | null;
+  omdb_checked_at: string | null;
   updated_at: string;
 }
 

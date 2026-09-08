@@ -1,18 +1,28 @@
 interface Props {
+  imdb?: number | null;
+  rt?: number | null; // Rotten Tomatoes critics %
+  metacritic?: number | null;
   tmdb?: number | null;
   imdbId?: string | null;
 }
 
 /**
- * TMDB user score is always available from the API. IMDb has no public ratings
- * API, so we link out to the real IMDb page rather than inventing a number.
+ * IMDb / Rotten Tomatoes / Metacritic come from OMDb (RT has no public API of
+ * its own). TMDB is always available. Any missing score is simply left out.
+ * The IMDb figure links to the real IMDb page.
  */
-export function ScorePills({ tmdb, imdbId }: Props) {
-  if (!tmdb && !imdbId) return null;
+export function ScorePills({ imdb, rt, metacritic, tmdb, imdbId }: Props) {
+  const hasImdb = typeof imdb === "number" && imdb > 0;
+  const hasRt = typeof rt === "number" && rt > 0;
+  const hasMc = typeof metacritic === "number" && metacritic > 0;
+  const hasTmdb = typeof tmdb === "number" && tmdb > 0;
+  if (!hasImdb && !hasRt && !hasMc && !hasTmdb && !imdbId) return null;
+
+  const imdbText = hasImdb ? `IMDb ${imdb!.toFixed(1)}` : "IMDb ↗";
+
   return (
     <span className="scores">
-      {typeof tmdb === "number" && tmdb > 0 && <span className="tmdb">TMDB {tmdb.toFixed(1)}</span>}
-      {imdbId && (
+      {imdbId ? (
         <a
           className="imdb"
           href={`https://www.imdb.com/title/${imdbId}/`}
@@ -20,9 +30,14 @@ export function ScorePills({ tmdb, imdbId }: Props) {
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}
         >
-          IMDb ↗
+          {imdbText}
         </a>
+      ) : (
+        hasImdb && <span className="imdb">{imdbText}</span>
       )}
+      {hasRt && <span className="rt">RT {Math.round(rt!)}%</span>}
+      {hasMc && <span className="mc">MC {Math.round(metacritic!)}</span>}
+      {hasTmdb && <span className="tmdb">TMDB {tmdb!.toFixed(1)}</span>}
     </span>
   );
 }

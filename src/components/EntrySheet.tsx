@@ -92,7 +92,13 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
                 ? ` · ${runtimeLabel(entry.title.runtime, entry.title.media_type)}`
                 : ""}
             </span>
-            <ScorePills tmdb={entry.title.tmdb_rating} imdbId={entry.title.imdb_id} />
+            <ScorePills
+              imdb={entry.title.imdb_rating}
+              rt={entry.title.rt_rating}
+              metacritic={entry.title.metacritic}
+              tmdb={entry.title.tmdb_rating}
+              imdbId={entry.title.imdb_id}
+            />
           </div>
 
           <div className="field" style={{ marginTop: 16 }}>

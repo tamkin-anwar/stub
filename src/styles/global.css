@@ -659,13 +659,23 @@ select:focus {
 .scores {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: -0.01em;
 }
 .scores .imdb {
+  color: var(--text);
+  font-weight: 500;
+}
+.scores a.imdb:hover {
   color: var(--accent-text);
+}
+.scores .rt {
+  color: #e0603f;
+}
+.scores .mc {
+  color: var(--dim);
 }
 .scores .tmdb {
   color: var(--dim);

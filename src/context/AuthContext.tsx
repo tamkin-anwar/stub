@@ -43,35 +43,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileChecked, setProfileChecked] = useState(false);
   const [loading, setLoading] = useState(supabaseReady);
-  const mounted = useRef(true);
+  // Bumped on unmount and before each new load; a load only commits its
+  // result while its token is still current (guards unmount + overlapping loads).
+  const loadSeq = useRef(0);
 
   const loadProfile = useCallback(async (userId: string) => {
     if (!supabase) return;
+    const seq = ++loadSeq.current;
     let { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
     // Just after sign-up the trigger row can lag by a beat; give it one retry.
     if (!data) {
       await sleep(900);
       ({ data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle());
     }
-    if (mounted.current) {
-      setProfile((data as Profile) ?? null);
-      setProfileChecked(true);
-    }
+    if (seq !== loadSeq.current) return;
+    setProfile((data as Profile) ?? null);
+    setProfileChecked(true);
   }, []);
 
   useEffect(() => {
-    mounted.current = true;
     if (!supabase) {
       setLoading(false);
       return;
     }
 
+    const startSeq = loadSeq.current;
     supabase.auth.getSession().then(async ({ data }) => {
-      if (!mounted.current) return;
+      if (loadSeq.current !== startSeq) return;
       setSession(data.session);
       if (data.session?.user) await loadProfile(data.session.user.id);
       else setProfileChecked(true);
-      if (mounted.current) setLoading(false);
+      setLoading(false);
     });
 
     let currentUserId: string | null = null;
@@ -92,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      mounted.current = false;
+      loadSeq.current++;
       sub.subscription.unsubscribe();
     };
   }, [loadProfile]);

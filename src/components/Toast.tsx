@@ -3,29 +3,44 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 interface ToastItem {
   id: number;
   text: string;
+  error?: boolean;
 }
 
-const ToastContext = createContext<(text: string) => void>(() => {});
+type Push = (text: string, opts?: { error?: boolean }) => void;
+
+const ToastContext = createContext<Push>(() => {});
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
 
-  const push = useCallback((text: string) => {
-    const id = Date.now() + Math.random();
-    setItems((prev) => [...prev, { id, text }]);
-    window.setTimeout(() => {
-      setItems((prev) => prev.filter((t) => t.id !== id));
-    }, 2600);
+  const dismiss = useCallback((id: number) => {
+    setItems((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  const push = useCallback<Push>(
+    (text, opts) => {
+      const id = Date.now() + Math.random();
+      const error = !!opts?.error;
+      setItems((prev) => [...prev, { id, text, error }]);
+      // errors linger so they can be read; anything can be tapped away early
+      window.setTimeout(() => dismiss(id), error ? 6500 : 2800);
+    },
+    [dismiss],
+  );
 
   return (
     <ToastContext.Provider value={push}>
       {children}
-      <div className="toast-wrap" aria-live="polite">
+      <div className="toast-wrap" role="status" aria-live="polite">
         {items.map((t) => (
-          <div key={t.id} className="toast">
+          <button
+            key={t.id}
+            type="button"
+            className={`toast${t.error ? " toast-error" : ""}`}
+            onClick={() => dismiss(t.id)}
+          >
             {t.text}
-          </div>
+          </button>
         ))}
       </div>
     </ToastContext.Provider>

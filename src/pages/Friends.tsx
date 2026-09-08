@@ -14,7 +14,7 @@ export function Friends() {
   const actions = useFriendActions(profile?.id ?? "");
 
   const fail = (err: unknown) =>
-    toast(err instanceof Error ? err.message : "Something went wrong");
+    toast(err instanceof Error ? err.message : "Something went wrong", { error: true });
 
   if (!profile) return null;
 

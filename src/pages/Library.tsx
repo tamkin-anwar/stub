@@ -96,7 +96,7 @@ export function Library() {
               {(["all", "movie", "tv"] as MediaFilter[]).map((m) => (
                 <button
                   key={m}
-                  aria-pressed={media === m}
+                  aria-pressed={effMedia === m}
                   disabled={feed === "now_playing" || feed === "on_air"}
                   onClick={() => setMedia(m)}
                 >

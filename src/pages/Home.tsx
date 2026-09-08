@@ -51,12 +51,16 @@ function Shelf({
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "";
-  const d = new Date(iso);
-  const days = Math.round((d.getTime() - Date.now()) / 86_400_000);
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const target = new Date(y, m - 1, d);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Math.round((target.getTime() - today.getTime()) / 86_400_000);
   if (days <= 0) return "out now";
   if (days === 1) return "tomorrow";
   if (days < 30) return `in ${days} days`;
-  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  return target.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
 export function Home() {

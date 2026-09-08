@@ -51,7 +51,7 @@ export function AddMenu({
       toast(`Saved to ${target.label}`);
       setOpen(false);
     } catch (err) {
-      toast(err instanceof Error ? err.message : "Could not add");
+      toast(err instanceof Error ? err.message : "Could not add", { error: true });
     } finally {
       setBusy(false);
     }

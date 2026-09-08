@@ -64,7 +64,7 @@ export function Settings() {
       await refreshProfile();
       toast("Saved");
     } catch (err) {
-      toast(err instanceof Error ? err.message : "Could not save");
+      toast(err instanceof Error ? err.message : "Could not save", { error: true });
     } finally {
       setBusy(false);
     }
@@ -248,7 +248,7 @@ export function Settings() {
               await signOut();
               navigate("/", { replace: true });
             } catch (err) {
-              toast(err instanceof Error ? err.message : "Could not delete account");
+              toast(err instanceof Error ? err.message : "Could not delete account", { error: true });
             }
           }}
         />

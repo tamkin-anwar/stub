@@ -7,6 +7,7 @@ import { posterUrl } from "../lib/tmdb";
 import { displayName, entryAverage, posterGradient, ratingFor, runtimeLabel } from "../lib/format";
 import { Stars } from "./Stars";
 import { ScorePills } from "./ScorePills";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 const STATUSES: ListStatus[] = ["watchlist", "watching", "watched"];
 const STATUS_TEXT: Record<ListStatus, string> = {
@@ -33,6 +34,7 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
   const [note, setNote] = useState(entry.note);
   const [status, setStatus] = useState<ListStatus>(entry.status);
   const [watchedOn, setWatchedOn] = useState(entry.watched_on ?? "");
+  const [confirmRemove, setConfirmRemove] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -61,6 +63,7 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
   const avg = entryAverage(entry);
 
   return (
+    <>
     <dialog ref={ref} onCancel={close} onClick={(e) => e.target === ref.current && close()}>
       <div className="detail-grid" style={{ padding: 22, gridTemplateColumns: "150px 1fr", gap: 20 }}>
         <div>
@@ -176,14 +179,7 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
           </div>
 
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-            <button
-              className="btn danger sm"
-              onClick={() => {
-                if (confirm(`Remove "${entry.title.name}" from this list?`)) {
-                  remove.mutate(entry.id, { onSuccess: () => { ref.current?.close(); onClose(); } });
-                }
-              }}
-            >
+            <button className="btn danger sm" onClick={() => setConfirmRemove(true)}>
               Remove
             </button>
             <div style={{ flex: 1 }} />
@@ -194,5 +190,24 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
         </div>
       </div>
     </dialog>
+
+    {confirmRemove && (
+      <ConfirmDialog
+        title="Remove this title?"
+        body={`"${entry.title.name}" will be taken off this list.`}
+        confirmLabel="Remove"
+        danger
+        onConfirm={() =>
+          remove.mutate(entry.id, {
+            onSuccess: () => {
+              ref.current?.close();
+              onClose();
+            },
+          })
+        }
+        onClose={() => setConfirmRemove(false)}
+      />
+    )}
+    </>
   );
 }

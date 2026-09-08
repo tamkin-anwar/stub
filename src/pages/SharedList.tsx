@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useFriends, useSpaceActions, useSpaces } from "../hooks/social";
 import { ListView } from "../components/ListView";
 import { Avatar } from "../components/Avatar";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { displayName } from "../lib/format";
 import { useToast } from "../components/Toast";
 
@@ -16,6 +17,7 @@ export function SharedList() {
   const [activeSpaceId, setActiveSpaceId] = useState<string | null>(null);
   const [name, setName] = useState("Our list");
   const [friendId, setFriendId] = useState("");
+  const [confirmLeave, setConfirmLeave] = useState(false);
 
   const acceptedFriends = (friends ?? []).filter((f) => f.direction === "friends");
   const current = useMemo(
@@ -32,7 +34,7 @@ export function SharedList() {
       setActiveSpaceId(id);
       toast("Shared list created");
     } catch (err) {
-      toast(err instanceof Error ? err.message : "Could not create the list");
+      toast(err instanceof Error ? err.message : "Could not create the list", { error: true });
     }
   }
 
@@ -72,12 +74,7 @@ export function SharedList() {
               </span>
             ))}
             <div style={{ flex: 1 }} />
-            <button
-              className="btn ghost sm"
-              onClick={() => {
-                if (confirm(`Leave "${current.name}"?`)) actions.leave.mutate(current.id);
-              }}
-            >
+            <button className="btn ghost sm" onClick={() => setConfirmLeave(true)}>
               Leave
             </button>
           </div>
@@ -123,6 +120,17 @@ export function SharedList() {
             </>
           )}
         </div>
+      )}
+
+      {confirmLeave && current && (
+        <ConfirmDialog
+          title={`Leave "${current.name}"?`}
+          body="You will lose access to the shared list. The other person keeps it."
+          confirmLabel="Leave"
+          danger
+          onConfirm={() => actions.leave.mutate(current.id, { onError: (e) => toast(e instanceof Error ? e.message : "Could not leave", { error: true }) })}
+          onClose={() => setConfirmLeave(false)}
+        />
       )}
     </div>
   );

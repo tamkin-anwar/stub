@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { Article } from "../lib/guardian";
+import { ArticleSheet } from "./ArticleSheet";
 
 function when(iso: string): string {
   const d = new Date(iso);
@@ -10,20 +12,25 @@ function when(iso: string): string {
 }
 
 export function ArticleCard({ a }: { a: Article }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <a className="article" href={a.url} target="_blank" rel="noreferrer">
-      {a.thumbnail && (
-        <div className="article-thumb">
-          <img src={a.thumbnail} alt="" loading="lazy" />
+    <>
+      <button type="button" className="article" onClick={() => setOpen(true)}>
+        {a.thumbnail && (
+          <div className="article-thumb">
+            <img src={a.thumbnail} alt="" loading="lazy" />
+          </div>
+        )}
+        <div className="article-body">
+          <div className="article-kicker">
+            {a.section} · {when(a.published)}
+          </div>
+          <div className="article-title">{a.title}</div>
+          {a.trail && <p className="article-trail">{a.trail}</p>}
         </div>
-      )}
-      <div className="article-body">
-        <div className="article-kicker">
-          {a.section} · {when(a.published)}
-        </div>
-        <div className="article-title">{a.title}</div>
-        {a.trail && <p className="article-trail">{a.trail}</p>}
-      </div>
-    </a>
+      </button>
+      {open && <ArticleSheet a={a} onClose={() => setOpen(false)} />}
+    </>
   );
 }

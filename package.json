@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "A watch tracker you keep with the people you watch with. Personal lists, shared couple lists, friends, and a live library of what is new.",
+  "description": "A record of what you've watched and what you made of it. A personal list, one you share with the person you watch with, friends, and the full catalogue to look through.",
   "author": "Anwar Creative Studio",
   "scripts": {
     "dev": "vite",

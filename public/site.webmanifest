@@ -1,7 +1,7 @@
 {
   "name": "Stub",
   "short_name": "Stub",
-  "description": "A watch tracker you keep with the people you watch with.",
+  "description": "A record of what you've watched and what you made of it, kept with the people you watch with.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121110",

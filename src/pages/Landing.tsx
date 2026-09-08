@@ -4,19 +4,19 @@ import { useAuth } from "../context/AuthContext";
 const FEATURES = [
   {
     t: "Your own list",
-    d: "Every film and series you have seen or mean to. Watchlist, watching, watched, with your own rating and notes.",
+    d: "Every film and series you've seen, or mean to. Mark each one watchlist, watching or watched, and leave a rating and a note.",
   },
   {
     t: "A list together",
-    d: "Pair with a partner and keep one shared list. You both add titles, you both rate them, and the average sits beside your names.",
+    d: "Share one list with the person you watch with. You both add titles, you both rate them, and your two scores sit side by side.",
   },
   {
     t: "Friends",
-    d: "Find people by username, compare, and pick who you share a list with. Your personal list always stays yours.",
+    d: "Find people by username and see what they've been watching. You decide who you keep a shared list with. Your own stays private.",
   },
   {
-    t: "A living library",
-    d: "Search the full catalogue and browse what is in cinemas and on air this week. Real posters, cast, and runtimes.",
+    t: "Look it up",
+    d: "Search the whole catalogue for posters, cast, runtimes and scores. Or just see what's in cinemas and on air this week.",
   },
 ];
 
@@ -41,10 +41,10 @@ export function Landing() {
       </header>
 
       <section className="hero">
-        <h1>Keep the reel.</h1>
+        <h1>Keep the stub.</h1>
         <p>
-          Stub is a watch tracker you keep with the people you watch with. Your list, a shared list,
-          and everything worth watching in one place.
+          A record of what you've watched and what you made of it. Keep your own, and share a list
+          with the person you watch with most.
         </p>
         <div className="cta">
           <Link to="/signup" className="btn primary">

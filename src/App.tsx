@@ -5,6 +5,7 @@ import { ToastProvider } from "./components/Toast";
 import { Nav } from "./components/Nav";
 import { Landing } from "./pages/Landing";
 import { AuthPage } from "./pages/Auth";
+import { Privacy, Terms } from "./pages/Legal";
 import { SetupScreen } from "./pages/SetupScreen";
 import { Home } from "./pages/Home";
 import { MyList } from "./pages/MyList";
@@ -46,6 +47,8 @@ export function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<AuthPage mode="login" />} />
         <Route path="/signup" element={<AuthPage mode="signup" />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/app" element={<AppLayout />}>
           <Route index element={<Home />} />
           <Route path="list" element={<MyList />} />

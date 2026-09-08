@@ -81,6 +81,8 @@ export function Landing() {
             Anwar Creative Studio
           </a>
         </span>
+        <Link to="/privacy">Privacy</Link>
+        <Link to="/terms">Terms</Link>
         <a href="https://github.com/tamkin-anwar/stub" target="_blank" rel="noreferrer">
           Source
         </a>

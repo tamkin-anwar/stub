@@ -22,9 +22,15 @@ interface AuthValue {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
-  signUp: (args: { email: string; password: string; username: string; displayName: string }) => Promise<void>;
+  signUp: (args: {
+    email: string;
+    password: string;
+    username: string;
+    displayName: string;
+  }) => Promise<{ needsConfirmation: boolean }>;
   signIn: (args: { email: string; password: string }) => Promise<void>;
   signOut: () => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -88,17 +94,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp: AuthValue["signUp"] = useCallback(async ({ email, password, username, displayName }) => {
     if (!supabase) throw new Error("Supabase is not configured.");
     const clean = username.trim().toLowerCase();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: { data: { username: clean, display_name: displayName.trim() || clean } },
     });
     if (error) throw error;
+    // With email confirmation on, Supabase returns a user but no session.
+    return { needsConfirmation: !data.session };
   }, []);
 
   const signIn: AuthValue["signIn"] = useCallback(async ({ email, password }) => {
     if (!supabase) throw new Error("Supabase is not configured.");
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) throw error;
+  }, []);
+
+  const resendConfirmation: AuthValue["resendConfirmation"] = useCallback(async (email: string) => {
+    if (!supabase) throw new Error("Supabase is not configured.");
+    const { error } = await supabase.auth.resend({ type: "signup", email: email.trim() });
     if (error) throw error;
   }, []);
 
@@ -125,9 +139,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signIn,
       signOut,
+      resendConfirmation,
       refreshProfile,
     }),
-    [loading, profileChecked, session, profile, signUp, signIn, signOut, refreshProfile],
+    [
+      loading,
+      profileChecked,
+      session,
+      profile,
+      signUp,
+      signIn,
+      signOut,
+      resendConfirmation,
+      refreshProfile,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

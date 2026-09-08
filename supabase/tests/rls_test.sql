@@ -80,7 +80,7 @@ select throws_ok(
   format(
     $$insert into public.ratings (entry_id, user_id, stars) values (%L, %L, 3.0)$$,
     current_setting('test.entry_id'), '22222222-2222-2222-2222-222222222222'),
-  '42501',
+  '42501', null,
   'u2 cannot attach a rating to u1 private entry');
 
 with upd as (update public.profiles set display_name = 'Nope'
@@ -116,7 +116,7 @@ select is((select count(*)::int from public.list_entries where owner_type = 'spa
 
 select throws_ok(
   $$select public.create_couple_space('11111111-1111-1111-1111-111111111111')$$,
-  'P0001',
+  'P0001', null,
   'u3 cannot pair with someone they are not friends with');
 
 -- ---------------------------------------------------------------------------

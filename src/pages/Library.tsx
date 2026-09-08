@@ -1,13 +1,54 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useBrowse, useTmdbSearch } from "../hooks/library";
+import { useBrowse, useCardScores, useTmdbSearch } from "../hooks/library";
 import { useSpaces } from "../hooks/social";
 import { PosterCard } from "../components/PosterCard";
 import { AddMenu, type AddTarget } from "../components/AddMenu";
 import { GENRES, type BrowseFeed, type MediaFilter } from "../lib/tmdb";
 import type { TmdbTitle } from "../lib/types";
 import { tmdbReady } from "../lib/env";
+
+function ResultCard({
+  r,
+  targets,
+  selfId,
+  onOpen,
+}: {
+  r: TmdbTitle;
+  targets: AddTarget[];
+  selfId: string;
+  onOpen: () => void;
+}) {
+  const cs = useCardScores(r.mediaType, r.tmdbId, true);
+  const kind = r.mediaType === "movie" ? "Film" : "Series";
+  const hasImdb = typeof cs.data?.imdb === "number" && cs.data.imdb > 0;
+  const hasRt = typeof cs.data?.rt === "number" && cs.data.rt > 0;
+
+  return (
+    <div style={{ position: "relative" }}>
+      <PosterCard
+        name={r.name}
+        year={r.year}
+        posterPath={r.posterPath}
+        sub={
+          <span className="scores">
+            <span className="tmdb">{kind}</span>
+            {hasImdb && <span className="imdb">IMDb {cs.data!.imdb!.toFixed(1)}</span>}
+            {hasRt && <span className="rt">RT {Math.round(cs.data!.rt!)}%</span>}
+            {!hasImdb && !hasRt && r.voteAverage ? (
+              <span className="tmdb">TMDB {r.voteAverage.toFixed(1)}</span>
+            ) : null}
+          </span>
+        }
+        onClick={onOpen}
+      />
+      <div style={{ position: "absolute", top: 8, right: 8 }}>
+        <AddMenu media={{ tmdbId: r.tmdbId, mediaType: r.mediaType }} targets={targets} selfId={selfId} />
+      </div>
+    </div>
+  );
+}
 
 const FEEDS: { key: BrowseFeed; label: string }[] = [
   { key: "trending", label: "Trending" },
@@ -142,27 +183,13 @@ export function Library() {
         <>
           <div className="grid">
             {unique.map((r) => (
-              <div key={`${r.mediaType}-${r.tmdbId}`} style={{ position: "relative" }}>
-                <PosterCard
-                  name={r.name}
-                  year={r.year}
-                  posterPath={r.posterPath}
-                  sub={
-                    <span>
-                      {r.mediaType === "movie" ? "Film" : "Series"}
-                      {r.voteAverage ? ` · TMDB ${r.voteAverage.toFixed(1)}` : ""}
-                    </span>
-                  }
-                  onClick={() => navigate(`/app/title/${r.mediaType}/${r.tmdbId}`)}
-                />
-                <div style={{ position: "absolute", top: 8, right: 8 }}>
-                  <AddMenu
-                    media={{ tmdbId: r.tmdbId, mediaType: r.mediaType }}
-                    targets={targets}
-                    selfId={profile.id}
-                  />
-                </div>
-              </div>
+              <ResultCard
+                key={`${r.mediaType}-${r.tmdbId}`}
+                r={r}
+                targets={targets}
+                selfId={profile.id}
+                onOpen={() => navigate(`/app/title/${r.mediaType}/${r.tmdbId}`)}
+              />
             ))}
           </div>
 

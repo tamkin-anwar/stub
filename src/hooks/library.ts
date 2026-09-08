@@ -66,6 +66,26 @@ export function useOmdb(imdbId: string | null | undefined) {
   });
 }
 
+/**
+ * IMDb / RT for one Library card. Costs a TMDB detail call (for the IMDb id)
+ * plus an OMDb call, so it is cached hard: each title is fetched at most once
+ * a week per browser. Falls back to nothing when OMDb is off or over quota.
+ */
+export function useCardScores(mediaType: MediaType, tmdbId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ["card-scores", mediaType, tmdbId],
+    queryFn: async () => {
+      const d = await titleDetail(mediaType, tmdbId);
+      const s = await omdbScores(d.imdbId);
+      return { imdb: s.imdb, rt: s.rt };
+    },
+    enabled: enabled && omdbReady,
+    staleTime: 7 * 24 * 60 * 60_000,
+    gcTime: 30 * 24 * 60 * 60_000,
+    retry: 0,
+  });
+}
+
 export function useTitleDetail(mediaType: MediaType | undefined, tmdbId: number | undefined) {
   return useQuery({
     queryKey: ["tmdb", "detail", mediaType, tmdbId],

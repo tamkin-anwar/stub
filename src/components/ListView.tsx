@@ -5,7 +5,8 @@ import type { ListOwner } from "../data/lists";
 import { useEntries } from "../hooks/lists";
 import { PosterCard } from "./PosterCard";
 import { EntrySheet } from "./EntrySheet";
-import { entryAverage, ratingFor } from "../lib/format";
+import { ScorePills } from "./ScorePills";
+import { entryAverage } from "../lib/format";
 
 type StatusFilter = "all" | ListStatus;
 type TypeFilter = "all" | MediaType;
@@ -108,7 +109,7 @@ export function ListView({ owner, members, selfId, emptyHint }: Props) {
               year={e.title.year}
               posterPath={e.title.poster_path}
               badge={e.status === "watched" ? "watched" : e.status === "watching" ? "watching" : null}
-              sub={<EntrySub entry={e} selfId={selfId} />}
+              sub={<EntrySub entry={e} />}
               onClick={() => setOpenId(e.id)}
             />
           ))}
@@ -128,18 +129,38 @@ export function ListView({ owner, members, selfId, emptyHint }: Props) {
   );
 }
 
-function EntrySub({ entry, selfId }: { entry: ListEntry; selfId: string }) {
+function EntrySub({ entry }: { entry: ListEntry }) {
   const avg = entryAverage(entry);
-  const mine = ratingFor(entry, selfId);
-  if (avg != null) {
-    return (
-      <>
-        <span className="ours">{avg.toFixed(1)} ★</span>
-        <span>{entry.ratings.length > 1 ? "both rated" : mine != null ? "your rating" : "1 rating"}</span>
-      </>
-    );
-  }
-  if (entry.status === "watched") return <span>Watched, not rated</span>;
-  if (entry.status === "watching") return <span>Watching now</span>;
-  return <span>On the watchlist</span>;
+  const t = entry.title;
+  const hasExternal =
+    (t.imdb_rating && t.imdb_rating > 0) ||
+    (t.rt_rating && t.rt_rating > 0) ||
+    (t.tmdb_rating && t.tmdb_rating > 0);
+
+  return (
+    <>
+      {hasExternal && (
+        <ScorePills
+          imdb={t.imdb_rating}
+          rt={t.rt_rating}
+          tmdb={t.imdb_rating ? null : t.tmdb_rating}
+        />
+      )}
+      {avg != null ? (
+        <span className="ours">
+          {avg.toFixed(1)} ★{entry.ratings.length > 1 ? " both" : ""}
+        </span>
+      ) : (
+        !hasExternal && (
+          <span>
+            {entry.status === "watched"
+              ? "Watched, not rated"
+              : entry.status === "watching"
+                ? "Watching now"
+                : "On the watchlist"}
+          </span>
+        )
+      )}
+    </>
+  );
 }

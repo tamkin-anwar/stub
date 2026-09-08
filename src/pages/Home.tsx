@@ -114,6 +114,16 @@ export function Home() {
         </div>
       )}
 
+      {guardianReady && (articles.data?.length ?? 0) > 0 && (
+        <Shelf label="Film & TV desk" title="In the press">
+          <div className="article-grid">
+            {(articles.data ?? []).map((a) => (
+              <ArticleCard key={a.id} a={a} />
+            ))}
+          </div>
+        </Shelf>
+      )}
+
       <ScoreLegend />
 
       <Shelf
@@ -131,16 +141,6 @@ export function Home() {
       <Shelf label="Right now" title="This week">
         {trending.isLoading ? <p className="center-note">Loading…</p> : strip(trending.data)}
       </Shelf>
-
-      {guardianReady && (articles.data?.length ?? 0) > 0 && (
-        <Shelf label="Film & TV desk" title="In the press">
-          <div className="article-grid">
-            {(articles.data ?? []).map((a) => (
-              <ArticleCard key={a.id} a={a} />
-            ))}
-          </div>
-        </Shelf>
-      )}
 
       <Shelf label="From the archive" title="Worth revisiting">
         {classics.isLoading ? <p className="center-note">Loading…</p> : strip(classics.data)}

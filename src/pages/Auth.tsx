@@ -41,7 +41,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
 
   return (
     <div className="auth-shell">
-      <Link to="/" className="brand" style={{ display: "inline-flex", marginBottom: 22 }}>
+      <Link to="/" className="brand auth-brand">
         <span className="dot" />
         Stub
       </Link>
@@ -106,7 +106,13 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
           )}
 
           <button className="btn primary" style={{ width: "100%" }} disabled={busy}>
-            {busy ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
+            {busy
+              ? mode === "signup"
+                ? "Creating account…"
+                : "Signing in…"
+              : mode === "signup"
+                ? "Create account"
+                : "Sign in"}
           </button>
         </form>
 

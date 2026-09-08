@@ -1230,16 +1230,38 @@ dialog::backdrop {
 
 /* ---------- auth ---------- */
 .auth-shell {
-  max-width: 404px;
-  margin: 9vh auto;
-  padding: 0 20px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 44px 20px;
+  background: radial-gradient(
+    56vw 42vh at 50% 34%,
+    color-mix(in srgb, var(--accent) 9%, transparent),
+    transparent 70%
+  );
+}
+/* centre the stack, but collapse the spacing first when the viewport is
+   short so the top of the form never gets clipped out of reach */
+.auth-shell::before,
+.auth-shell::after {
+  content: "";
+  flex: 1 1 0;
+}
+.auth-brand {
+  font-size: 23px;
+  margin-bottom: 26px;
 }
 .auth-card {
+  width: 100%;
+  max-width: 400px;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: var(--shadow);
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  padding: 30px;
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 /* ---------- title detail ---------- */

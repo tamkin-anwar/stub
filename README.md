@@ -12,7 +12,10 @@ Built by Anwar Creative Studio.
 - **A list together.** Pair with an accepted friend and get one shared list. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Your personal list stays yours.
 - **Friends.** Find people by username, send and accept requests, and choose who you share a list with.
 - **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Add anything to any list in two clicks.
-- **Title pages.** Backdrop, synopsis, cast, runtime, the TMDB score, and a link out to the real IMDb page.
+- **Scores on every card.** IMDb, Rotten Tomatoes and Metacritic, pulled once per title from OMDb and cached, shown on list cards, library cards and title pages, with a small legend.
+- **A home page.** What is coming, what is trending this week, older films worth another look, and a feed of recent film and TV coverage from The Guardian that opens in an in-app reader and links back to their site.
+- **Title pages.** Backdrop, synopsis, cast, runtime, all the scores, and a link out to the real IMDb page.
+- **Settings.** Theme (system, light, dark), a JSON export of your whole list, and account deletion behind a typed confirmation that also purges your personal rows.
 
 ## How it works
 
@@ -28,7 +31,8 @@ Postgres row level security does the access control. A signed-in user can read a
 - react-router-dom
 - TanStack Query for server state
 - Supabase: Postgres, email auth, row level security, realtime
-- TMDB API for titles, artwork, and discovery feeds
+- TMDB for titles, artwork and discovery feeds; OMDb for IMDb / Rotten Tomatoes / Metacritic scores; The Guardian Open Platform for the press feed
+- Vitest for unit tests, pgTAP for the row-level-security and account-deletion tests, GitHub Actions to run both
 
 ## Why Stub
 
@@ -45,8 +49,8 @@ npm install
 ### 2. Supabase
 
 1. Create a free project at https://supabase.com/dashboard.
-2. Open the SQL editor, paste all of `supabase/migrations/0001_init.sql`, and run it.
-3. Auth, Providers, Email is on by default. For quick local testing, turn off "Confirm email" so new accounts can sign in right away.
+2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0004`), or `supabase link` and `supabase db push`.
+3. Auth, Providers, Email is on by default. For quick local testing, turn off "Confirm email" so new accounts can sign in right away; with it on, sign-up shows a "confirm your email" step.
 4. Project Settings, API: copy the Project URL and the `anon` public key.
 
 ### 3. TMDB
@@ -58,8 +62,10 @@ npm install
 
 ```bash
 cp .env.example .env
-# then fill in the three values
+# then fill in the values
 ```
+
+Supabase and TMDB are required. `VITE_OMDB_API_KEY` (free, omdbapi.com) and `VITE_GUARDIAN_API_KEY` (free, open-platform.theguardian.com) are optional: without them the scores and the press feed just do not show.
 
 ### 5. Run
 
@@ -67,7 +73,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Open the local URL Vite prints, create an account, and start adding titles from the Library. Until `.env` is filled in, the app shows a setup screen instead of booting.
+Open the local URL Vite prints, create an account, and start adding titles from the Library. Until the two required values are set, the app shows a setup screen instead of booting.
 
 ## Data model
 
@@ -86,13 +92,25 @@ Open the local URL Vite prints, create an account, and start adding titles from 
 npm run dev        # dev server
 npm run build      # typecheck, then production build
 npm run typecheck  # types only
+npm test           # unit tests (Vitest)
+npm run test:db    # row-level-security tests (needs a local Supabase: supabase start)
 npm run preview    # serve the build
+npm run icons      # regenerate the PNG icons from the mark
 ```
+
+## Testing
+
+`npm test` covers the pure logic: OMDb score parsing, Guardian article mapping, TMDB normalisation and the upcoming/classic filters, list averages, and theme persistence.
+
+`supabase/tests/rls_test.sql` is a pgTAP suite that runs against a throwaway database (`supabase start && npm run test:db`, or the CI `database` job). It asserts that one user cannot read or write another's personal list or ratings or profile, that a couple space is visible only to its two members, and that `delete_own_account` removes exactly the caller and their personal rows.
+
+CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on every push, plus the database tests on a fresh Supabase stack.
 
 ## What's here now, and what's next
 
-- Done: accounts, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, title pages with cast, light and dark themes.
+- Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, and an installable manifest.
 - Not yet: a native iOS client on the same Supabase API.
+- Not yet: a server-side cache for the TMDB/OMDb/Guardian calls so heavy use does not hit their free-tier limits.
 - Not yet: caching posters into Supabase Storage so the grid does not depend on TMDB's CDN.
 - Not yet: an activity view (what a friend rated recently) and comparing two lists for overlap.
 - Not yet: spaces larger than two people, and a shared note per title.

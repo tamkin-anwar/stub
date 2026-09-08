@@ -1235,16 +1235,14 @@ dialog::backdrop {
   flex-direction: column;
   align-items: center;
   padding: 44px 20px;
-  /* round, and eased through many stops so the falloff stays smooth with
-     no visible ring on any viewport */
-  background: radial-gradient(
-    circle 820px at 50% 30%,
-    color-mix(in srgb, var(--accent) 13%, transparent) 0%,
-    color-mix(in srgb, var(--accent) 9%, transparent) 18%,
-    color-mix(in srgb, var(--accent) 5%, transparent) 36%,
-    color-mix(in srgb, var(--accent) 2.2%, transparent) 54%,
-    color-mix(in srgb, var(--accent) 0.6%, transparent) 74%,
-    transparent 100%
+  /* a gentle wash from the top, no radial shape to perceive an edge on;
+     eased over a long span so the transition stays smooth */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 7%, var(--bg)) 0%,
+    color-mix(in srgb, var(--accent) 3%, var(--bg)) 22%,
+    color-mix(in srgb, var(--accent) 0.8%, var(--bg)) 40%,
+    var(--bg) 58%
   );
 }
 /* centre the stack, but collapse the spacing first when the viewport is

@@ -30,8 +30,13 @@ function AppLayout() {
   if (!profileChecked) return <p className="center-note">Loading…</p>;
   return (
     <>
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
       <Nav />
-      <Outlet />
+      <main id="main">
+        <Outlet />
+      </main>
     </>
   );
 }

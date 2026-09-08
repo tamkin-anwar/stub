@@ -3,6 +3,14 @@ import { useAuth } from "../context/AuthContext";
 import { Avatar } from "./Avatar";
 import { displayName } from "../lib/format";
 
+const LINKS: [string, string][] = [
+  ["/app", "Home"],
+  ["/app/list", "My list"],
+  ["/app/library", "Library"],
+  ["/app/shared", "Shared"],
+  ["/app/friends", "Friends"],
+];
+
 export function Nav() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
@@ -10,26 +18,16 @@ export function Nav() {
   return (
     <header className="nav">
       <div className="wrap nav-inner">
-        <NavLink to="/app" className="brand">
+        <NavLink to="/app" className="brand" end>
           <span className="dot" />
           Stub
         </NavLink>
-        <nav className="nav-links">
-          <NavLink to="/app" end className={({ isActive }) => (isActive ? "active" : "")}>
-            Home
-          </NavLink>
-          <NavLink to="/app/list" className={({ isActive }) => (isActive ? "active" : "")}>
-            My list
-          </NavLink>
-          <NavLink to="/app/library" className={({ isActive }) => (isActive ? "active" : "")}>
-            Library
-          </NavLink>
-          <NavLink to="/app/shared" className={({ isActive }) => (isActive ? "active" : "")}>
-            Shared
-          </NavLink>
-          <NavLink to="/app/friends" className={({ isActive }) => (isActive ? "active" : "")}>
-            Friends
-          </NavLink>
+        <nav className="nav-links" aria-label="Primary">
+          {LINKS.map(([to, label]) => (
+            <NavLink key={to} to={to} end={to === "/app"} className={({ isActive }) => (isActive ? "active" : "")}>
+              {label}
+            </NavLink>
+          ))}
         </nav>
         <div className="nav-spacer" />
         <div className="nav-user">
@@ -38,12 +36,12 @@ export function Nav() {
               <button
                 className="btn ghost sm"
                 onClick={() => navigate("/app/settings")}
-                title="Settings"
+                aria-label={`Settings, signed in as @${profile.username}`}
               >
                 <Avatar name={displayName(profile)} accent={profile.accent} />
-                <span>@{profile.username}</span>
+                <span className="nav-username">@{profile.username}</span>
               </button>
-              <button className="btn ghost sm" onClick={() => void signOut()}>
+              <button className="btn ghost sm nav-signout" onClick={() => void signOut()}>
                 Sign out
               </button>
             </>

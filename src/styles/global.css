@@ -13,7 +13,7 @@
   --surface-3: #e2ded7;
   --text: #191512;
   --dim: #6a625a;
-  --faint: #98918a;
+  --faint: #77706a;
   --line: rgba(25, 21, 18, 0.12);
   --line-2: rgba(25, 21, 18, 0.2);
   --accent: #8f2b3c;
@@ -46,7 +46,7 @@
     --surface-3: #2c2a28;
     --text: #f3efe9;
     --dim: #a09a91;
-    --faint: #6f6963;
+    --faint: #948d84;
     --line: rgba(245, 242, 237, 0.09);
     --line-2: rgba(245, 242, 237, 0.16);
     --accent: #b34156;
@@ -72,7 +72,7 @@
   --surface-3: #2c2a28;
   --text: #f3efe9;
   --dim: #a09a91;
-  --faint: #6f6963;
+  --faint: #948d84;
   --line: rgba(245, 242, 237, 0.09);
   --line-2: rgba(245, 242, 237, 0.16);
   --accent: #b34156;
@@ -518,11 +518,11 @@ select:focus {
 /* ---------- poster grid ---------- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
   gap: 30px 18px;
 }
 .grid.tight {
-  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
   gap: 22px 14px;
 }
 .poster-card {
@@ -888,7 +888,7 @@ dialog::backdrop {
 }
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 28px 26px;
   margin-top: 14vh;
   counter-reset: feat;
@@ -926,7 +926,7 @@ dialog::backdrop {
 /* ---------- home: article cards ---------- */
 .article-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 18px;
 }
 .article {
@@ -1383,7 +1383,7 @@ dialog::backdrop {
 }
 .cast-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 104px), 1fr));
   gap: 16px;
 }
 .cast .ch {
@@ -1402,5 +1402,111 @@ dialog::backdrop {
   }
   .poster .badge.live i {
     animation: none;
+  }
+}
+
+/* ---------- accessibility helpers ---------- */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  font-size: 13px;
+  transform: translateY(-160%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* comfortable touch targets on phones and tablets */
+@media (pointer: coarse) {
+  .btn.sm,
+  .nav-links a,
+  .chip,
+  .seg button {
+    min-height: 40px;
+  }
+  .btn.sm {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ---------- mobile layout ---------- */
+@media (max-width: 760px) {
+  .nav-inner {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 10px 16px;
+    padding-top: 12px;
+    padding-bottom: 4px;
+  }
+  .nav-links {
+    order: 3;
+    flex-basis: 100%;
+    margin: 2px calc(-1 * clamp(20px, 5vw, 40px)) 0;
+    padding: 4px clamp(20px, 5vw, 40px) 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-username,
+  .nav-user .nav-signout {
+    display: none;
+  }
+  .nav-user .btn.sm {
+    padding: 5px 6px;
+  }
+
+  .page {
+    padding: 22px 0 80px;
+  }
+  .page-head {
+    margin-bottom: 20px;
+  }
+  .hero {
+    padding: 9vh 0 7vh;
+  }
+
+  .settings-row {
+    flex-wrap: wrap;
+  }
+  .settings-row .seg,
+  .settings-row .btn {
+    margin-left: auto;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  dialog .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* honour the notch / rounded corners on installed iOS */
+@media (max-width: 760px) {
+  .wrap {
+    padding-left: max(clamp(20px, 5vw, 40px), env(safe-area-inset-left));
+    padding-right: max(clamp(20px, 5vw, 40px), env(safe-area-inset-right));
   }
 }

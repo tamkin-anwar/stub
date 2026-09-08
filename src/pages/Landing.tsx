@@ -41,6 +41,7 @@ export function Landing() {
         </Link>
       </header>
 
+      <main>
       <section className="hero">
         <h1>Keep the stub.</h1>
         <p>
@@ -65,6 +66,7 @@ export function Landing() {
           </div>
         ))}
       </section>
+      </main>
 
       <footer className="site-foot">
         <span className="brand-mini">

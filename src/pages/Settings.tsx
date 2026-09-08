@@ -123,8 +123,13 @@ export function Settings() {
           </div>
 
           <div className="field">
-            <label>Display name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
+            <label htmlFor="settings-name">Display name</label>
+            <input
+              id="settings-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={40}
+            />
           </div>
 
           <div className="field" style={{ marginBottom: 4 }}>
@@ -286,10 +291,15 @@ function DeleteDialog({
           and sign-in. There is no undo.
         </p>
         <div className="field">
-          <label>
+          <label htmlFor="delete-confirm">
             Type <span className="mono">{username}</span> to confirm
           </label>
-          <input value={text} onChange={(e) => setText(e.target.value)} autoFocus />
+          <input
+            id="delete-confirm"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            autoFocus
+          />
         </div>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button className="btn sm" onClick={close}>

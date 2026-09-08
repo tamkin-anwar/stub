@@ -61,7 +61,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
                 <input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="lowercase_handle"
+                  placeholder="alex"
                   autoComplete="username"
                   required
                 />
@@ -71,7 +71,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
                 <input
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="What friends see"
+                  placeholder="Alex Rivera"
                 />
               </div>
             </>

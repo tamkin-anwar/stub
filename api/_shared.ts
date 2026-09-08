@@ -1,6 +1,12 @@
 // Shared helpers for the /api proxy functions. Underscore prefix so Vercel
 // does not treat this as a route.
 
+/** Read a server env var, accepting the old VITE_-prefixed name as a fallback
+ *  so a deploy keeps working before the Vercel vars are renamed. */
+export function serverKey(name: string): string | undefined {
+  return process.env[name] || process.env[`VITE_${name}`];
+}
+
 export interface OmdbScores {
   imdb: number | null;
   imdbVotes: number | null;
@@ -75,14 +81,20 @@ export function mapGuardian(data: GuardianRaw): Article[] {
   }));
 }
 
-/** JSON response with a CDN cache header. `sMaxage` seconds shared-cache fresh,
- *  then served stale while revalidating for the same again. */
+/** Cache headers: browsers don't store it, but Vercel's edge holds it for
+ *  `sMaxage` seconds and serves it stale for the same again while it
+ *  revalidates. CDN-Cache-Control is set explicitly so Vercel doesn't
+ *  normalise the plain Cache-Control away. */
+export function cacheHeaders(sMaxage: number): Record<string, string> {
+  const shared = `public, s-maxage=${sMaxage}, stale-while-revalidate=${sMaxage}`;
+  return {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "public, max-age=0, must-revalidate",
+    "cdn-cache-control": shared,
+    "vercel-cdn-cache-control": shared,
+  };
+}
+
 export function json(data: unknown, sMaxage: number, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": `public, max-age=0, s-maxage=${sMaxage}, stale-while-revalidate=${sMaxage}`,
-    },
-  });
+  return new Response(JSON.stringify(data), { status, headers: cacheHeaders(sMaxage) });
 }

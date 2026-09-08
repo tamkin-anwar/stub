@@ -101,7 +101,8 @@ describe("json", () => {
   it("sets a shared-cache header and serialises the body", async () => {
     const r = json({ ok: true }, 900);
     expect(r.status).toBe(200);
-    expect(r.headers.get("cache-control")).toContain("s-maxage=900");
+    expect(r.headers.get("cdn-cache-control")).toContain("s-maxage=900");
+    expect(r.headers.get("cache-control")).toContain("max-age=0");
     expect(await r.json()).toEqual({ ok: true });
   });
 });

@@ -1,6 +1,8 @@
+import { cacheHeaders, serverKey } from "./_shared";
+
 export const config = { runtime: "edge" };
 
-const TOKEN = process.env.TMDB_ACCESS_TOKEN;
+const TOKEN = serverKey("TMDB_ACCESS_TOKEN");
 
 // Only the read-only endpoints the app actually uses.
 const ALLOW: RegExp[] = [
@@ -40,16 +42,8 @@ export default async function handler(req: Request): Promise<Response> {
     });
     const body = await r.text();
     // Title detail rarely changes; discovery feeds move through the day.
-    const ttl = /^\/(movie|tv)\/\d+$/.test(path) ? 60 * 60 * 24 : 60 * 15;
-    return new Response(body, {
-      status: r.status,
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": r.ok
-          ? `public, max-age=0, s-maxage=${ttl}, stale-while-revalidate=${ttl}`
-          : "public, s-maxage=30",
-      },
-    });
+    const ttl = r.ok ? (/^\/(movie|tv)\/\d+(\/external_ids)?$/.test(path) ? 60 * 60 * 24 : 60 * 15) : 30;
+    return new Response(body, { status: r.status, headers: cacheHeaders(ttl) });
   } catch {
     return new Response(JSON.stringify({ error: "tmdb unreachable" }), {
       status: 502,

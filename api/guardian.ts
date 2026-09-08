@@ -1,8 +1,8 @@
-import { json, mapGuardian } from "./_shared";
+import { json, mapGuardian, serverKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
-const KEY = process.env.GUARDIAN_API_KEY;
+const KEY = serverKey("GUARDIAN_API_KEY");
 const HALF_HOUR = 60 * 30;
 
 export default async function handler(req: Request): Promise<Response> {

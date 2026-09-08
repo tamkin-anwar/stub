@@ -1,8 +1,8 @@
-import { EMPTY_SCORES, json, normalizeOmdb } from "./_shared";
+import { EMPTY_SCORES, json, normalizeOmdb, serverKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
-const KEY = process.env.OMDB_API_KEY;
+const KEY = serverKey("OMDB_API_KEY");
 const WEEK = 60 * 60 * 24 * 7;
 
 export default async function handler(req: Request): Promise<Response> {

@@ -203,7 +203,9 @@ h3 {
   padding: 0 clamp(20px, 5vw, 40px);
 }
 .page {
-  padding: 36px 0 112px;
+  /* top/bottom only: .wrap owns the horizontal padding */
+  padding-top: 36px;
+  padding-bottom: 112px;
 }
 .page-head {
   display: flex;
@@ -1469,9 +1471,13 @@ dialog::backdrop {
   }
 
   /* app nav: one row. Brand and avatar stay put, the section links
-     become a horizontal scroll strip in between. */
+     become a horizontal scroll strip in between. Solid, not frosted,
+     so the status-bar strip above it reads as a clean bar. */
   .nav {
     padding-top: max(18px, env(safe-area-inset-top));
+    background: var(--bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   .nav .nav-inner {
     gap: 12px;
@@ -1521,7 +1527,8 @@ dialog::backdrop {
   }
 
   .page {
-    padding: 20px 0 max(72px, calc(56px + env(safe-area-inset-bottom)));
+    padding-top: 18px;
+    padding-bottom: max(72px, calc(56px + env(safe-area-inset-bottom)));
   }
   .page-head {
     margin-bottom: 20px;

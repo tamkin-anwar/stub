@@ -26,7 +26,7 @@ export function Landing() {
 
   return (
     <div className="wrap">
-      <header className="nav-inner" style={{ borderBottom: "1px solid var(--line)" }}>
+      <header className="nav-inner" style={{ borderBottom: "1px solid var(--line-2)" }}>
         <span className="brand">
           <span className="dot" />
           Stub

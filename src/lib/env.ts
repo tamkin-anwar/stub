@@ -8,8 +8,17 @@ export const env = {
   tmdbToken: tmdbToken ?? "",
 };
 
-export const supabaseReady = Boolean(url && anonKey && url.startsWith("http"));
-export const tmdbReady = Boolean(tmdbToken && tmdbToken.length > 20);
+// Reject the .env.example placeholders, which are otherwise long enough to look real.
+const isPlaceholder = (v: string | undefined) =>
+  !v || /^your-/i.test(v) || v.includes("YOUR-PROJECT");
+
+export const supabaseReady = Boolean(
+  !isPlaceholder(url) && !isPlaceholder(anonKey) && url!.startsWith("http") && anonKey!.length > 20,
+);
+// A TMDB v4 read access token is a JWT beginning with "eyJ".
+export const tmdbReady = Boolean(
+  !isPlaceholder(tmdbToken) && tmdbToken!.startsWith("eyJ") && tmdbToken!.length > 40,
+);
 
 export const missingConfig: string[] = [
   ...(supabaseReady ? [] : ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY"]),

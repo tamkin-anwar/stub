@@ -6,6 +6,7 @@ import { useEntries } from "../hooks/lists";
 import { PosterCard } from "./PosterCard";
 import { EntrySheet } from "./EntrySheet";
 import { ScorePills } from "./ScorePills";
+import { ScoreLegend } from "./ScoreLegend";
 import { entryAverage } from "../lib/format";
 
 type StatusFilter = "all" | ListStatus;
@@ -61,6 +62,7 @@ export function ListView({ owner, members, selfId, emptyHint }: Props) {
 
   return (
     <>
+      <ScoreLegend />
       <div className="list-toolbar">
         <div className="seg">
           {(["all", "movie", "tv"] as TypeFilter[]).map((t) => (

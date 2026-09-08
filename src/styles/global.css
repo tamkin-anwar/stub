@@ -734,6 +734,32 @@ select:focus {
   color: var(--dim);
 }
 
+/* ---------- score legend ---------- */
+.score-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 18px;
+  margin-bottom: 22px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.01em;
+  color: var(--faint);
+}
+.score-legend-key {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+}
+.score-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.score-legend .scores {
+  gap: 5px;
+}
+
 /* ---------- stars ---------- */
 .stars {
   display: inline-flex;

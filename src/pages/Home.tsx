@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useArticles, useClassics, useTrending, useUpcoming } from "../hooks/library";
 import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
+import { ScoreLegend } from "../components/ScoreLegend";
 import { ArticleCard } from "../components/ArticleCard";
 import { type AddTarget } from "../components/AddMenu";
 import type { TmdbTitle } from "../lib/types";
@@ -112,6 +113,8 @@ export function Home() {
           Set <code>VITE_TMDB_ACCESS_TOKEN</code> in <code>.env</code> to populate this page.
         </div>
       )}
+
+      <ScoreLegend />
 
       <Shelf
         label="Release radar"

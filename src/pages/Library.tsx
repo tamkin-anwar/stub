@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useBrowse, useTmdbSearch } from "../hooks/library";
 import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
+import { ScoreLegend } from "../components/ScoreLegend";
 import { type AddTarget } from "../components/AddMenu";
 import { GENRES, type BrowseFeed, type MediaFilter } from "../lib/tmdb";
 import type { TmdbTitle } from "../lib/types";
@@ -76,6 +77,8 @@ export function Library() {
           Set <code>VITE_TMDB_ACCESS_TOKEN</code> in <code>.env</code> to load real titles and artwork.
         </div>
       )}
+
+      <ScoreLegend />
 
       <div className="search-box" style={{ marginBottom: 16 }}>
         <input

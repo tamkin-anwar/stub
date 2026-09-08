@@ -77,6 +77,16 @@ export function Home() {
 
   if (!profile) return null;
 
+  const shelfBody = (
+    q: { isLoading: boolean; isError: boolean; data: TmdbTitle[] | undefined },
+    opts?: { dates?: boolean },
+  ) => {
+    if (q.isLoading) return <p className="center-note">Loading…</p>;
+    if (q.isError || !q.data?.length)
+      return <p className="center-note">Nothing to show right now.</p>;
+    return strip(q.data, opts);
+  };
+
   const strip = (rows: TmdbTitle[] | undefined, opts?: { dates?: boolean }) => (
     <div className="grid">
       {(rows ?? []).slice(0, 12).map((r) => (
@@ -131,19 +141,15 @@ export function Home() {
         title="Coming soon"
         more={<Link to="/app/library" className="btn ghost sm">Browse all</Link>}
       >
-        {upcoming.isLoading ? (
-          <p className="center-note">Loading…</p>
-        ) : (
-          strip(upcoming.data, { dates: true })
-        )}
+        {shelfBody(upcoming, { dates: true })}
       </Shelf>
 
       <Shelf label="Right now" title="This week">
-        {trending.isLoading ? <p className="center-note">Loading…</p> : strip(trending.data)}
+        {shelfBody(trending)}
       </Shelf>
 
       <Shelf label="From the archive" title="Worth revisiting">
-        {classics.isLoading ? <p className="center-note">Loading…</p> : strip(classics.data)}
+        {shelfBody(classics)}
       </Shelf>
     </div>
   );

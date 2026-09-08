@@ -150,12 +150,14 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
           </div>
 
           <div className="field">
-            <label>Watched on</label>
+            <label htmlFor={`watched-${entry.id}`}>Watched on</label>
             <input
-              type="month"
-              value={watchedOn ? watchedOn.slice(0, 7) : ""}
+              id={`watched-${entry.id}`}
+              type="date"
+              value={watchedOn || ""}
+              max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => {
-                const v = e.target.value ? `${e.target.value}-01` : "";
+                const v = e.target.value || "";
                 setWatchedOn(v);
                 update.mutate({ entryId: entry.id, patch: { watched_on: v || null } });
               }}
@@ -163,8 +165,9 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
           </div>
 
           <div className="field">
-            <label>Notes</label>
+            <label htmlFor={`note-${entry.id}`}>Notes</label>
             <textarea
+              id={`note-${entry.id}`}
               value={note}
               placeholder="What did you think?"
               onChange={(e) => setNote(e.target.value)}

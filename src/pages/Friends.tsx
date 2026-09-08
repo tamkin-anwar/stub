@@ -13,6 +13,9 @@ export function Friends() {
   const { data: found } = useProfileSearch(term, profile?.id);
   const actions = useFriendActions(profile?.id ?? "");
 
+  const fail = (err: unknown) =>
+    toast(err instanceof Error ? err.message : "Something went wrong");
+
   if (!profile) return null;
 
   const incoming = (friends ?? []).filter((f) => f.direction === "incoming");
@@ -57,7 +60,7 @@ export function Friends() {
                     <button
                       className="btn sm"
                       onClick={() =>
-                        actions.request.mutate(p.id, { onSuccess: () => toast("Request sent") })
+                        actions.request.mutate(p.id, { onSuccess: () => toast("Request sent"), onError: fail })
                       }
                     >
                       Add friend
@@ -81,10 +84,10 @@ export function Friends() {
                   <div className="name">{displayName(f.profile)}</div>
                   <div className="handle">@{f.profile.username}</div>
                 </div>
-                <button className="btn primary sm" onClick={() => actions.accept.mutate(f.friendship.id)}>
+                <button className="btn primary sm" onClick={() => actions.accept.mutate(f.friendship.id, { onError: fail })}>
                   Accept
                 </button>
-                <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id)}>
+                <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
                   Ignore
                 </button>
               </div>
@@ -109,7 +112,7 @@ export function Friends() {
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>
                   </div>
-                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id)}>
+                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
                     Remove
                   </button>
                 </div>
@@ -122,7 +125,7 @@ export function Friends() {
                     <div className="handle">@{f.profile.username}</div>
                   </div>
                   <span className="muted" style={{ fontSize: 12.5 }}>Requested</span>
-                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id)}>
+                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
                     Cancel
                   </button>
                 </div>

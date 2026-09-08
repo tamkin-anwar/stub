@@ -2,7 +2,13 @@ import { requireSupabase } from "../lib/supabase";
 import type { FriendView, Friendship, Profile, SpaceWithMembers } from "../lib/types";
 
 export async function searchProfiles(term: string, selfId: string): Promise<Profile[]> {
-  const q = term.trim().replace(/^@/, "");
+  // Strip characters that are special to PostgREST's filter grammar so a
+  // stray comma or paren in the query can't break (or bend) the request.
+  const q = term
+    .trim()
+    .replace(/^@/, "")
+    .replace(/[%,()"'\\*]/g, " ")
+    .trim();
   if (q.length < 2) return [];
   const sb = requireSupabase();
   const { data, error } = await sb

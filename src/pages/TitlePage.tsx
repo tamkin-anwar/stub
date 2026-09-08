@@ -111,10 +111,10 @@ export function TitlePage() {
             <>
               <p className="eyebrow" style={{ margin: "26px 0 12px" }}>Cast</p>
               <div className="cast-grid cast">
-                {detail.cast.map((c) => {
+                {detail.cast.map((c, i) => {
                   const pp = profileUrl(c.profilePath);
                   return (
-                    <div key={c.name + c.character}>
+                    <div key={`${c.name}-${c.character}-${i}`}>
                       <div className="poster" style={{ aspectRatio: "1 / 1", borderRadius: 10, marginBottom: 6 }}>
                         {pp ? (
                           <img src={pp} alt={c.name} />

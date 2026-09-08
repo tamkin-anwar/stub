@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ListStatus } from "../lib/types";
 import type { ListOwner } from "../data/lists";
@@ -35,6 +35,13 @@ export function AddMenu({
   const qc = useQueryClient();
   const target = targets[targetIndex] ?? targets[0];
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   async function add(status: ListStatus) {
     if (!target) return;
     setBusy(true);
@@ -62,11 +69,12 @@ export function AddMenu({
       {open && (
         <>
           <div
+            className="add-menu-scrim"
             style={{ position: "fixed", inset: 0, zIndex: 40 }}
             onClick={() => setOpen(false)}
           />
           <div
-            className="card"
+            className="card add-menu-pop"
             style={{
               position: "absolute",
               top: "calc(100% + 6px)",

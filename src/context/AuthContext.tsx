@@ -74,11 +74,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (mounted.current) setLoading(false);
     });
 
+    let currentUserId: string | null = null;
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
+      const nextId = next?.user?.id ?? null;
+      // Token refreshes and tab refocus re-fire this with the same user; only
+      // re-check the profile when the identity actually changes.
+      if (nextId === currentUserId) return;
+      currentUserId = nextId;
       setProfileChecked(false);
-      if (next?.user) {
-        void loadProfile(next.user.id);
+      if (nextId) {
+        void loadProfile(nextId);
       } else {
         setProfile(null);
         setProfileChecked(true);

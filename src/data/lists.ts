@@ -1,6 +1,7 @@
 import { requireSupabase } from "../lib/supabase";
 import { titleDetail } from "../lib/tmdb";
 import { omdbScores } from "../lib/omdb";
+import { omdbReady } from "../lib/env";
 import type {
   ListEntry,
   ListStatus,
@@ -53,10 +54,12 @@ export async function cacheTitle(mediaType: MediaType, tmdbId: number): Promise<
 
 /** Backfill OMDb scores onto an already-cached title (used from the title page). */
 export async function refreshTitleScores(titleId: number, imdbId: string | null): Promise<void> {
-  if (!imdbId) return;
+  if (!imdbId || !omdbReady) return;
   const s = await omdbScores(imdbId).catch(() => null);
-  if (!s || (s.imdb === null && s.rt === null && s.metacritic === null)) return;
+  if (!s) return;
   const sb = requireSupabase();
+  // Stamp omdb_checked_at even when nothing was found (common for TV) so the
+  // title page effect does not re-run this on every list refresh.
   await sb
     .from("titles")
     .update({

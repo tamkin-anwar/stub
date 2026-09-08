@@ -1079,6 +1079,102 @@ dialog::backdrop {
   color: var(--faint);
 }
 
+/* ---------- settings ---------- */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+.tiny {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.settings-group {
+  margin-bottom: 22px;
+}
+.settings-group > .eyebrow {
+  margin-bottom: 10px;
+}
+.settings-identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.settings-handle {
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.swatches {
+  display: flex;
+  gap: 10px;
+}
+.swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.12s ease, transform 0.12s ease;
+}
+.swatch:hover {
+  transform: scale(1.08);
+}
+.swatch[aria-pressed="true"] {
+  outline-color: var(--text);
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.settings-row-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.settings-row-divide {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.settings-kv {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  font-size: 13.5px;
+}
+.settings-kv + .settings-kv {
+  border-top: 1px solid var(--line);
+}
+.settings-kv > span:first-child {
+  color: var(--dim);
+}
+.settings-kv .mono {
+  color: var(--text);
+}
+.danger-label {
+  color: var(--bad);
+}
+.danger-card {
+  border-color: color-mix(in srgb, var(--bad) 40%, var(--line));
+}
+.btn.danger-btn {
+  border-color: color-mix(in srgb, var(--bad) 55%, transparent);
+  color: var(--bad);
+}
+.btn.danger-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+  border-color: var(--bad);
+}
+
 /* ---------- auth ---------- */
 .auth-shell {
   max-width: 404px;

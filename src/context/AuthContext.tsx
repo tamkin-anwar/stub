@@ -17,6 +17,8 @@ interface AuthValue {
   ready: boolean;
   configured: boolean;
   loading: boolean;
+  /** True once a profile lookup has finished for the current session (found or not). */
+  profileChecked: boolean;
   session: Session | null;
   user: User | null;
   profile: Profile | null;
@@ -28,16 +30,27 @@ interface AuthValue {
 
 const AuthContext = createContext<AuthValue | null>(null);
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileChecked, setProfileChecked] = useState(false);
   const [loading, setLoading] = useState(supabaseReady);
   const mounted = useRef(true);
 
   const loadProfile = useCallback(async (userId: string) => {
     if (!supabase) return;
-    const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
-    if (mounted.current) setProfile((data as Profile) ?? null);
+    let { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    // Just after sign-up the trigger row can lag by a beat; give it one retry.
+    if (!data) {
+      await sleep(900);
+      ({ data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle());
+    }
+    if (mounted.current) {
+      setProfile((data as Profile) ?? null);
+      setProfileChecked(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -51,15 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted.current) return;
       setSession(data.session);
       if (data.session?.user) await loadProfile(data.session.user.id);
+      else setProfileChecked(true);
       if (mounted.current) setLoading(false);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
+      setProfileChecked(false);
       if (next?.user) {
         void loadProfile(next.user.id);
       } else {
         setProfile(null);
+        setProfileChecked(true);
       }
     });
 
@@ -90,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return;
     await supabase.auth.signOut();
     setProfile(null);
+    setProfileChecked(true);
   }, []);
 
   const refreshProfile = useCallback(async () => {
@@ -101,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ready: !loading,
       configured: supabaseReady,
       loading,
+      profileChecked,
       session,
       user: session?.user ?? null,
       profile,
@@ -109,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       refreshProfile,
     }),
-    [loading, session, profile, signUp, signIn, signOut, refreshProfile],
+    [loading, profileChecked, session, profile, signUp, signIn, signOut, refreshProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

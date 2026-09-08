@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./components/Toast";
@@ -13,9 +14,18 @@ import { Settings } from "./pages/Settings";
 import { TitlePage } from "./pages/TitlePage";
 
 function AppLayout() {
-  const { loading, user } = useAuth();
+  const { loading, user, profile, profileChecked, signOut } = useAuth();
+
+  // A session whose profile row is gone (account deleted, or the sign-up trigger
+  // never ran) is unusable. Clear it and send the person back to sign in.
+  const orphaned = !!user && profileChecked && !profile;
+  useEffect(() => {
+    if (orphaned) void signOut();
+  }, [orphaned, signOut]);
+
   if (loading) return <p className="center-note">Loading…</p>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user || orphaned) return <Navigate to="/login" replace />;
+  if (!profileChecked) return <p className="center-note">Loading…</p>;
   return (
     <>
       <Nav />

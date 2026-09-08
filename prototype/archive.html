@@ -1,0 +1,581 @@
+<title>Tamkin &amp; Ridu Film Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">
+<style id="app-style">
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+
+:root{
+  color-scheme:light dark;
+  --bg:#FAF9F6; --surface:#FFFFFF; --surface-2:#F3F1EC;
+  --text:#211D19; --dim:#6C645B;
+  --line:rgba(33,29,25,.12); --line-2:rgba(33,29,25,.24);
+  --accent:#AC6A1C; --accent-ink:#7A4A10; --accent-soft:rgba(172,106,28,.12);
+  --on-accent:#FFFFFF;
+  --cool:#357C9B; --ok:#3B8A62;
+  --imdb:#B8860B; --fresh:#E4572E; --rotten:#12A150;
+  --star-empty:rgba(33,29,25,.18);
+  --shadow:0 24px 64px -26px rgba(46,34,18,.34);
+  --grain:.05;
+  --bg-grad:radial-gradient(125% 90% at 50% -20%,#FFFFFF,var(--bg) 60%);
+  --font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+  --font-display:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131013; --surface:#1B171B; --surface-2:#241F24;
+    --text:#F0EAE1; --dim:#A79D91;
+    --line:rgba(240,228,214,.10); --line-2:rgba(240,228,214,.20);
+    --accent:#F0B95C; --accent-ink:#F0B95C; --accent-soft:rgba(240,185,92,.14);
+    --on-accent:#1B1206;
+    --cool:#84B7D1; --ok:#80C49F;
+    --imdb:#F5C518; --fresh:#FF6B4A; --rotten:#3DD68C;
+    --star-empty:rgba(240,228,214,.16);
+    --shadow:0 32px 84px -30px rgba(0,0,0,.66);
+    --grain:.10;
+    --bg-grad:radial-gradient(130% 90% at 50% -15%,#201B20,var(--bg) 62%);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131013; --surface:#1B171B; --surface-2:#241F24;
+  --text:#F0EAE1; --dim:#A79D91;
+  --line:rgba(240,228,214,.10); --line-2:rgba(240,228,214,.20);
+  --accent:#F0B95C; --accent-ink:#F0B95C; --accent-soft:rgba(240,185,92,.14);
+  --on-accent:#1B1206;
+  --cool:#84B7D1; --ok:#80C49F;
+  --imdb:#F5C518; --fresh:#FF6B4A; --rotten:#3DD68C;
+  --star-empty:rgba(240,228,214,.16);
+  --shadow:0 32px 84px -30px rgba(0,0,0,.66);
+  --grain:.10;
+  --bg-grad:radial-gradient(130% 90% at 50% -15%,#201B20,var(--bg) 62%);
+}
+
+body{background:var(--bg-grad);background-attachment:fixed;color:var(--text);font:15px/1.5 var(--font-ui);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+.top{padding:36px 0 16px}
+.hrow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.wordmark{margin:0;font-family:var(--font-display);font-style:italic;font-weight:400;font-size:clamp(30px,4.4vw,46px);line-height:1;letter-spacing:.005em}
+.kicker{margin-top:9px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+.stats{margin-top:14px;color:var(--dim);font-size:13.5px;font-variant-numeric:tabular-nums;max-width:62ch}
+.stats b{color:var(--text);font-weight:600}
+.stats .row2{margin-top:3px}
+.savepill{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;transition:color .2s,border-color .2s}
+.savepill[data-s="saving"]{color:var(--accent-ink);border-color:var(--accent)}
+
+.bar{position:sticky;top:0;z-index:20;margin-top:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3)}
+.bar .wrap{display:flex;gap:10px 12px;align-items:center;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--dim);font:inherit;font-size:13px;font-weight:550;padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-btn{border:1px solid var(--line);background:transparent;color:var(--dim);font:inherit;font-size:12.5px;padding:6px 11px;border-radius:999px;cursor:pointer;font-variant-numeric:tabular-nums}
+.chip-btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+.search{flex:1;min-width:148px;display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px;color:var(--dim)}
+.search input{border:0;background:transparent;color:var(--text);font:inherit;width:100%;outline:none}
+.sort{background:var(--surface-2);border:1px solid var(--line);color:var(--text);font:inherit;font-size:13px;border-radius:10px;padding:7px 10px}
+.add{border:0;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:650;font-size:13px;padding:8px 15px;border-radius:10px;cursor:pointer}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px 16px;padding:24px 0 72px}
+.card{border:0;background:transparent;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:8px;font:inherit;color:inherit}
+.poster{position:relative;aspect-ratio:2/3;border-radius:12px;overflow:hidden;padding:12px;display:flex;flex-direction:column;justify-content:space-between;color:#F3ECE0;background:radial-gradient(120% 70% at 22% 2%,rgba(255,255,255,.16),transparent 58%),linear-gradient(158deg,var(--d,#333),var(--m,#666));box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),inset 0 -64px 60px -30px rgba(0,0,0,.55);transition:transform .22s ease,box-shadow .22s ease}
+.poster::after{content:"";position:absolute;inset:0;background-image:var(--noise);opacity:var(--grain);mix-blend-mode:overlay;pointer-events:none}
+.poster.is-list{filter:saturate(.72) brightness(.9)}
+.card:hover .poster{box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 18px 42px -18px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:no-preference){.card:hover .poster{transform:translateY(-4px) scale(1.012)}}
+.p-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;min-height:20px}
+.p-title{font-family:var(--font-display);font-size:21px;line-height:1.05;text-wrap:balance;text-shadow:0 1px 14px rgba(0,0,0,.4);max-height:5.3em;overflow:hidden}
+.p-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:rgba(243,236,224,.82)}
+.pill{font-size:9.5px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:999px;background:rgba(0,0,0,.36);color:#fff;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.pill.ok{background:rgba(59,138,98,.92)}
+.pill.live{display:inline-flex;align-items:center;gap:5px}
+.pill.live i{width:6px;height:6px;border-radius:50%;background:var(--cool);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(132,183,209,.6)}70%{box-shadow:0 0 0 7px rgba(132,183,209,0)}100%{box-shadow:0 0 0 0 rgba(132,183,209,0)}}
+.heart{font-size:13px;line-height:1;color:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.55))}
+.c-title{font-size:13px;font-weight:600;line-height:1.32;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-sub{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-height:19px;font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.c-sub .ours{color:var(--accent-ink);font-weight:600}
+.empty{grid-column:1/-1;padding:64px 0;text-align:center;color:var(--dim)}
+
+.scores{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.scores span{display:inline-flex;align-items:center;padding:3px 5px}
+.scores .imdb{background:var(--imdb);color:#1a1a1a;letter-spacing:.02em}
+.scores .rt{background:var(--surface-2)}
+.scores .rt.fresh{color:var(--fresh)}
+.scores .rt.rotten{color:var(--rotten)}
+
+#sheet{border:0;padding:0;max-width:640px;width:calc(100vw - 32px);background:var(--surface);color:var(--text);border-radius:20px;box-shadow:var(--shadow)}
+#sheet::backdrop{background:rgba(12,9,10,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.d-grid{display:grid;grid-template-columns:170px 1fr;gap:22px;padding:22px}
+.d-poster{aspect-ratio:2/3}
+.d-body h2{font-family:var(--font-display);font-weight:400;font-size:30px;line-height:1.06;margin:0 0 5px;text-wrap:balance}
+.d-meta{color:var(--dim);font-size:12.5px;font-variant-numeric:tabular-nums}
+.d-blurb{margin:12px 0 4px;font-size:13.5px;color:var(--text);opacity:.9}
+.score-tiles{display:flex;gap:10px;margin:14px 0 4px}
+.stile{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.stile input{width:100%;border:0;background:transparent;color:var(--text);font:inherit;font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;padding:0;outline:none}
+.stile input::-webkit-outer-spin-button,.stile input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stile.imdb input{color:var(--imdb)}
+.stile.rtf input{color:var(--fresh)}
+.stile.rtr input{color:var(--rotten)}
+.stile label{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+.field{margin-bottom:15px}
+.field>span.lab{display:block;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.rate-row{display:flex;align-items:center;gap:12px;margin:8px 0}
+.rate-row .who{width:58px;font-size:13px;font-weight:600}
+.stars{display:inline-flex;gap:3px}
+.star{position:relative;width:24px;height:24px;font-size:22px;line-height:24px;border:0;background:transparent;padding:0;cursor:pointer;color:var(--star-empty)}
+.star .fv{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:var(--accent);width:calc(var(--f,0)*100%)}
+.rate-row .num{font-size:12px;color:var(--dim);min-width:30px;font-variant-numeric:tabular-nums}
+.linkbtn{border:0;background:transparent;color:var(--dim);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
+textarea,input[type="month"],input[type="text"],input[type="number"]{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:14px;padding:9px 11px;outline:none}
+textarea{resize:vertical;min-height:66px}
+textarea:focus,input:focus{border-color:var(--accent)}
+.d-actions{display:flex;align-items:center;gap:10px;padding:15px 22px;border-top:1px solid var(--line)}
+.btn-primary{margin-left:auto;border:0;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:650;padding:9px 18px;border-radius:10px;cursor:pointer}
+.btn-ghost{border:1px solid var(--line-2);background:transparent;color:var(--text);font:inherit;padding:9px 14px;border-radius:10px;cursor:pointer}
+.btn-ghost.danger{color:#c8503f;border-color:rgba(200,80,63,.4)}
+@media (max-width:560px){
+  .d-grid{grid-template-columns:1fr;gap:16px}
+  .d-poster{aspect-ratio:16/6;max-height:150px}
+}
+@media (prefers-reduced-motion:reduce){.pill.live i{animation:none}.card:hover .poster{transform:none}}
+</style>
+
+<div id="app"></div>
+<script id="seed-data" type="application/json"></script>
+<script id="app-script">
+(function(){
+"use strict";
+
+var SEED = [
+ {t:"The Intern",k:"movie",y:2015,g:"Comedy",b:"A retired executive takes an internship at a fashion startup and quietly steadies its young founder.",s:"watched",r:121,i:7.1,rt:60},
+ {t:"The Devil Wears Prada",k:"movie",y:2006,g:"Comedy",b:"A new graduate survives a punishing year as assistant to a feared magazine editor.",s:"watched",r:109,i:6.9,rt:76},
+ {t:"Project Hail Mary",k:"movie",y:2026,g:"Sci-Fi",b:"An amnesiac wakes alone on a spacecraft as the last hope against a dying sun.",s:"watched",r:null,i:null,rt:null},
+ {t:"Love and Other Drugs",k:"movie",y:2010,g:"Romance",b:"A charming drug rep falls for a woman living with early onset Parkinson's.",s:"watched",r:112,i:6.7,rt:48},
+ {t:"The Hating Game",k:"movie",y:2021,g:"Romance",b:"Two assistants at a merged publisher turn open rivalry into something warmer.",s:"watched",r:102,i:6.1,rt:46},
+ {t:"Mr. and Mrs. Smith",k:"movie",y:2005,g:"Action",b:"A bored married couple learn they are rival assassins ordered to kill each other.",s:"watched",r:120,i:6.5,rt:60},
+ {t:"Fair Play",k:"movie",y:2023,g:"Thriller",b:"A promotion at a ruthless hedge fund pulls a secret couple apart.",s:"watched",r:113,i:6.5,rt:87},
+ {t:"Pride and Prejudice",k:"movie",y:2005,g:"Romance",b:"Elizabeth Bennet and Mr Darcy misjudge each other across Georgian England.",s:"watched",r:129,i:7.8,rt:87},
+ {t:"Knives Out",k:"movie",y:2019,g:"Mystery",b:"A courtly detective picks apart a crime novelist's death and his grasping family.",s:"watched",r:130,i:7.9,rt:97},
+ {t:"Glass Onion",k:"movie",y:2022,g:"Mystery",b:"Benoit Blanc crashes a tech billionaire's murder party on a private Greek island.",s:"watched",r:139,i:7.1,rt:92},
+ {t:"Wake Up Dead Man",k:"movie",y:2025,g:"Mystery",b:"Benoit Blanc takes his most dangerous case yet inside a small parish.",s:"watched",r:146,i:7.4,rt:92},
+ {t:"Always Be My Maybe",k:"movie",y:2019,g:"Romance",b:"Childhood friends reconnect in San Francisco years after one bad night.",s:"watched",r:101,i:6.8,rt:89},
+ {t:"The Adam Project",k:"movie",y:2022,g:"Sci-Fi",b:"A time travelling pilot crash lands and reluctantly teams up with his younger self.",s:"watched",r:106,i:6.7,rt:67},
+ {t:"Friends with Benefits",k:"movie",y:2011,g:"Romance",b:"Two friends promise to keep it casual and fail almost at once.",s:"watched",r:109,i:6.5,rt:71},
+ {t:"Your Name",k:"movie",y:2016,g:"Animation",b:"A city boy and a country girl find they are trading bodies across a gap they cannot explain.",s:"watched",r:106,i:8.4,rt:98},
+ {t:"Lucy",k:"movie",y:2014,g:"Action",b:"A courier absorbs a synthetic drug that unlocks the full range of her mind.",s:"watched",r:89,i:6.4,rt:66},
+ {t:"Carry-On",k:"movie",y:2024,g:"Thriller",b:"A young TSA officer is forced to let a deadly package through on Christmas Eve.",s:"watched",r:119,i:6.5,rt:92},
+
+ {t:"Wayward",k:"show",y:2025,g:"Thriller",b:"A small town officer digs into a school for troubled teens and its magnetic founder.",s:"watched",e:8,r:50,i:6.8,rt:78},
+ {t:"The Night Agent",k:"show",y:2023,g:"Thriller",b:"A junior FBI agent answers a dormant emergency line and lands inside a White House plot.",s:"watched",e:20,r:45,i:7.4,rt:58},
+ {t:"The Beast in Me",k:"show",y:2025,g:"Thriller",b:"A grieving novelist becomes obsessed with the real estate mogul who moves in next door.",s:"watched",e:8,r:50,i:7.5,rt:83},
+ {t:"Harlan Coben's Fool Me Once",k:"show",y:2024,g:"Thriller",b:"A widow spots her murdered husband alive on the family's nanny cam.",s:"watched",e:8,r:50,i:7.1,rt:70},
+ {t:"Harlan Coben's Run Away",k:"show",y:2025,g:"Thriller",b:"A father chases his estranged daughter into a violent hidden world.",s:"watched",e:8,r:50,i:6.8,rt:78},
+ {t:"Hostage",k:"show",y:2025,g:"Thriller",b:"A British and French summit collapses when the prime minister's husband is taken.",s:"watched",e:5,r:50,i:6.5,rt:85},
+ {t:"His and Hers",k:"show",y:2026,g:"Mystery",b:"A former news anchor and a detective tell the same small town murder two different ways.",s:"watched",e:6,r:50,i:6.8,rt:62},
+
+ {t:"The Four Seasons",k:"show",y:2025,g:"Comedy",b:"Three couples take seasonal trips together, then one marriage falls apart.",s:"watching",e:8,r:30,i:7.0,rt:78},
+ {t:"Weathering With You",k:"movie",y:2019,g:"Animation",b:"A runaway in rainy Tokyo meets a girl who can part the clouds for a price.",s:"watching",r:112,i:7.5,rt:92},
+ {t:"Game of Thrones",k:"show",y:2011,g:"Fantasy",b:"Rival houses fight for a kingdom while an ancient threat wakes in the north.",s:"watching",e:73,r:57,n:"Rewatch.",i:9.2,rt:89},
+ {t:"The Blacklist",k:"show",y:2013,g:"Crime",b:"A most wanted fugitive surrenders to help the FBI catch criminals only he can name.",s:"watching",e:218,r:43,i:8.0,rt:84},
+ {t:"1899",k:"show",y:2022,g:"Mystery",b:"Passengers on a migrant steamship find a vessel lost at sea and a puzzle inside a puzzle.",s:"watching",e:8,r:60,i:7.4,rt:77},
+ {t:"Black Doves",k:"show",y:2024,g:"Thriller",b:"A politician's wife who secretly sells secrets calls in an old friend after her lover is killed.",s:"watching",e:6,r:50,i:7.4,rt:91},
+ {t:"Death Note",k:"show",y:2006,g:"Animation",b:"A top student finds a notebook that kills anyone whose name is written in it.",s:"watching",e:37,r:24,i:9.0,rt:96},
+ {t:"Sirens",k:"show",y:2025,g:"Comedy",b:"One explosive weekend as a woman tries to pull her sister from a socialite's grip.",s:"watching",e:5,r:45,i:6.7,rt:75},
+ {t:"When Life Gives You Tangerines",k:"show",y:2025,g:"Romance",b:"On Jeju Island a spirited woman and a steadfast man build a life across the decades.",s:"watching",e:16,r:70,i:9.3,rt:100},
+ {t:"Black Mirror",k:"show",y:2011,g:"Sci-Fi",b:"Standalone stories about the near future and the price of the screens in it.",s:"watching",e:33,r:55,i:8.7,rt:83},
+ {t:"Dragon Ball",k:"show",y:1986,g:"Animation",b:"A strong young boy hunts seven wish granting orbs and trains to guard the Earth.",s:"watching",e:153,r:24,i:8.5,rt:90},
+
+ {t:"Crazy, Stupid, Love",k:"movie",y:2011,g:"Romance",b:"A newly separated husband gets lessons in dating from a slick younger bachelor.",s:"watchlist",r:118,i:7.4,rt:79},
+ {t:"American Psycho",k:"movie",y:2000,g:"Thriller",b:"A Manhattan banker hides a murderous second life behind a perfect surface.",s:"watchlist",r:102,i:7.6,rt:68},
+ {t:"50/50",k:"movie",y:2011,g:"Comedy",b:"A young man meets a cancer diagnosis with his blunt best friend beside him.",s:"watchlist",r:100,i:7.6,rt:94},
+ {t:"The Perks of Being a Wallflower",k:"movie",y:2012,g:"Drama",b:"A shy freshman is taken in by two seniors who show him how to take part.",s:"watchlist",r:103,i:8.0,rt:86},
+ {t:"The Holiday",k:"movie",y:2006,g:"Romance",b:"Two women trade houses across the ocean and each finds someone at the other end.",s:"watchlist",r:138,i:6.9,rt:51},
+ {t:"Revolutionary Road",k:"movie",y:2008,g:"Drama",b:"A 1950s suburban couple watch their big plans harden into resentment.",s:"watchlist",r:119,i:7.3,rt:68},
+ {t:"Think Like a Man",k:"movie",y:2012,g:"Comedy",b:"Friends find their partners are using a bestselling relationship book against them.",s:"watchlist",r:122,i:6.5,rt:55},
+ {t:"Think Like a Man Too",k:"movie",y:2014,g:"Comedy",b:"The whole group's Las Vegas wedding weekend runs off the rails.",s:"watchlist",r:106,i:5.9,rt:25},
+ {t:"Fight Club",k:"movie",y:1999,g:"Drama",b:"An insomniac office worker and a soap maker start a club that grows past them.",s:"watchlist",r:139,i:8.8,rt:79},
+ {t:"Pulp Fiction",k:"movie",y:1994,g:"Crime",b:"Hit men, a boxer and a mob wife cross paths across looping Los Angeles stories.",s:"watchlist",r:154,i:8.9,rt:92},
+ {t:"The Woman in the Window",k:"movie",y:2021,g:"Thriller",b:"A housebound psychologist is sure she saw a crime in the house across the street.",s:"watchlist",r:100,i:5.7,rt:26},
+ {t:"How to Make a Killing",k:"movie",y:2026,g:"Thriller",b:"A disowned man will go to any length to take back the inheritance kept from him.",s:"watchlist",r:106,i:null,rt:null},
+ {t:"The Devil Wears Prada 2",k:"movie",y:2026,g:"Comedy",b:"Miranda Priestly faces the fall of print magazines and a familiar former assistant.",s:"watchlist",r:null,i:null,rt:null},
+ {t:"The Drama",k:"movie",y:2026,g:"Romance",b:"One week before the wedding, a single revelation puts a couple's whole plan in doubt.",s:"watchlist",r:105,i:null,rt:null},
+
+ {t:"The Crown",k:"show",y:2016,g:"Drama",b:"The reign of Elizabeth II told decade by decade, from the wedding onward.",s:"watchlist",e:60,r:58,i:8.6,rt:88},
+ {t:"Agatha Christie's Seven Dials",k:"show",y:2025,g:"Mystery",b:"A country house death draws a bright young woman into a London conspiracy.",s:"watchlist",e:3,r:70,i:null,rt:null},
+ {t:"The Umbrella Academy",k:"show",y:2019,g:"Sci-Fi",b:"Estranged adopted siblings with strange powers keep reuniting to stop the end of the world.",s:"watchlist",e:40,r:48,i:7.8,rt:75},
+ {t:"Behind Her Eyes",k:"show",y:2021,g:"Thriller",b:"A single mother is pulled into her boss's marriage and a secret that should be impossible.",s:"watchlist",e:6,r:48,i:7.2,rt:83},
+ {t:"Cyberpunk: Edgerunners",k:"show",y:2022,g:"Animation",b:"A street kid in Night City joins the edgerunners as the cyberware eats away at him.",s:"watchlist",e:10,r:25,i:8.6,rt:100},
+ {t:"Stranger Things",k:"show",y:2016,g:"Sci-Fi",b:"Kids in 1980s Indiana face a lab, a monster and a door that opened the wrong way.",s:"watchlist",e:42,r:55,i:8.7,rt:92},
+ {t:"Squid Game",k:"show",y:2021,g:"Thriller",b:"Hundreds of people deep in debt risk their lives in children's games for a huge prize.",s:"watchlist",e:22,r:55,i:8.0,rt:89},
+ {t:"Suits",k:"show",y:2011,g:"Drama",b:"A brilliant college dropout fakes a law degree and thrives at a top Manhattan firm.",s:"watchlist",e:134,r:44,i:8.5,rt:75},
+ {t:"House",k:"show",y:2004,g:"Drama",b:"A rude genius diagnostician chases the cases that stump everyone else.",s:"watchlist",e:177,r:44,i:8.7,rt:90},
+ {t:"House of the Dragon",k:"show",y:2022,g:"Fantasy",b:"The Targaryen civil war, told about two centuries before the Iron Throne falls.",s:"watchlist",e:18,r:60,i:8.3,rt:92},
+ {t:"Manifest",k:"show",y:2018,g:"Mystery",b:"A plane lands five years late and its passengers start hearing calls to act.",s:"watchlist",e:62,r:43,i:7.1,rt:55},
+ {t:"Clickbait",k:"show",y:2021,g:"Thriller",b:"A devoted father is taken and turns up in a video that kills him when the views climb.",s:"watchlist",e:8,r:45,i:7.0,rt:71},
+ {t:"Outlander",k:"show",y:2014,g:"Romance",b:"A wartime nurse is thrown back to 1743 Scotland and caught between two lives.",s:"watchlist",e:100,r:58,i:8.4,rt:89},
+ {t:"Unchosen",k:"show",y:null,g:"Drama",b:"Added from the shared list. We fill in the details before we start it.",s:"watchlist",r:null,i:null,rt:null}
+];
+
+var TYPE_LABEL={movie:"Film",show:"Series"};
+var PALETTE=[["#0c2b2e","#1f5c5c"],["#2a0f12","#6e2230"],["#1e1230","#4a2a63"],["#10230f","#2f5d2c"],["#10152e","#2c3a70"],["#2b1305","#7a3a17"],["#171b20","#3d4a56"],["#2a2205","#7d6216"],["#290f0a","#7a2f22"],["#1a2213","#46592f"],["#0b1220","#223a5e"],["#22101d","#5a2650"]];
+
+function pIndex(str){var h=0;for(var i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))>>>0;return h%PALETTE.length;}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function fromSeed(s,i){return{id:"s"+i,title:s.t,type:s.k,year:s.y==null?null:s.y,genre:s.g||"",blurb:s.b||"",status:s.s,eps:s.e==null?null:s.e,runtime:s.r==null?null:s.r,imdb:s.i==null?null:s.i,rt:s.rt==null?null:s.rt,note:s.n||"",ratingT:null,ratingR:null,watchedOn:"",fav:false,ord:i};}
+function avg(it){var a=[];if(typeof it.ratingT==="number")a.push(it.ratingT);if(typeof it.ratingR==="number")a.push(it.ratingR);return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:null;}
+function lengthMin(it){return it.type==="movie"?(it.runtime||0):((it.runtime||0)*(it.eps||0));}
+function uid(){return"u"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+
+var persisted=(function(){try{var el=document.getElementById("seed-data");var tx=el&&el.textContent.trim();return tx?JSON.parse(tx):null;}catch(e){return null;}})();
+var ITEMS=persisted&&Array.isArray(persisted.items)?persisted.items:SEED.map(fromSeed);
+ITEMS.forEach(function(it,i){if(typeof it.ord!=="number")it.ord=i;if(it.imdb===undefined)it.imdb=null;if(it.rt===undefined)it.rt=null;});
+
+var F={type:"all",status:"all",q:"",sort:"ord"};
+var artifactApi=null,saveTimer=null;
+
+function scoresHTML(it){
+  var out=[];
+  if(typeof it.imdb==="number")out.push('<span class="imdb">IMDb '+it.imdb.toFixed(1)+'</span>');
+  if(typeof it.rt==="number")out.push('<span class="rt '+(it.rt>=60?"fresh":"rotten")+'">RT '+it.rt+'%</span>');
+  return out.length?'<span class="scores">'+out.join("")+'</span>':'';
+}
+
+function buildShell(){
+  document.getElementById("app").innerHTML=
+   '<header class="top"><div class="wrap">'
+   +'<div class="hrow"><h1 class="wordmark">Tamkin &amp; Ridu</h1><span id="savepill" class="savepill">Saved on this device</span></div>'
+   +'<div class="kicker">Film Archive</div>'
+   +'<div class="stats" id="stats"></div>'
+   +'</div></header>'
+   +'<div class="bar"><div class="wrap">'
+   +'<div class="seg" id="segType">'
+     +'<button data-v="all" aria-pressed="true">All</button>'
+     +'<button data-v="movie" aria-pressed="false">Films</button>'
+     +'<button data-v="show" aria-pressed="false">Series</button>'
+   +'</div>'
+   +'<div class="chips" id="chips">'
+     +'<button class="chip-btn" data-v="all" aria-pressed="true">Everything</button>'
+     +'<button class="chip-btn" data-v="watched" aria-pressed="false">Watched</button>'
+     +'<button class="chip-btn" data-v="watching" aria-pressed="false">Watching</button>'
+     +'<button class="chip-btn" data-v="watchlist" aria-pressed="false">Watchlist</button>'
+   +'</div>'
+   +'<label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>'
+     +'<input id="q" type="text" placeholder="Search titles" autocomplete="off"></label>'
+   +'<select class="sort" id="sort" aria-label="Sort by">'
+     +'<option value="ord">Added order</option>'
+     +'<option value="title">Title</option>'
+     +'<option value="year">Year</option>'
+     +'<option value="rating">Our rating</option>'
+     +'<option value="imdb">IMDb</option>'
+     +'<option value="rt">RT critics</option>'
+     +'<option value="runtime">Length</option>'
+   +'</select>'
+   +'<button class="add" id="add">Add title</button>'
+   +'</div></div>'
+   +'<main class="wrap"><div class="grid" id="grid"></div></main>';
+
+  var dlg=document.createElement("dialog");
+  dlg.id="sheet";
+  document.body.appendChild(dlg);
+
+  document.getElementById("segType").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;F.type=b.dataset.v;render();});
+  document.getElementById("chips").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;F.status=b.dataset.v;render();});
+  document.getElementById("q").addEventListener("input",function(e){F.q=e.target.value;render();});
+  document.getElementById("sort").addEventListener("change",function(e){F.sort=e.target.value;render();});
+  document.getElementById("add").addEventListener("click",openAdd);
+  document.getElementById("grid").addEventListener("click",function(e){var c=e.target.closest(".card");if(!c)return;openDetail(c.dataset.id);});
+  dlg.addEventListener("click",function(e){if(e.target===dlg)dlg.close();});
+}
+
+function cardHTML(it){
+  var p=PALETTE[pIndex(it.title)];
+  var a=avg(it);
+  var pill=it.status==="watched"?'<span class="pill ok">Watched</span>'
+          :it.status==="watching"?'<span class="pill live"><i></i>Watching</span>':'<span></span>';
+  var heart=it.fav?'<span class="heart">&#9829;</span>':'';
+  var cap=scoresHTML(it);
+  var ours=a!=null?'<span class="ours">'+a.toFixed(1)+' &#9733;</span>':'';
+  var sub;
+  if(cap||ours){sub=cap+ours;}
+  else if(it.status==="watched"){sub="Watched, no rating yet";}
+  else if(it.status==="watching"){sub="Watching now";}
+  else{sub="On the watchlist";}
+  return '<button class="card" data-id="'+it.id+'">'
+    +'<div class="poster'+(it.status==="watchlist"?' is-list':'')+'" style="--d:'+p[0]+';--m:'+p[1]+'">'
+      +'<div class="p-top">'+pill+heart+'</div>'
+      +'<div class="p-title">'+esc(it.title)+'</div>'
+      +'<div class="p-foot"><span>'+esc(it.genre||TYPE_LABEL[it.type])+'</span><span>'+(it.year||"TBD")+'</span></div>'
+    +'</div>'
+    +'<div class="c-title">'+esc(it.title)+'</div>'
+    +'<div class="c-sub">'+sub+'</div>'
+  +'</button>';
+}
+
+function render(){
+  var inType=ITEMS.filter(function(i){return F.type==="all"||i.type===F.type;});
+  var counts={all:inType.length,watched:0,watching:0,watchlist:0};
+  inType.forEach(function(i){counts[i.status]++;});
+  var chips=document.getElementById("chips").children;
+  var cl=["all","watched","watching","watchlist"];
+  var names={all:"Everything",watched:"Watched",watching:"Watching",watchlist:"Watchlist"};
+  for(var ci=0;ci<chips.length;ci++){
+    var v=cl[ci];
+    chips[ci].textContent=names[v]+"  "+counts[v];
+    chips[ci].setAttribute("aria-pressed",F.status===v?"true":"false");
+  }
+  var segs=document.getElementById("segType").children;
+  for(var si=0;si<segs.length;si++)segs[si].setAttribute("aria-pressed",segs[si].dataset.v===F.type?"true":"false");
+
+  var q=F.q.trim().toLowerCase();
+  var list=inType.filter(function(i){
+    if(F.status!=="all"&&i.status!==F.status)return false;
+    if(q&&i.title.toLowerCase().indexOf(q)<0&&(i.genre||"").toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+  var cmp={
+    ord:function(a,b){return a.ord-b.ord;},
+    title:function(a,b){return a.title.localeCompare(b.title);},
+    year:function(a,b){return(b.year||0)-(a.year||0);},
+    rating:function(a,b){return((avg(b)==null?-1:avg(b))-(avg(a)==null?-1:avg(a)));},
+    imdb:function(a,b){return((b.imdb==null?-1:b.imdb)-(a.imdb==null?-1:a.imdb));},
+    rt:function(a,b){return((b.rt==null?-1:b.rt)-(a.rt==null?-1:a.rt));},
+    runtime:function(a,b){return lengthMin(b)-lengthMin(a);}
+  };
+  list.sort(cmp[F.sort]);
+
+  var grid=document.getElementById("grid");
+  grid.innerHTML=list.length?list.map(cardHTML).join(""):'<div class="empty">Nothing here yet. Adjust the filters or add a title.</div>';
+
+  renderStats();
+}
+
+function renderStats(){
+  var w=ITEMS.filter(function(i){return i.status==="watched";});
+  var wl=ITEMS.filter(function(i){return i.status==="watchlist";}).length;
+  var wa=ITEMS.filter(function(i){return i.status==="watching";}).length;
+  var mins=0;w.forEach(function(i){mins+=lengthMin(i);});
+  var hrs=Math.round(mins/60);
+  var tR=ITEMS.map(function(i){return i.ratingT;}).filter(function(v){return typeof v==="number";});
+  var rR=ITEMS.map(function(i){return i.ratingR;}).filter(function(v){return typeof v==="number";});
+  function mean(x){return x.length?(x.reduce(function(p,c){return p+c;},0)/x.length):null;}
+  var line1='<b>'+w.length+'</b> watched, <b>'+wa+'</b> watching, <b>'+wl+'</b> on the list, about <b>'+hrs+'</b> hours together';
+  var line2;
+  if(tR.length||rR.length){
+    line2='Tamkin averages <b>'+(tR.length?mean(tR).toFixed(1):"0.0")+'</b>, Ridu averages <b>'+(rR.length?mean(rR).toFixed(1):"0.0")+'</b>';
+  }else{
+    line2='Open any title to rate it together';
+  }
+  document.getElementById("stats").innerHTML=line1+'<div class="row2">'+line2+'</div>';
+}
+
+function starsHTML(who,val){
+  var s='<div class="stars" data-who="'+who+'">';
+  for(var i=1;i<=5;i++){
+    var f=Math.max(0,Math.min(1,(val||0)-(i-1)));
+    s+='<button type="button" class="star" data-v="'+i+'" style="--f:'+f+'" aria-label="'+i+' of 5"><span class="fv">&#9733;</span>&#9733;</button>';
+  }
+  return s+'</div>';
+}
+function paintStars(box,val){
+  var kids=box.querySelectorAll(".star");
+  for(var i=0;i<kids.length;i++)kids[i].style.setProperty("--f",Math.max(0,Math.min(1,(val||0)-i)));
+}
+
+function metaLine(it){
+  var bits=[it.year||"Year TBD",TYPE_LABEL[it.type]];
+  if(it.type==="movie"&&it.runtime)bits.push(it.runtime+" min");
+  if(it.type==="show"&&it.eps)bits.push(it.eps+" episodes");
+  if(it.genre)bits.push(it.genre);
+  return bits.join("  ·  ");
+}
+
+function openDetail(id){
+  var it=ITEMS.filter(function(x){return x.id===id;})[0];
+  if(!it)return;
+  var dlg=document.getElementById("sheet");
+  var p=PALETTE[pIndex(it.title)];
+  var rtClass=typeof it.rt==="number"?(it.rt>=60?"rtf":"rtr"):"";
+  dlg.innerHTML=
+   '<div class="d-grid">'
+   +'<div class="poster d-poster" style="--d:'+p[0]+';--m:'+p[1]+'">'
+     +'<div class="p-top"><span></span></div>'
+     +'<div class="p-title">'+esc(it.title)+'</div>'
+     +'<div class="p-foot"><span>'+esc(it.genre||TYPE_LABEL[it.type])+'</span><span>'+(it.year||"TBD")+'</span></div>'
+   +'</div>'
+   +'<div class="d-body">'
+     +'<h2>'+esc(it.title)+'</h2>'
+     +'<div class="d-meta">'+esc(metaLine(it))+'</div>'
+     +'<p class="d-blurb">'+esc(it.blurb||"")+'</p>'
+     +'<div class="score-tiles">'
+       +'<div class="stile imdb"><input type="number" id="dImdb" min="0" max="10" step="0.1" placeholder="—" value="'+(it.imdb==null?"":it.imdb)+'"><label for="dImdb">IMDb, audience</label></div>'
+       +'<div class="stile '+rtClass+'"><input type="number" id="dRt" min="0" max="100" step="1" placeholder="—" value="'+(it.rt==null?"":it.rt)+'"><label for="dRt">RT critics %</label></div>'
+     +'</div>'
+     +'<div class="field"><span class="lab">Status</span>'
+       +'<div class="seg" id="dStatus">'
+         +'<button data-v="watchlist">Watchlist</button>'
+         +'<button data-v="watching">Watching</button>'
+         +'<button data-v="watched">Watched</button>'
+       +'</div></div>'
+     +'<div class="field"><span class="lab">Our ratings</span>'
+       +'<div class="rate-row"><span class="who">Tamkin</span>'+starsHTML("T",it.ratingT)+'<span class="num" id="numT">'+(it.ratingT==null?"":it.ratingT.toFixed(1))+'</span><button type="button" class="linkbtn" data-clear="T">Clear</button></div>'
+       +'<div class="rate-row"><span class="who">Ridu</span>'+starsHTML("R",it.ratingR)+'<span class="num" id="numR">'+(it.ratingR==null?"":it.ratingR.toFixed(1))+'</span><button type="button" class="linkbtn" data-clear="R">Clear</button></div>'
+     +'</div>'
+     +'<div class="field"><span class="lab">Watched</span><input type="month" id="dMonth" value="'+esc(it.watchedOn||"")+'"></div>'
+     +'<div class="field"><span class="lab">Notes</span><textarea id="dNote" placeholder="What did you think?">'+esc(it.note||"")+'</textarea></div>'
+   +'</div>'
+   +'</div>'
+   +'<div class="d-actions">'
+     +'<button type="button" class="btn-ghost" id="dFav">'+(it.fav?"♥ Favorite":"♡ Favorite")+'</button>'
+     +'<button type="button" class="btn-ghost danger" id="dDel">Remove</button>'
+     +'<button type="button" class="btn-primary" id="dDone">Done</button>'
+   +'</div>';
+
+  function syncStatus(){
+    var b=dlg.querySelectorAll("#dStatus button");
+    for(var i=0;i<b.length;i++)b[i].setAttribute("aria-pressed",b[i].dataset.v===it.status?"true":"false");
+  }
+  function markWatchedNow(){
+    if(!it.watchedOn){var d=new Date();it.watchedOn=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");var m=dlg.querySelector("#dMonth");if(m)m.value=it.watchedOn;}
+  }
+  syncStatus();
+
+  dlg.querySelector("#dStatus").addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    it.status=b.dataset.v;
+    if(it.status==="watched")markWatchedNow();
+    syncStatus();render();scheduleSave();
+  });
+
+  dlg.querySelectorAll(".stars").forEach(function(box){
+    box.addEventListener("click",function(e){
+      var b=e.target.closest(".star");if(!b)return;
+      var rect=b.getBoundingClientRect();
+      var half=(e.clientX-rect.left)<rect.width*0.5;
+      var v=(+b.dataset.v)-(half?0.5:0);
+      var who=box.dataset.who;
+      if(who==="T")it.ratingT=v;else it.ratingR=v;
+      paintStars(box,v);
+      dlg.querySelector(who==="T"?"#numT":"#numR").textContent=v.toFixed(1);
+      if(it.status!=="watched"){it.status="watched";markWatchedNow();syncStatus();}
+      render();scheduleSave();
+    });
+  });
+
+  dlg.querySelectorAll("[data-clear]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var who=btn.dataset.clear;
+      if(who==="T")it.ratingT=null;else it.ratingR=null;
+      paintStars(dlg.querySelector('.stars[data-who="'+who+'"]'),0);
+      dlg.querySelector(who==="T"?"#numT":"#numR").textContent="";
+      render();scheduleSave();
+    });
+  });
+
+  dlg.querySelector("#dImdb").addEventListener("input",function(e){
+    var v=parseFloat(e.target.value);
+    it.imdb=isNaN(v)?null:Math.min(10,Math.max(0,v));
+    render();scheduleSave();
+  });
+  dlg.querySelector("#dRt").addEventListener("input",function(e){
+    var v=parseInt(e.target.value,10);
+    it.rt=isNaN(v)?null:Math.min(100,Math.max(0,v));
+    var tile=e.target.closest(".stile");
+    tile.classList.toggle("rtf",typeof it.rt==="number"&&it.rt>=60);
+    tile.classList.toggle("rtr",typeof it.rt==="number"&&it.rt<60);
+    render();scheduleSave();
+  });
+
+  dlg.querySelector("#dMonth").addEventListener("change",function(e){it.watchedOn=e.target.value;scheduleSave();});
+  dlg.querySelector("#dNote").addEventListener("input",function(e){it.note=e.target.value;scheduleSave();});
+  dlg.querySelector("#dFav").addEventListener("click",function(e){
+    it.fav=!it.fav;e.target.textContent=it.fav?"♥ Favorite":"♡ Favorite";render();scheduleSave();
+  });
+  dlg.querySelector("#dDel").addEventListener("click",function(){
+    if(!window.confirm('Remove "'+it.title+'" from the archive?'))return;
+    ITEMS=ITEMS.filter(function(x){return x.id!==it.id;});
+    render();scheduleSave();dlg.close();
+  });
+  dlg.querySelector("#dDone").addEventListener("click",function(){dlg.close();});
+
+  if(!dlg.open)dlg.showModal();
+}
+
+function openAdd(){
+  var dlg=document.getElementById("sheet");
+  dlg.innerHTML=
+   '<div style="padding:22px">'
+   +'<h2 style="font-family:var(--font-display);font-weight:400;font-size:28px;margin:0 0 16px">Add a title</h2>'
+   +'<div class="field"><span class="lab">Title</span><input type="text" id="aTitle" placeholder="Film or series name" autocomplete="off"></div>'
+   +'<div class="field"><span class="lab">Type</span><div class="seg" id="aType"><button data-v="movie" aria-pressed="true">Film</button><button data-v="show" aria-pressed="false">Series</button></div></div>'
+   +'<div class="field"><span class="lab">Year</span><input type="number" id="aYear" placeholder="Optional" min="1900" max="2100"></div>'
+   +'<div class="field"><span class="lab">Genre</span><input type="text" id="aGenre" placeholder="Optional" autocomplete="off"></div>'
+   +'<div class="score-tiles">'
+     +'<div class="stile imdb"><input type="number" id="aImdb" min="0" max="10" step="0.1" placeholder="—"><label for="aImdb">IMDb, audience</label></div>'
+     +'<div class="stile"><input type="number" id="aRt" min="0" max="100" step="1" placeholder="—"><label for="aRt">RT critics %</label></div>'
+   +'</div>'
+   +'</div>'
+   +'<div class="d-actions"><button type="button" class="btn-ghost" id="aCancel">Cancel</button><button type="button" class="btn-primary" id="aSave">Add to archive</button></div>';
+  var atype="movie";
+  dlg.querySelector("#aType").addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;atype=b.dataset.v;
+    dlg.querySelectorAll("#aType button").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.v===atype?"true":"false");});
+  });
+  dlg.querySelector("#aCancel").addEventListener("click",function(){dlg.close();});
+  dlg.querySelector("#aSave").addEventListener("click",function(){
+    var title=dlg.querySelector("#aTitle").value.trim();
+    if(!title){dlg.querySelector("#aTitle").focus();return;}
+    var yr=parseInt(dlg.querySelector("#aYear").value,10);
+    var im=parseFloat(dlg.querySelector("#aImdb").value);
+    var rtv=parseInt(dlg.querySelector("#aRt").value,10);
+    var it={id:uid(),title:title,type:atype,year:isNaN(yr)?null:yr,genre:dlg.querySelector("#aGenre").value.trim(),blurb:"",status:"watchlist",eps:null,runtime:null,imdb:isNaN(im)?null:Math.min(10,Math.max(0,im)),rt:isNaN(rtv)?null:Math.min(100,Math.max(0,rtv)),note:"",ratingT:null,ratingR:null,watchedOn:"",fav:false,ord:ITEMS.reduce(function(m,i){return Math.max(m,i.ord);},-1)+1};
+    ITEMS.push(it);render();scheduleSave();
+    openDetail(it.id);
+  });
+  if(!dlg.open)dlg.showModal();
+  dlg.querySelector("#aTitle").focus();
+}
+
+function setSave(s){
+  var el=document.getElementById("savepill");if(!el)return;
+  el.dataset.s=s;
+  el.textContent=s==="saving"?"Saving…":s==="saved"?"Saved to the archive":"Saved on this device";
+}
+function scheduleSave(){setSave("saving");clearTimeout(saveTimer);saveTimer=setTimeout(save,700);}
+function save(){
+  if(!artifactApi){setSave("local");return;}
+  Promise.resolve().then(function(){return artifactApi.publish(currentDoc());})
+    .then(function(){setSave("saved");})
+    .catch(function(e){setSave(e&&e.code==="conflict"?"saved":"local");});
+}
+function currentDoc(){
+  var data={items:ITEMS,savedAt:new Date().toISOString()};
+  var json=JSON.stringify(data).replace(/</g,"\\u003c");
+  var css=document.getElementById("app-style").textContent;
+  var js=document.getElementById("app-script").textContent;
+  return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+    +'<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+    +'<title>Tamkin &amp; Ridu Film Archive<\/title>\n'
+    +'<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+    +'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+    +'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">\n'
+    +'<style id="app-style">'+css+'<\/style>\n</head>\n<body>\n'
+    +'<div id="app"><\/div>\n'
+    +'<script id="seed-data" type="application/json">'+json+'<\/script>\n'
+    +'<script id="app-script">'+js+'<\/script>\n<\/body>\n<\/html>';
+}
+
+buildShell();
+render();
+if(window.claude&&typeof window.claude.use==="function"){
+  window.claude.use("artifact").then(function(a){artifactApi=a;setSave(a?"saved":"local");}).catch(function(){setSave("local");});
+}else{
+  setSave("local");
+}
+})();
+</script>

@@ -97,6 +97,8 @@
 }
 html {
   -webkit-text-size-adjust: 100%;
+  /* nothing should ever create a sideways scroll on a phone */
+  overflow-x: clip;
 }
 body {
   margin: 0;
@@ -1450,23 +1452,48 @@ dialog::backdrop {
 
 /* ---------- mobile layout ---------- */
 @media (max-width: 760px) {
-  .nav-inner {
-    flex-wrap: wrap;
-    height: auto;
-    gap: 10px 16px;
-    padding-top: 12px;
-    padding-bottom: 4px;
+  /* honour the notch and the rounded corners on installed iOS */
+  .wrap {
+    padding-left: max(clamp(20px, 5vw, 40px), env(safe-area-inset-left));
+    padding-right: max(clamp(20px, 5vw, 40px), env(safe-area-inset-right));
   }
-  .nav-links {
-    order: 3;
-    flex-basis: 100%;
-    margin: 2px calc(-1 * clamp(20px, 5vw, 40px)) 0;
-    padding: 4px clamp(20px, 5vw, 40px) 8px;
+  .landing-bg,
+  .auth-shell {
+    padding-top: max(40px, env(safe-area-inset-top));
+  }
+
+  /* app nav: one row. Brand and avatar stay put, the section links
+     become a horizontal scroll strip in between. */
+  .nav {
+    padding-top: env(safe-area-inset-top);
+  }
+  .nav .nav-inner {
+    gap: 12px;
+    height: 56px;
+  }
+  .nav .brand {
+    flex: none;
+    font-size: 19px;
+  }
+  .nav .nav-links {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    gap: 0;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: hidden;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, #000 88%, transparent);
   }
-  .nav-links::-webkit-scrollbar {
+  .nav .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+  .nav .nav-links a {
+    flex: none;
+  }
+  .nav .nav-spacer {
     display: none;
   }
   .nav-username,
@@ -1477,14 +1504,23 @@ dialog::backdrop {
     padding: 5px 6px;
   }
 
+  /* landing header: let the two actions wrap under the wordmark if
+     the screen is very narrow, rather than clip */
+  .landing-nav {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 10px 12px;
+    padding: 10px 0 8px;
+  }
+
   .page {
-    padding: 22px 0 80px;
+    padding: 20px 0 max(72px, calc(56px + env(safe-area-inset-bottom)));
   }
   .page-head {
     margin-bottom: 20px;
   }
   .hero {
-    padding: 9vh 0 7vh;
+    padding: 8vh 0 6vh;
   }
 
   .settings-row {
@@ -1495,18 +1531,8 @@ dialog::backdrop {
     margin-left: auto;
   }
 
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
+  .detail-grid,
   dialog .detail-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* honour the notch / rounded corners on installed iOS */
-@media (max-width: 760px) {
-  .wrap {
-    padding-left: max(clamp(20px, 5vw, 40px), env(safe-area-inset-left));
-    padding-right: max(clamp(20px, 5vw, 40px), env(safe-area-inset-right));
+    grid-template-columns: 1fr;
   }
 }

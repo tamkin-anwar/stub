@@ -8,7 +8,6 @@ import { ScoreLegend } from "../components/ScoreLegend";
 import { type AddTarget } from "../components/AddMenu";
 import { GENRES, type BrowseFeed, type MediaFilter } from "../lib/tmdb";
 import type { TmdbTitle } from "../lib/types";
-import { tmdbReady } from "../lib/env";
 
 const FEEDS: { key: BrowseFeed; label: string }[] = [
   { key: "trending", label: "Trending" },
@@ -71,12 +70,6 @@ export function Library() {
           <p className="page-sub">Search TMDB's whole catalogue, or browse by feed and genre.</p>
         </div>
       </div>
-
-      {!tmdbReady && (
-        <div className="card" style={{ marginBottom: 18 }}>
-          Set <code>VITE_TMDB_ACCESS_TOKEN</code> in <code>.env</code> to load real titles and artwork.
-        </div>
-      )}
 
       <ScoreLegend />
 

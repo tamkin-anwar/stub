@@ -66,26 +66,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
+    let cancelled = false;
 
-    const startSeq = loadSeq.current;
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (loadSeq.current !== startSeq) return;
-      setSession(data.session);
-      if (data.session?.user) await loadProfile(data.session.user.id);
-      else setProfileChecked(true);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        if (cancelled) return;
+        setSession(data.session);
+        if (data.session?.user) await loadProfile(data.session.user.id);
+        else setProfileChecked(true);
+      })
+      .catch(() => !cancelled && setProfileChecked(true))
+      .finally(() => !cancelled && setLoading(false));
 
     let currentUserId: string | null = null;
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
       const nextId = next?.user?.id ?? null;
       // Token refreshes and tab refocus re-fire this with the same user; only
-      // re-check the profile when the identity actually changes.
-      if (nextId === currentUserId) return;
+      // re-check the profile when a signed-in identity actually changes.
+      if (nextId && nextId === currentUserId) return;
       currentUserId = nextId;
-      setProfileChecked(false);
       if (nextId) {
+        setProfileChecked(false);
         void loadProfile(nextId);
       } else {
         setProfile(null);
@@ -94,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
+      cancelled = true;
       loadSeq.current++;
       sub.subscription.unsubscribe();
     };

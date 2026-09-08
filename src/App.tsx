@@ -1,19 +1,28 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./components/Toast";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { DocumentTitle } from "./components/DocumentTitle";
 import { Nav } from "./components/Nav";
+import { SetupScreen } from "./pages/SetupScreen";
+
+// Landing and auth are the first paint; the rest load on navigation.
 import { Landing } from "./pages/Landing";
 import { AuthPage } from "./pages/Auth";
-import { Privacy, Terms } from "./pages/Legal";
-import { SetupScreen } from "./pages/SetupScreen";
-import { Home } from "./pages/Home";
-import { MyList } from "./pages/MyList";
-import { Library } from "./pages/Library";
-import { SharedList } from "./pages/SharedList";
-import { Friends } from "./pages/Friends";
-import { Settings } from "./pages/Settings";
-import { TitlePage } from "./pages/TitlePage";
+const Privacy = lazy(() => import("./pages/Legal").then((m) => ({ default: m.Privacy })));
+const Terms = lazy(() => import("./pages/Legal").then((m) => ({ default: m.Terms })));
+const Home = lazy(() => import("./pages/Home").then((m) => ({ default: m.Home })));
+const MyList = lazy(() => import("./pages/MyList").then((m) => ({ default: m.MyList })));
+const Library = lazy(() => import("./pages/Library").then((m) => ({ default: m.Library })));
+const SharedList = lazy(() => import("./pages/SharedList").then((m) => ({ default: m.SharedList })));
+const Friends = lazy(() => import("./pages/Friends").then((m) => ({ default: m.Friends })));
+const Settings = lazy(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
+const TitlePage = lazy(() => import("./pages/TitlePage").then((m) => ({ default: m.TitlePage })));
+
+function Loading() {
+  return <p className="center-note">Loading…</p>;
+}
 
 function AppLayout() {
   const { loading, user, profile, profileChecked, signOut } = useAuth();
@@ -25,9 +34,9 @@ function AppLayout() {
     if (orphaned) void signOut();
   }, [orphaned, signOut]);
 
-  if (loading) return <p className="center-note">Loading…</p>;
+  if (loading) return <Loading />;
   if (!user || orphaned) return <Navigate to="/login" replace />;
-  if (!profileChecked) return <p className="center-note">Loading…</p>;
+  if (!profileChecked) return <Loading />;
   return (
     <>
       <a href="#main" className="skip-link">
@@ -35,7 +44,11 @@ function AppLayout() {
       </a>
       <Nav />
       <main id="main">
-        <Outlet />
+        <ErrorBoundary>
+          <Suspense fallback={<Loading />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </>
   );
@@ -48,23 +61,28 @@ export function App() {
 
   return (
     <ToastProvider>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<AuthPage mode="login" />} />
-        <Route path="/signup" element={<AuthPage mode="signup" />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/app" element={<AppLayout />}>
-          <Route index element={<Home />} />
-          <Route path="list" element={<MyList />} />
-          <Route path="library" element={<Library />} />
-          <Route path="shared" element={<SharedList />} />
-          <Route path="friends" element={<Friends />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="title/:mediaType/:tmdbId" element={<TitlePage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <DocumentTitle />
+      <ErrorBoundary>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<AuthPage mode="login" />} />
+            <Route path="/signup" element={<AuthPage mode="signup" />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/app" element={<AppLayout />}>
+              <Route index element={<Home />} />
+              <Route path="list" element={<MyList />} />
+              <Route path="library" element={<Library />} />
+              <Route path="shared" element={<SharedList />} />
+              <Route path="friends" element={<Friends />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="title/:mediaType/:tmdbId" element={<TitlePage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </ToastProvider>
   );
 }

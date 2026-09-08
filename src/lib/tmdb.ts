@@ -1,7 +1,5 @@
-import { env, tmdbReady } from "./env";
 import type { MediaType, TmdbDetail, TmdbTitle } from "./types";
 
-const BASE = "https://api.themoviedb.org/3";
 const IMG = "https://image.tmdb.org/t/p";
 
 export function posterUrl(path: string | null, size: "w185" | "w342" | "w500" = "w342") {
@@ -14,12 +12,15 @@ export function profileUrl(path: string | null, size: "w185" = "w185") {
   return path ? `${IMG}/${size}${path}` : null;
 }
 
+/**
+ * Every TMDB call goes through /api/tmdb, which holds the read token
+ * server-side and caches responses on the CDN (feeds ~15 min, title detail
+ * ~1 day). The token is no longer shipped to the browser.
+ */
 async function tmdb<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
-  if (!tmdbReady) throw new Error("TMDB is not configured. Set VITE_TMDB_ACCESS_TOKEN in .env.");
-  const qs = new URLSearchParams({ language: "en-US", ...toStringRecord(params) });
-  const res = await fetch(`${BASE}${path}?${qs.toString()}`, {
-    headers: { Authorization: `Bearer ${env.tmdbToken}`, accept: "application/json" },
-  });
+  const qs = new URLSearchParams(toStringRecord(params));
+  qs.set("path", path);
+  const res = await fetch(`/api/tmdb?${qs.toString()}`, { headers: { accept: "application/json" } });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`TMDB ${res.status}: ${body.slice(0, 160)}`);
@@ -253,6 +254,13 @@ interface RawDetail extends RawResult {
   aggregate_credits?: {
     cast?: { name: string; roles?: { character?: string }[]; profile_path?: string | null }[];
   };
+}
+
+/** Just the IMDb id for a title. A far smaller payload than titleDetail,
+ *  used for score lookups on library / home cards. */
+export async function imdbIdFor(mediaType: MediaType, tmdbId: number): Promise<string | null> {
+  const raw = await tmdb<{ imdb_id?: string | null }>(`/${mediaType}/${tmdbId}/external_ids`);
+  return raw.imdb_id ?? null;
 }
 
 export async function titleDetail(mediaType: MediaType, tmdbId: number): Promise<TmdbDetail> {

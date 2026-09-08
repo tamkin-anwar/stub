@@ -3,6 +3,7 @@ import {
   airingShows,
   browseTitles,
   classicFilms,
+  imdbIdFor,
   nowPlayingMovies,
   searchTitles,
   titleDetail,
@@ -13,7 +14,6 @@ import {
 } from "../lib/tmdb";
 import { guardianArticles } from "../lib/guardian";
 import { omdbScores } from "../lib/omdb";
-import { omdbReady } from "../lib/env";
 import type { MediaType } from "../lib/types";
 
 export function useTrending() {
@@ -79,26 +79,26 @@ export function useOmdb(imdbId: string | null | undefined) {
   return useQuery({
     queryKey: ["omdb", imdbId],
     queryFn: () => omdbScores(imdbId),
-    enabled: !!imdbId && omdbReady,
+    enabled: !!imdbId,
     staleTime: 24 * 60 * 60_000,
     gcTime: 24 * 60 * 60_000,
   });
 }
 
 /**
- * IMDb / RT for one Library card. Costs a TMDB detail call (for the IMDb id)
- * plus an OMDb call, so it is cached hard: each title is fetched at most once
- * a week per browser. Falls back to nothing when OMDb is off or over quota.
+ * IMDb / RT for one Library card. Costs a small TMDB external-ids call plus
+ * an OMDb call, both served from the CDN cache after the first lookup, and
+ * held for a week per browser. Shows nothing when OMDb is off or over quota.
  */
 export function useCardScores(mediaType: MediaType, tmdbId: number, enabled: boolean) {
   return useQuery({
     queryKey: ["card-scores", mediaType, tmdbId],
     queryFn: async () => {
-      const d = await titleDetail(mediaType, tmdbId);
-      const s = await omdbScores(d.imdbId);
+      const imdbId = await imdbIdFor(mediaType, tmdbId);
+      const s = await omdbScores(imdbId);
       return { imdb: s.imdb, rt: s.rt };
     },
-    enabled: enabled && omdbReady,
+    enabled,
     staleTime: 7 * 24 * 60 * 60_000,
     gcTime: 30 * 24 * 60 * 60_000,
     retry: 0,

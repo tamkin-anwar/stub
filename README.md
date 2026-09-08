@@ -27,12 +27,27 @@ Postgres row level security does the access control. A signed-in user can read a
 
 ## Tech stack
 
-- React 18, Vite, TypeScript
+- React 18, Vite, TypeScript, code-split by route
 - react-router-dom
 - TanStack Query for server state
 - Supabase: Postgres, email auth, row level security, realtime
-- TMDB for titles, artwork and discovery feeds; OMDb for IMDb / Rotten Tomatoes / Metacritic scores; The Guardian Open Platform for the press feed
+- `/api/*` Vercel Edge functions proxy TMDB, OMDb and The Guardian: the keys stay server-side and responses are cached on the CDN, so the free-tier limits are shared across everyone rather than spent per visit
 - Vitest for unit tests, pgTAP for the row-level-security and account-deletion tests, GitHub Actions to run both
+
+## The API proxy
+
+The browser never talks to TMDB, OMDb or The Guardian directly. It calls
+`/api/tmdb`, `/api/omdb` and `/api/guardian`, which:
+
+- hold the keys in server-only env vars (no `VITE_` prefix, never bundled),
+- set `Cache-Control: s-maxage` so Vercel's edge caches the response — title
+  detail for a day, discovery feeds for 15 minutes, the press feed for 30,
+  IMDb/RT scores for a week,
+- allow-list only the read endpoints the app uses.
+
+So the first person to open "trending" this hour pays the upstream calls; the
+next few thousand are served from the edge. During `vite dev` a small plugin
+in `vite.config.ts` runs the same handler modules so `/api/*` works locally.
 
 ## Why Stub
 
@@ -65,7 +80,16 @@ cp .env.example .env
 # then fill in the values
 ```
 
-Supabase and TMDB are required. `VITE_OMDB_API_KEY` (free, omdbapi.com) and `VITE_GUARDIAN_API_KEY` (free, open-platform.theguardian.com) are optional: without them the scores and the press feed just do not show.
+| var | side | required | what |
+|---|---|---|---|
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | client | yes | the database and auth |
+| `TMDB_ACCESS_TOKEN` | server (`/api/*`) | yes | titles, artwork, discovery |
+| `OMDB_API_KEY` | server | no | IMDb / Rotten Tomatoes / Metacritic scores |
+| `GUARDIAN_API_KEY` | server | no | the "In the press" feed |
+
+The three server vars have **no `VITE_` prefix** on purpose, so they never
+reach the browser. On Vercel, add them as plain (not `VITE_`) environment
+variables; `vite dev` reads them from `.env` for the local `/api` plugin.
 
 ### 5. Run
 
@@ -73,7 +97,7 @@ Supabase and TMDB are required. `VITE_OMDB_API_KEY` (free, omdbapi.com) and `VIT
 npm run dev
 ```
 
-Open the local URL Vite prints, create an account, and start adding titles from the Library. Until the two required values are set, the app shows a setup screen instead of booting.
+Open the local URL Vite prints, create an account, and start adding titles from the Library. Until the two Supabase values are set, the app shows a setup screen instead of booting.
 
 ## Data model
 

@@ -8,7 +8,6 @@ import { ScoreLegend } from "../components/ScoreLegend";
 import { ArticleCard } from "../components/ArticleCard";
 import { type AddTarget } from "../components/AddMenu";
 import type { TmdbTitle } from "../lib/types";
-import { guardianReady, tmdbReady } from "../lib/env";
 
 function Shelf({
   label,
@@ -122,13 +121,7 @@ export function Home() {
         </div>
       </div>
 
-      {!tmdbReady && (
-        <div className="card" style={{ marginBottom: 20 }}>
-          Set <code>VITE_TMDB_ACCESS_TOKEN</code> in <code>.env</code> to populate this page.
-        </div>
-      )}
-
-      {guardianReady && (articles.data?.length ?? 0) > 0 && (
+      {(articles.data?.length ?? 0) > 0 && (
         <Shelf label="Film & TV desk" title="In the press">
           <div className="article-grid">
             {(articles.data ?? []).map((a) => (

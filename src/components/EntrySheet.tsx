@@ -1,13 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ListEntry, ListStatus, Profile } from "../lib/types";
 import type { ListOwner } from "../data/lists";
-import { useRemoveEntry, useSetRating, useUpdateEntry } from "../hooks/lists";
+import { moveEntry, updateEntry } from "../data/lists";
+import { entriesKey, useRemoveEntry, useSetRating, useUpdateEntry } from "../hooks/lists";
+import { useSpaces } from "../hooks/social";
 import { posterUrl } from "../lib/tmdb";
 import { displayName, entryAverage, posterGradient, ratingFor, runtimeLabel } from "../lib/format";
 import { Stars } from "./Stars";
 import { ScorePills } from "./ScorePills";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { useToast } from "./Toast";
+
+interface Destination {
+  label: string;
+  owner: ListOwner;
+}
 
 const STATUSES: ListStatus[] = ["watchlist", "watching", "watched"];
 const STATUS_TEXT: Record<ListStatus, string> = {
@@ -27,19 +36,65 @@ interface Props {
 export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const toast = useToast();
   const update = useUpdateEntry(owner);
   const remove = useRemoveEntry(owner);
   const rate = useSetRating(owner, selfId);
+  const { data: spaces } = useSpaces(selfId);
 
   const [note, setNote] = useState(entry.note);
   const [status, setStatus] = useState<ListStatus>(entry.status);
   const [watchedOn, setWatchedOn] = useState(entry.watched_on ?? "");
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [destIndex, setDestIndex] = useState(0);
+  const [moving, setMoving] = useState(false);
+  const [confirmMoveOut, setConfirmMoveOut] = useState<Destination | null>(null);
+
+  const destinations = useMemo<Destination[]>(() => {
+    const all: Destination[] = [
+      { label: "My list", owner: { type: "user" as const, id: selfId } },
+      ...(spaces ?? []).map((s) => ({
+        label: s.name,
+        owner: { type: "space" as const, id: s.id },
+      })),
+    ];
+    return all.filter((d) => !(d.owner.type === owner.type && d.owner.id === owner.id));
+  }, [spaces, selfId, owner]);
 
   useEffect(() => {
     const el = ref.current;
     if (el && !el.open) el.showModal();
   }, []);
+
+  async function doMove(dest: Destination) {
+    setConfirmMoveOut(null);
+    setMoving(true);
+    try {
+      if (note !== entry.note) await updateEntry(entry.id, { note });
+      const { moved } = await moveEntry(entry.id, dest.owner);
+      if (!moved) {
+        toast(`${entry.title.name} is already on ${dest.label}`, { error: true });
+        setMoving(false);
+        return;
+      }
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: entriesKey(owner) }),
+        qc.invalidateQueries({ queryKey: entriesKey(dest.owner) }),
+      ]);
+      toast(`Moved to ${dest.label}`);
+      ref.current?.close();
+      onClose();
+    } catch {
+      toast("Could not move it", { error: true });
+      setMoving(false);
+    }
+  }
+
+  function requestMove(dest: Destination) {
+    if (owner.type === "space") setConfirmMoveOut(dest);
+    else void doMove(dest);
+  }
 
   function close() {
     if (note !== entry.note) update.mutate({ entryId: entry.id, patch: { note } });
@@ -183,6 +238,46 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
             </p>
           </div>
 
+          {destinations.length > 0 && (
+            <div className="field">
+              <label htmlFor={`move-${entry.id}`}>Move to</label>
+              {destinations.length === 1 ? (
+                <button
+                  id={`move-${entry.id}`}
+                  className="btn sm"
+                  disabled={moving}
+                  onClick={() => requestMove(destinations[0])}
+                >
+                  Move to {destinations[0].label}
+                </button>
+              ) : (
+                <div style={{ display: "flex", gap: 8 }}>
+                  <select
+                    id={`move-${entry.id}`}
+                    value={destIndex}
+                    onChange={(e) => setDestIndex(Number(e.target.value))}
+                  >
+                    {destinations.map((d, i) => (
+                      <option key={`${d.owner.type}-${d.owner.id}`} value={i}>
+                        {d.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="btn sm"
+                    disabled={moving}
+                    onClick={() => requestMove(destinations[destIndex])}
+                  >
+                    Move
+                  </button>
+                </div>
+              )}
+              <p className="tiny muted" style={{ marginTop: 4 }}>
+                Status, dates, notes and ratings move with it.
+              </p>
+            </div>
+          )}
+
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <button className="btn danger sm" onClick={() => setConfirmRemove(true)}>
               Remove
@@ -211,6 +306,21 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
           })
         }
         onClose={() => setConfirmRemove(false)}
+      />
+    )}
+
+    {confirmMoveOut && (
+      <ConfirmDialog
+        title={`Move "${entry.title.name}" to ${confirmMoveOut.label}?`}
+        body={`It comes off the list you share with ${
+          members
+            .filter((m) => m.id !== selfId)
+            .map((m) => displayName(m))
+            .join(" and ") || "the other person"
+        }.`}
+        confirmLabel="Move"
+        onConfirm={() => void doMove(confirmMoveOut)}
+        onClose={() => setConfirmMoveOut(null)}
       />
     )}
     </>

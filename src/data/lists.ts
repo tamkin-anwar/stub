@@ -135,6 +135,24 @@ export async function updateEntry(
   if (error) throw error;
 }
 
+/** Move an entry to a different list, keeping its status, dates, note and
+ *  ratings. `moved` is false when the target list already has that title. */
+export async function moveEntry(
+  entryId: string,
+  to: ListOwner,
+): Promise<{ moved: boolean }> {
+  const sb = requireSupabase();
+  const { error } = await sb
+    .from("list_entries")
+    .update({ owner_type: to.type, owner_id: to.id })
+    .eq("id", entryId);
+  if (error) {
+    if (error.code === "23505") return { moved: false };
+    throw error;
+  }
+  return { moved: true };
+}
+
 export async function removeEntry(entryId: string): Promise<void> {
   const sb = requireSupabase();
   const { error } = await sb.from("list_entries").delete().eq("id", entryId);

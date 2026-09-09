@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 // Swap in a real inbox once there is one; until then, GitHub issues are the
 // contact route and this stays blank so no address is published.
 const CONTACT_EMAIL = "";
-const UPDATED = "8 September 2026";
+const UPDATED = "9 September 2026";
 const REPO = "https://github.com/tamkin-anwar/stub/issues";
 
 function Shell({ title, children }: { title: string; children: ReactNode }) {
@@ -53,7 +53,9 @@ export function Privacy() {
     <Shell title="Privacy">
       <p>
         Stub is a small watch-list app. This page says plainly what it stores about you and who
-        else can see it. There is no analytics, no advertising, and no tracking of any kind.
+        else can see it. There is no analytics, no advertising, and no tracking of what you do in
+        the app. The one thing that leaves your browser beyond the essentials is a crash report,
+        and only when something actually breaks. That is covered under <em>Diagnostics</em> below.
       </p>
 
       <h2>What Stub stores</h2>
@@ -87,11 +89,24 @@ export function Privacy() {
         </li>
         <li>
           <strong>TMDB</strong>, <strong>OMDb</strong> and <strong>The Guardian</strong> supply
-          film and show data, artwork, scores and the press feed. Your browser calls them
-          directly, so they see your IP address for those requests, but nothing about your Stub
-          account.
+          film and show data, scores and the press feed. Those requests go through Stub's own
+          server, so the providers see the server, not you. Artwork and press thumbnails load
+          straight from their image servers, which see your IP address when an image loads but
+          nothing about your Stub account.
+        </li>
+        <li>
+          <strong>Sentry</strong> receives crash reports, described next.
         </li>
       </ul>
+
+      <h2>Diagnostics</h2>
+      <p>
+        If the app hits an unexpected error, Stub sends a crash report to Sentry, an
+        error-tracking service, so it can be found and fixed. A report contains the error message,
+        where in the code it happened, the page you were on, and your browser type. It does not
+        contain your email, your lists, your notes, or anything you typed. Reports are sent only
+        when something breaks, never during normal use.
+      </p>
 
       <h2>Keeping and deleting it</h2>
       <p>

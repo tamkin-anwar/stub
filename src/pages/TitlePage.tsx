@@ -9,6 +9,7 @@ import { useSpaces } from "../hooks/social";
 import { AddMenu, type AddTarget } from "../components/AddMenu";
 import { EntrySheet } from "../components/EntrySheet";
 import { ScorePills } from "../components/ScorePills";
+import { LoadError } from "../components/States";
 import { backdropUrl, posterUrl, profileUrl } from "../lib/tmdb";
 import { posterGradient, runtimeLabel } from "../lib/format";
 import type { MediaType } from "../lib/types";
@@ -18,7 +19,7 @@ export function TitlePage() {
   const idNum = Number(tmdbId);
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { data: detail, isLoading, error } = useTitleDetail(mediaType, idNum || undefined);
+  const { data: detail, isLoading, error, refetch } = useTitleDetail(mediaType, idNum || undefined);
   const { data: omdb } = useOmdb(detail?.imdbId);
   const { data: personal } = useEntries(profile ? { type: "user", id: profile.id } : null);
   const { data: spaces } = useSpaces(profile?.id);
@@ -47,8 +48,13 @@ export function TitlePage() {
   }, [onMyList, profile, qc]);
 
   if (!profile) return null;
-  if (isLoading) return <p className="center-note">Loading…</p>;
-  if (error || !detail) return <p className="center-note">Could not load this title.</p>;
+  if (isLoading) return <TitleSkeleton />;
+  if (error || !detail)
+    return (
+      <div className="wrap page">
+        <LoadError note="This title did not load." onRetry={() => refetch()} />
+      </div>
+    );
 
   const bd = backdropUrl(detail.backdropPath);
   const poster = posterUrl(detail.posterPath, "w342");
@@ -142,6 +148,26 @@ export function TitlePage() {
           onClose={() => setSheetOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+function TitleSkeleton() {
+  return (
+    <div className="wrap page" aria-hidden="true">
+      <div className="skel" style={{ height: 300, borderRadius: 10, marginBottom: 26 }} />
+      <div className="detail-grid">
+        <div>
+          <div className="skel skel-poster" style={{ marginBottom: 14 }} />
+          <div className="skel skel-line" style={{ height: 40, borderRadius: 7 }} />
+        </div>
+        <div>
+          <div className="skel skel-line" style={{ width: "60%", marginBottom: 16 }} />
+          <div className="skel skel-line" style={{ marginBottom: 8 }} />
+          <div className="skel skel-line" style={{ marginBottom: 8 }} />
+          <div className="skel skel-line" style={{ width: "75%" }} />
+        </div>
+      </div>
     </div>
   );
 }

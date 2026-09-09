@@ -196,6 +196,92 @@ h3 {
   font-size: 14px;
 }
 
+/* ---------- empty / error / loading states ---------- */
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 9px;
+  padding: 60px 20px 68px;
+}
+.state-glyph {
+  width: 46px;
+  height: auto;
+  color: var(--line-2);
+  margin-bottom: 6px;
+}
+.state-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.state-hint {
+  color: var(--dim);
+  font-size: 13.5px;
+  max-width: 42ch;
+  line-height: 1.5;
+}
+.state-hint a {
+  color: var(--accent-text);
+}
+.state-action {
+  margin-top: 8px;
+}
+
+.skel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skel {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+.skel-poster {
+  aspect-ratio: 2 / 3;
+  border: 1px solid var(--line-2);
+}
+.skel-line {
+  height: 10px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--text) 8%, transparent),
+      transparent
+    );
+    animation: skel-shimmer 1.4s ease-in-out infinite;
+  }
+}
+@keyframes skel-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Save data: skip the heavy decorative artwork, keep a solid ground. */
+@media (prefers-reduced-data: reduce) {
+  .detail-hero .bd,
+  .article-thumb {
+    display: none;
+  }
+  .detail-hero {
+    background: linear-gradient(158deg, #241c1f, #46383c);
+  }
+}
+
 /* ---------- layout ---------- */
 .wrap {
   max-width: var(--wrap);

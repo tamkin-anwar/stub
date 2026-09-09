@@ -5,6 +5,7 @@ import { useFriends, useSpaceActions, useSpaces } from "../hooks/social";
 import { ListView } from "../components/ListView";
 import { Avatar } from "../components/Avatar";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { GridSkeleton } from "../components/States";
 import { displayName } from "../lib/format";
 import { useToast } from "../components/Toast";
 
@@ -61,7 +62,7 @@ export function SharedList() {
       </div>
 
       {isLoading ? (
-        <p className="center-note">Loading…</p>
+        <GridSkeleton count={8} />
       ) : current ? (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>

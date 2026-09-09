@@ -102,7 +102,9 @@ export function Friends() {
         </p>
         <div className="card">
           {accepted.length === 0 && outgoing.length === 0 ? (
-            <p className="muted" style={{ fontSize: 13.5, padding: "6px 4px" }}>No friends yet.</p>
+            <p className="muted" style={{ fontSize: 13.5, padding: "6px 4px" }}>
+              No friends yet. Search by username above to send your first request.
+            </p>
           ) : (
             <>
               {accepted.map((f) => (

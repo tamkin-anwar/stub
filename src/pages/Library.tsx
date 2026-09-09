@@ -5,6 +5,7 @@ import { useBrowse, useTmdbSearch } from "../hooks/library";
 import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
+import { EmptyState, GridSkeleton, LoadError } from "../components/States";
 import { type AddTarget } from "../components/AddMenu";
 import { GENRES, type BrowseFeed, type MediaFilter } from "../lib/tmdb";
 import type { TmdbTitle } from "../lib/types";
@@ -129,11 +130,18 @@ export function Library() {
       )}
 
       {state.isLoading ? (
-        <p className="center-note">Loading…</p>
+        <GridSkeleton />
       ) : state.error ? (
-        <p className="center-note">TMDB error: {String((state.error as Error).message)}</p>
+        <LoadError onRetry={() => state.refetch()} />
       ) : unique.length === 0 ? (
-        <p className="center-note">{searching ? "No matches." : "Nothing to show."}</p>
+        <EmptyState
+          title={searching ? "No matches" : "Nothing to show here"}
+          hint={
+            searching
+              ? "Try another spelling, or a shorter search."
+              : "Pick a different feed or genre above."
+          }
+        />
       ) : (
         <>
           <div className="grid">

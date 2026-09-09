@@ -132,9 +132,8 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on ever
 
 ## What's here now, and what's next
 
-- Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, and an installable manifest.
+- Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, an installable manifest, and an `/api/*` proxy that keeps the third-party keys server-side and caches their responses on the CDN.
 - Not yet: a native iOS client on the same Supabase API.
-- Not yet: a server-side cache for the TMDB/OMDb/Guardian calls so heavy use does not hit their free-tier limits.
 - Not yet: caching posters into Supabase Storage so the grid does not depend on TMDB's CDN.
 - Not yet: an activity view (what a friend rated recently) and comparing two lists for overlap.
 - Not yet: spaces larger than two people, and a shared note per title.

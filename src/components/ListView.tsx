@@ -7,6 +7,7 @@ import { PosterCard } from "./PosterCard";
 import { EntrySheet } from "./EntrySheet";
 import { ScorePills } from "./ScorePills";
 import { ScoreLegend } from "./ScoreLegend";
+import { EmptyState, GridSkeleton, LoadError } from "./States";
 import { entryAverage } from "../lib/format";
 
 type StatusFilter = "all" | ListStatus;
@@ -21,7 +22,7 @@ interface Props {
 }
 
 export function ListView({ owner, members, selfId, emptyHint }: Props) {
-  const { data: entries, isLoading, error } = useEntries(owner);
+  const { data: entries, isLoading, error, refetch } = useEntries(owner);
   const [status, setStatus] = useState<StatusFilter>("all");
   const [type, setType] = useState<TypeFilter>("all");
   const [sort, setSort] = useState<Sort>("added");
@@ -57,7 +58,7 @@ export function ListView({ owner, members, selfId, emptyHint }: Props) {
   const open = openId ? (entries ?? []).find((e) => e.id === openId) ?? null : null;
 
   if (error) {
-    return <p className="center-note">Could not load this list. {String((error as Error).message)}</p>;
+    return <LoadError note="This list did not load." onRetry={() => refetch()} />;
   }
 
   return (
@@ -90,18 +91,22 @@ export function ListView({ owner, members, selfId, emptyHint }: Props) {
       </div>
 
       {isLoading ? (
-        <p className="center-note">Loading…</p>
+        <GridSkeleton />
       ) : visible.length === 0 ? (
-        <div className="center-note">
-          <p>Nothing here yet.</p>
-          <p>
-            {emptyHint ?? (
-              <>
-                Head to the <Link to="/app/library">Library</Link> to add something.
-              </>
-            )}
-          </p>
-        </div>
+        <EmptyState
+          title={entries?.length ? "Nothing matches those filters" : "Nothing here yet"}
+          hint={
+            entries?.length ? (
+              "Clear the filters or search to see the rest."
+            ) : (
+              (emptyHint ?? (
+                <>
+                  Head to the <Link to="/app/library">Library</Link> to add something.
+                </>
+              ))
+            )
+          }
+        />
       ) : (
         <div className="grid">
           {visible.map((e) => (

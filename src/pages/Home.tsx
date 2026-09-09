@@ -6,6 +6,7 @@ import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
 import { ArticleCard } from "../components/ArticleCard";
+import { GridSkeleton, LoadError } from "../components/States";
 import { type AddTarget } from "../components/AddMenu";
 import type { TmdbTitle } from "../lib/types";
 
@@ -81,11 +82,17 @@ export function Home() {
   if (!profile) return null;
 
   const shelfBody = (
-    q: { isLoading: boolean; isError: boolean; data: TmdbTitle[] | undefined },
+    q: {
+      isLoading: boolean;
+      isError: boolean;
+      data: TmdbTitle[] | undefined;
+      refetch: () => void;
+    },
     opts?: { dates?: boolean },
   ) => {
-    if (q.isLoading) return <p className="center-note">Loading…</p>;
-    if (q.isError || !q.data?.length)
+    if (q.isLoading) return <GridSkeleton count={6} />;
+    if (q.isError) return <LoadError onRetry={() => q.refetch()} />;
+    if (!q.data?.length)
       return <p className="center-note">Nothing to show right now.</p>;
     return strip(q.data, opts);
   };

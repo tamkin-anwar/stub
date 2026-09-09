@@ -1,8 +1,9 @@
 // Shared helpers for the /api proxy functions. Underscore prefix so Vercel
 // does not treat this as a route.
 
-/** Read a server env var, accepting the old VITE_-prefixed name as a fallback
- *  so a deploy keeps working before the Vercel vars are renamed. */
+/** Read a server env var. The Vercel project uses the unprefixed names
+ *  (TMDB_ACCESS_TOKEN and so on); the VITE_-prefixed fallback is kept only so a
+ *  clone with an older .env still runs. */
 export function serverKey(name: string): string | undefined {
   return process.env[name] || process.env[`VITE_${name}`];
 }

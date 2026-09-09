@@ -49,6 +49,11 @@ So the first person to open "trending" this hour pays the upstream calls; the
 next few thousand are served from the edge. During `vite dev` a small plugin
 in `vite.config.ts` runs the same handler modules so `/api/*` works locally.
 
+Each function also runs a best-effort per-IP rate limit (in the edge
+instance's memory, ceilings well above any real session) so one client cannot
+run the free-tier budgets down. For a hard limit, add a rule in the Vercel
+firewall.
+
 `/api/poster` is opt-in (see the env table). When it and `VITE_POSTER_CACHE`
 are set, it copies each TMDB poster into a public Supabase Storage bucket the
 first time a card renders it, and the grid serves the Storage copy from then
@@ -93,6 +98,7 @@ cp .env.example .env
 | `GUARDIAN_API_KEY` | server | no | the "In the press" feed |
 | `SUPABASE_SERVICE_ROLE_KEY` | server | no | lets `/api/poster` write to Storage |
 | `VITE_POSTER_CACHE` | client | no | set to `1` to serve posters from Storage |
+| `VITE_SENTRY_DSN` | client | no | a Sentry DSN turns on crash reporting |
 
 The server vars have **no `VITE_` prefix** on purpose, so they never reach the
 browser. On Vercel, add them as plain (not `VITE_`) environment variables;
@@ -143,6 +149,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on ever
 
 - Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, an installable manifest, and an `/api/*` proxy that keeps the third-party keys server-side and caches their responses on the CDN.
 - Done (opt-in): `/api/poster` caches TMDB poster art into Supabase Storage so the grid does not depend on TMDB's CDN. Off until `SUPABASE_SERVICE_ROLE_KEY` and `VITE_POSTER_CACHE` are set.
+- Done: a per-IP rate limit on every `/api/*` function, and crash reporting to Sentry when `VITE_SENTRY_DSN` is set.
 - Not yet: a native iOS client on the same Supabase API.
 - Not yet: an activity view (what a friend rated recently) and comparing two lists for overlap.
 - Not yet: spaces larger than two people, and a shared note per title.

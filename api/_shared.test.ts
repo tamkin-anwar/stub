@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { json, mapGuardian, normalizeOmdb, posterObjectKey } from "./_shared";
+import { json, mapGuardian, normalizeOmdb, posterObjectKey, rateLimit } from "./_shared";
+
+const reqFrom = (ip: string) =>
+  new Request("https://stub.app/api/x", { headers: { "x-forwarded-for": ip } });
 
 describe("normalizeOmdb", () => {
   it("parses IMDb, Rotten Tomatoes and Metacritic from a full response", () => {
@@ -111,6 +114,31 @@ describe("posterObjectKey", () => {
     expect(posterObjectKey("/a/b.jpg")).toBeNull();
     expect(posterObjectKey("/a.jpg?x=1")).toBeNull();
     expect(posterObjectKey("/a.gif")).toBeNull();
+  });
+});
+
+describe("rateLimit", () => {
+  it("passes under the limit and 429s over it", () => {
+    const req = reqFrom("10.0.0.1");
+    for (let i = 0; i < 3; i++) expect(rateLimit(req, "test-a", 3)).toBeNull();
+    const blocked = rateLimit(req, "test-a", 3);
+    expect(blocked?.status).toBe(429);
+    expect(Number(blocked?.headers.get("retry-after"))).toBeGreaterThan(0);
+    expect(blocked?.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("counts each client IP separately", () => {
+    expect(rateLimit(reqFrom("10.0.0.2"), "test-b", 1)).toBeNull();
+    expect(rateLimit(reqFrom("10.0.0.2"), "test-b", 1)?.status).toBe(429);
+    expect(rateLimit(reqFrom("10.0.0.3"), "test-b", 1)).toBeNull();
+  });
+
+  it("takes the first hop from a forwarded-for chain", () => {
+    const req = new Request("https://stub.app/api/x", {
+      headers: { "x-forwarded-for": "9.9.9.9, 70.0.0.1" },
+    });
+    expect(rateLimit(req, "test-c", 1)).toBeNull();
+    expect(rateLimit(reqFrom("9.9.9.9"), "test-c", 1)?.status).toBe(429);
   });
 });
 

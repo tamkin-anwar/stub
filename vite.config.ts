@@ -41,8 +41,11 @@ function apiDev(env: Record<string, string>): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  // Stamp the build with the deploy's commit so error reports name a version.
+  const commit = env.VITE_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || "";
   return {
     plugins: [react(), apiDev(env)],
+    define: { "import.meta.env.VITE_COMMIT_SHA": JSON.stringify(commit) },
     server: { port: 5173 },
     build: {
       // Split the heavy, rarely-changing libraries out of the app bundle so a

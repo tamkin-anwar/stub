@@ -1,4 +1,4 @@
-import { json, mapGuardian, serverKey } from "./_shared";
+import { json, mapGuardian, rateLimit, serverKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
@@ -6,6 +6,9 @@ const KEY = serverKey("GUARDIAN_API_KEY");
 const HALF_HOUR = 60 * 30;
 
 export default async function handler(req: Request): Promise<Response> {
+  const limited = rateLimit(req, "guardian", 40);
+  if (limited) return limited;
+
   const raw = Number(new URL(req.url).searchParams.get("limit"));
   const limit = Math.min(24, Math.max(1, Number.isFinite(raw) && raw > 0 ? raw : 12));
   if (!KEY) return json({ articles: [] }, HALF_HOUR);

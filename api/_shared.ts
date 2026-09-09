@@ -107,3 +107,49 @@ export function cacheHeaders(sMaxage: number): Record<string, string> {
 export function json(data: unknown, sMaxage: number, status = 200): Response {
   return new Response(JSON.stringify(data), { status, headers: cacheHeaders(sMaxage) });
 }
+
+/**
+ * Best-effort per-IP rate limit. The counter lives in the edge instance's
+ * memory, so it is not shared across regions or instances: it blunts a single
+ * client hammering one function, not distributed abuse. Set the ceilings well
+ * above any real session so only a script trips them. For hard guarantees,
+ * enable rate limiting in the Vercel firewall.
+ */
+const HITS = new Map<string, { n: number; reset: number }>();
+
+export function rateLimit(
+  req: Request,
+  bucket: string,
+  limit: number,
+  windowMs = 60_000,
+): Response | null {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+  const key = `${bucket}:${ip}`;
+  const now = Date.now();
+
+  if (HITS.size > 5000) {
+    for (const [k, v] of HITS) if (v.reset < now) HITS.delete(k);
+  }
+
+  const cur = HITS.get(key);
+  if (!cur || cur.reset < now) {
+    HITS.set(key, { n: 1, reset: now + windowMs });
+    return null;
+  }
+  cur.n += 1;
+  if (cur.n > limit) {
+    const retry = Math.max(1, Math.ceil((cur.reset - now) / 1000));
+    return new Response(JSON.stringify({ error: "rate limited" }), {
+      status: 429,
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "retry-after": String(retry),
+        "cache-control": "no-store",
+      },
+    });
+  }
+  return null;
+}

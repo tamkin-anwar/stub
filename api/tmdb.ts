@@ -1,4 +1,4 @@
-import { cacheHeaders, serverKey } from "./_shared";
+import { cacheHeaders, rateLimit, serverKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
@@ -16,6 +16,9 @@ const ALLOW: RegExp[] = [
 ];
 
 export default async function handler(req: Request): Promise<Response> {
+  const limited = rateLimit(req, "tmdb", 200);
+  if (limited) return limited;
+
   const u = new URL(req.url);
   const path = u.searchParams.get("path") ?? "";
 

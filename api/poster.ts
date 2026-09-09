@@ -1,4 +1,4 @@
-import { json, posterObjectKey, serverKey } from "./_shared";
+import { json, posterObjectKey, rateLimit, serverKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
@@ -14,6 +14,9 @@ const HOUR = 60 * 60;
  * (client keeps the TMDB image) when Storage is not configured.
  */
 export default async function handler(req: Request): Promise<Response> {
+  const limited = rateLimit(req, "poster", 120);
+  if (limited) return limited;
+
   const path = new URL(req.url).searchParams.get("path") ?? "";
   const key = posterObjectKey(path);
   if (!key) return json({ url: null, error: "bad path" }, HOUR, 400);

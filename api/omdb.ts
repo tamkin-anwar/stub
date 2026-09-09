@@ -1,4 +1,4 @@
-import { EMPTY_SCORES, json, normalizeOmdb, serverKey } from "./_shared";
+import { EMPTY_SCORES, json, normalizeOmdb, rateLimit, serverKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
@@ -6,6 +6,9 @@ const KEY = serverKey("OMDB_API_KEY");
 const WEEK = 60 * 60 * 24 * 7;
 
 export default async function handler(req: Request): Promise<Response> {
+  const limited = rateLimit(req, "omdb", 100);
+  if (limited) return limited;
+
   const id = new URL(req.url).searchParams.get("i");
   if (!id || !/^tt\d+$/.test(id)) return json({ error: "invalid imdb id" }, 60, 400);
   if (!KEY) return json(EMPTY_SCORES, 3600);

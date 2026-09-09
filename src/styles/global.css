@@ -725,9 +725,6 @@ select:focus {
 .poster .badge.ok {
   background: color-mix(in srgb, var(--accent) 90%, black);
 }
-.poster .badge.want {
-  background: color-mix(in srgb, var(--cool) 80%, black);
-}
 .poster .badge.live {
   display: inline-flex;
   align-items: center;

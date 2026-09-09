@@ -7,7 +7,7 @@ interface Props {
   name: string;
   year: number | null;
   posterPath: string | null;
-  badge?: "watched" | "watching" | "watchlist" | null;
+  badge?: "watched" | "watching" | null;
   fav?: boolean;
   sub?: ReactNode;
   onClick?: () => void;
@@ -49,7 +49,6 @@ export function PosterCard({ name, year, posterPath, badge, fav, sub, onClick }:
             Watching
           </span>
         )}
-        {badge === "watchlist" && <span className="badge want">Watchlist</span>}
         {fav && <span className="heart">♥</span>}
       </div>
       <div className="pc-title">{name}</div>

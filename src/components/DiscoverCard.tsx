@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useCardScores } from "../hooks/library";
 import { PosterCard } from "./PosterCard";
 import { AddMenu, type AddTarget, type CurrentEntry } from "./AddMenu";
-import type { ListStatus, TmdbTitle } from "../lib/types";
+import type { TmdbTitle } from "../lib/types";
 
 interface Props {
   r: TmdbTitle;
@@ -16,12 +16,6 @@ interface Props {
   /** Set when this title is already on the viewer's personal list. */
   mine?: CurrentEntry | null;
 }
-
-const BADGE: Record<ListStatus, "watched" | "watching" | "watchlist"> = {
-  watched: "watched",
-  watching: "watching",
-  watchlist: "watchlist",
-};
 
 export function DiscoverCard({
   r,
@@ -78,14 +72,7 @@ export function DiscoverCard({
 
   return (
     <div style={{ position: "relative" }}>
-      <PosterCard
-        name={r.name}
-        year={r.year}
-        posterPath={r.posterPath}
-        badge={mine ? BADGE[mine.status] : null}
-        sub={sub}
-        onClick={onOpen}
-      />
+      <PosterCard name={r.name} year={r.year} posterPath={r.posterPath} sub={sub} onClick={onOpen} />
       <div style={{ position: "absolute", top: 8, right: 8 }}>
         <AddMenu
           media={{ tmdbId: r.tmdbId, mediaType: r.mediaType }}

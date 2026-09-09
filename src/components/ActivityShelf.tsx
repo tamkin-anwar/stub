@@ -16,6 +16,8 @@ export function ActivityShelf() {
 
   if (!profile) return null;
 
+  // Supplementary shelf: show a skeleton only during an active first fetch,
+  // and otherwise just stay hidden when there is nothing (or nothing loaded).
   if (activity.isLoading) {
     return (
       <Shelf label="Recently rated" title="From friends">

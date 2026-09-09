@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useFriends, useListCompare } from "../hooks/social";
 import { PosterCard } from "../components/PosterCard";
@@ -61,6 +61,7 @@ export function Compare() {
   const shown = filter === "all" ? items : items.filter((i) => i.bucket === filter);
 
   if (!profile) return null;
+  if (!friendId) return <Navigate to="/app/friends" replace />;
 
   const tabs: [Filter, string][] = [
     ["all", "All"],
@@ -88,9 +89,9 @@ export function Compare() {
         </div>
       </div>
 
-      {compare.isLoading ? (
+      {compare.isPending ? (
         <GridSkeleton />
-      ) : compare.error ? (
+      ) : compare.isError ? (
         <LoadError note="Could not compare your lists." onRetry={() => compare.refetch()} />
       ) : !items.length ? (
         <EmptyState

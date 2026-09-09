@@ -29,6 +29,20 @@ const target = DSN ? parseDsn(DSN) : null;
 const seen = new Set<string>();
 let sent = 0;
 
+/** Transient noise, not a code bug: a chunk 404 after a deploy landed
+ *  mid-session. lazyRetry already reloads the page to recover. */
+const IGNORE = [
+  /failed to fetch dynamically imported module/i,
+  /error loading dynamically imported module/i,
+  /importing a module script failed/i,
+  /'text\/html' is not a valid javascript mime type/i,
+  /ChunkLoadError/i,
+];
+
+export function isIgnored(message: string): boolean {
+  return IGNORE.some((re) => re.test(message));
+}
+
 function frames(err: Error) {
   const rows = (err.stack || "")
     .split("\n")
@@ -54,7 +68,9 @@ export function reportError(err: unknown, extra?: Record<string, unknown>): void
   if (!target || sent >= MAX_EVENTS) return;
 
   const e = err instanceof Error ? err : new Error(typeof err === "string" ? err : "Unknown error");
-  const sig = `${e.name}:${e.message}`;
+  if (isIgnored(e.message)) return;
+  // Collapse per-URL variants (e.g. one chunk hash vs another) to one issue.
+  const sig = `${e.name}:${e.message.replace(/https?:\/\/\S+/g, "<url>")}`;
   if (seen.has(sig)) return;
   seen.add(sig);
   sent += 1;

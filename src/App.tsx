@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./components/Toast";
@@ -6,20 +6,21 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { DocumentTitle } from "./components/DocumentTitle";
 import { Nav } from "./components/Nav";
 import { SetupScreen } from "./pages/SetupScreen";
+import { lazyRetry } from "./lib/lazyRetry";
 
 // Landing and auth are the first paint; the rest load on navigation.
 import { Landing } from "./pages/Landing";
 import { AuthPage } from "./pages/Auth";
-const Privacy = lazy(() => import("./pages/Legal").then((m) => ({ default: m.Privacy })));
-const Terms = lazy(() => import("./pages/Legal").then((m) => ({ default: m.Terms })));
-const Home = lazy(() => import("./pages/Home").then((m) => ({ default: m.Home })));
-const MyList = lazy(() => import("./pages/MyList").then((m) => ({ default: m.MyList })));
-const Library = lazy(() => import("./pages/Library").then((m) => ({ default: m.Library })));
-const SharedList = lazy(() => import("./pages/SharedList").then((m) => ({ default: m.SharedList })));
-const Friends = lazy(() => import("./pages/Friends").then((m) => ({ default: m.Friends })));
-const Compare = lazy(() => import("./pages/Compare").then((m) => ({ default: m.Compare })));
-const Settings = lazy(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
-const TitlePage = lazy(() => import("./pages/TitlePage").then((m) => ({ default: m.TitlePage })));
+const Privacy = lazyRetry(() => import("./pages/Legal").then((m) => ({ default: m.Privacy })));
+const Terms = lazyRetry(() => import("./pages/Legal").then((m) => ({ default: m.Terms })));
+const Home = lazyRetry(() => import("./pages/Home").then((m) => ({ default: m.Home })));
+const MyList = lazyRetry(() => import("./pages/MyList").then((m) => ({ default: m.MyList })));
+const Library = lazyRetry(() => import("./pages/Library").then((m) => ({ default: m.Library })));
+const SharedList = lazyRetry(() => import("./pages/SharedList").then((m) => ({ default: m.SharedList })));
+const Friends = lazyRetry(() => import("./pages/Friends").then((m) => ({ default: m.Friends })));
+const Compare = lazyRetry(() => import("./pages/Compare").then((m) => ({ default: m.Compare })));
+const Settings = lazyRetry(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
+const TitlePage = lazyRetry(() => import("./pages/TitlePage").then((m) => ({ default: m.TitlePage })));
 
 function Loading() {
   return <p className="center-note">Loading…</p>;

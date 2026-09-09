@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useArticles, useClassics, useTrending, useUpcoming } from "../hooks/library";
+import { useMyEntryLookup } from "../hooks/lists";
 import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
@@ -34,6 +35,7 @@ export function Home() {
   const classics = useClassics();
   const articles = useArticles();
   const { data: spaces } = useSpaces(profile?.id);
+  const mine = useMyEntryLookup(profile?.id);
 
   const targets = useMemo<AddTarget[]>(() => {
     if (!profile) return [];
@@ -68,6 +70,7 @@ export function Home() {
           r={r}
           targets={targets}
           selfId={profile.id}
+          mine={mine.get(`${r.mediaType}-${r.tmdbId}`) ?? null}
           withScores={!opts?.dates}
           subOverride={
             opts?.dates ? (

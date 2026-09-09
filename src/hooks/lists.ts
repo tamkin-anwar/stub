@@ -1,12 +1,6 @@
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  addToList,
-  fetchEntries,
-  removeEntry,
-  setRating,
-  updateEntry,
-  type ListOwner,
-} from "../data/lists";
+import { fetchEntries, removeEntry, setRating, updateEntry, type ListOwner } from "../data/lists";
 import type { ListEntry, ListStatus } from "../lib/types";
 
 export function entriesKey(owner: ListOwner) {
@@ -21,13 +15,22 @@ export function useEntries(owner: ListOwner | null) {
   });
 }
 
-export function useAddToList(owner: ListOwner, userId: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (args: { tmdbId: number; mediaType: "movie" | "tv"; status: ListStatus }) =>
-      addToList(owner, { tmdbId: args.tmdbId, mediaType: args.mediaType }, args.status, userId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: entriesKey(owner) }),
-  });
+export interface MyEntry {
+  entryId: string;
+  status: ListStatus;
+}
+
+/** A "mediaType-tmdbId" -> {entryId, status} map of the viewer's own list,
+ *  so discovery cards can show what is already on it. */
+export function useMyEntryLookup(userId: string | undefined): Map<string, MyEntry> {
+  const { data } = useEntries(userId ? { type: "user", id: userId } : null);
+  return useMemo(() => {
+    const m = new Map<string, MyEntry>();
+    for (const e of data ?? []) {
+      m.set(`${e.title.media_type}-${e.title.tmdb_id}`, { entryId: e.id, status: e.status });
+    }
+    return m;
+  }, [data]);
 }
 
 export function useUpdateEntry(owner: ListOwner) {

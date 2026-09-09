@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useBrowse, useTmdbSearch } from "../hooks/library";
+import { useMyEntryLookup } from "../hooks/lists";
 import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
@@ -52,6 +53,7 @@ export function Library() {
   });
   const search = useTmdbSearch(q);
   const { data: spaces } = useSpaces(profile?.id);
+  const mine = useMyEntryLookup(profile?.id);
 
   const targets = useMemo<AddTarget[]>(() => {
     if (!profile) return [];
@@ -187,6 +189,7 @@ export function Library() {
                 r={r}
                 targets={targets}
                 selfId={profile.id}
+                mine={mine.get(`${r.mediaType}-${r.tmdbId}`) ?? null}
                 onOpen={() => navigate(`/app/title/${r.mediaType}/${r.tmdbId}`)}
               />
             ))}

@@ -464,6 +464,18 @@ h3 {
   padding: 6px 11px;
   font-size: 12px;
 }
+/* "Already on your list" pill over a poster: frosted dark, legible on any art. */
+.btn.on-list {
+  background: rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-weight: 500;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.btn.on-list:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+}
 .btn:disabled {
   opacity: 0.45;
   cursor: default;
@@ -712,6 +724,9 @@ select:focus {
 }
 .poster .badge.ok {
   background: color-mix(in srgb, var(--accent) 90%, black);
+}
+.poster .badge.want {
+  background: color-mix(in srgb, var(--cool) 80%, black);
 }
 .poster .badge.live {
   display: inline-flex;

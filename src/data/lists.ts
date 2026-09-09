@@ -88,7 +88,7 @@ export async function addToList(
   media: Pick<TmdbTitle, "tmdbId" | "mediaType">,
   status: ListStatus,
   addedBy: string,
-): Promise<ListEntry> {
+): Promise<{ entry: ListEntry; created: boolean }> {
   const sb = requireSupabase();
   const title = await cacheTitle(media.mediaType, media.tmdbId);
 
@@ -115,11 +115,11 @@ export async function addToList(
         .eq("title_id", title.id)
         .single();
       if (e2) throw e2;
-      return existing as unknown as ListEntry;
+      return { entry: existing as unknown as ListEntry, created: false };
     }
     throw error;
   }
-  return data as unknown as ListEntry;
+  return { entry: data as unknown as ListEntry, created: true };
 }
 
 export async function updateEntry(

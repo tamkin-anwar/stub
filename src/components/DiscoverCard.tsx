@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { useCardScores } from "../hooks/library";
 import { PosterCard } from "./PosterCard";
-import { AddMenu, type AddTarget } from "./AddMenu";
-import type { TmdbTitle } from "../lib/types";
+import { AddMenu, type AddTarget, type CurrentEntry } from "./AddMenu";
+import type { ListStatus, TmdbTitle } from "../lib/types";
 
 interface Props {
   r: TmdbTitle;
@@ -13,9 +13,25 @@ interface Props {
   subOverride?: ReactNode;
   /** Fetch IMDb/RT for this card. Off for unreleased titles. */
   withScores?: boolean;
+  /** Set when this title is already on the viewer's personal list. */
+  mine?: CurrentEntry | null;
 }
 
-export function DiscoverCard({ r, targets, selfId, onOpen, subOverride, withScores = true }: Props) {
+const BADGE: Record<ListStatus, "watched" | "watching" | "watchlist"> = {
+  watched: "watched",
+  watching: "watching",
+  watchlist: "watchlist",
+};
+
+export function DiscoverCard({
+  r,
+  targets,
+  selfId,
+  onOpen,
+  subOverride,
+  withScores = true,
+  mine = null,
+}: Props) {
   const cs = useCardScores(r.mediaType, r.tmdbId, withScores && subOverride === undefined);
   const kind = r.mediaType === "movie" ? "Film" : "Series";
   const hasImdb = typeof cs.data?.imdb === "number" && cs.data.imdb > 0;
@@ -62,9 +78,21 @@ export function DiscoverCard({ r, targets, selfId, onOpen, subOverride, withScor
 
   return (
     <div style={{ position: "relative" }}>
-      <PosterCard name={r.name} year={r.year} posterPath={r.posterPath} sub={sub} onClick={onOpen} />
+      <PosterCard
+        name={r.name}
+        year={r.year}
+        posterPath={r.posterPath}
+        badge={mine ? BADGE[mine.status] : null}
+        sub={sub}
+        onClick={onOpen}
+      />
       <div style={{ position: "absolute", top: 8, right: 8 }}>
-        <AddMenu media={{ tmdbId: r.tmdbId, mediaType: r.mediaType }} targets={targets} selfId={selfId} />
+        <AddMenu
+          media={{ tmdbId: r.tmdbId, mediaType: r.mediaType }}
+          targets={targets}
+          selfId={selfId}
+          current={mine}
+        />
       </div>
     </div>
   );

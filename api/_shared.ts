@@ -54,6 +54,14 @@ export function normalizeOmdb(data: OmdbRaw): OmdbScores {
   };
 }
 
+/** Validate a TMDB poster path and turn it into a Storage object key.
+ *  Returns null for anything that is not a plain "/hash.ext" image path. */
+const POSTER_PATH = /^\/[A-Za-z0-9._-]+\.(jpe?g|png|webp)$/;
+export function posterObjectKey(path: string): string | null {
+  if (path.includes("..") || !POSTER_PATH.test(path)) return null;
+  return `w342${path}`;
+}
+
 const stripTags = (html?: string) => (html ?? "").replace(/<[^>]+>/g, "").trim();
 
 interface GuardianRaw {

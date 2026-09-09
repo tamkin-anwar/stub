@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { json, mapGuardian, normalizeOmdb } from "./_shared";
+import { json, mapGuardian, normalizeOmdb, posterObjectKey } from "./_shared";
 
 describe("normalizeOmdb", () => {
   it("parses IMDb, Rotten Tomatoes and Metacritic from a full response", () => {
@@ -94,6 +94,23 @@ describe("mapGuardian", () => {
 
   it("is an empty array with no results", () => {
     expect(mapGuardian({})).toEqual([]);
+  });
+});
+
+describe("posterObjectKey", () => {
+  it("prefixes a valid TMDB poster path with the size", () => {
+    expect(posterObjectKey("/aBc123-x.jpg")).toBe("w342/aBc123-x.jpg");
+    expect(posterObjectKey("/p.png")).toBe("w342/p.png");
+    expect(posterObjectKey("/p.webp")).toBe("w342/p.webp");
+  });
+
+  it("rejects anything that is not a plain image path", () => {
+    expect(posterObjectKey("")).toBeNull();
+    expect(posterObjectKey("aBc.jpg")).toBeNull();
+    expect(posterObjectKey("/../secret.jpg")).toBeNull();
+    expect(posterObjectKey("/a/b.jpg")).toBeNull();
+    expect(posterObjectKey("/a.jpg?x=1")).toBeNull();
+    expect(posterObjectKey("/a.gif")).toBeNull();
   });
 });
 

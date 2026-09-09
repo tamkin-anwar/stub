@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { posterUrl } from "../lib/tmdb";
+import { cachePoster, storedPosterUrl } from "../lib/posters";
 import { posterGradient } from "../lib/format";
 
 interface Props {
@@ -13,14 +14,28 @@ interface Props {
 }
 
 export function PosterCard({ name, year, posterPath, badge, fav, sub, onClick }: Props) {
-  const src = posterUrl(posterPath, "w342");
+  const stored = storedPosterUrl(posterPath);
+  const tmdb = posterUrl(posterPath, "w342");
   const g = posterGradient(name);
+
+  // 0 = Storage copy, 1 = TMDB CDN, 2 = painted fallback.
+  const [stage, setStage] = useState<0 | 1 | 2>(stored ? 0 : tmdb ? 1 : 2);
+  const src = stage === 0 ? stored : stage === 1 ? tmdb : null;
+
+  function onError() {
+    if (stage === 0) {
+      cachePoster(posterPath);
+      setStage(tmdb ? 1 : 2);
+    } else if (stage === 1) {
+      setStage(2);
+    }
+  }
 
   return (
     <button className="poster-card" onClick={onClick} type="button">
       <div className="poster">
         {src ? (
-          <img src={src} alt={name} loading="lazy" />
+          <img key={stage} src={src} alt={name} loading="lazy" onError={onError} />
         ) : (
           <div className="fallback" style={{ ["--d" as string]: g.d, ["--m" as string]: g.m }}>
             <span className="ftitle">{name}</span>

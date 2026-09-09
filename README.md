@@ -49,6 +49,11 @@ So the first person to open "trending" this hour pays the upstream calls; the
 next few thousand are served from the edge. During `vite dev` a small plugin
 in `vite.config.ts` runs the same handler modules so `/api/*` works locally.
 
+`/api/poster` is opt-in (see the env table). When it and `VITE_POSTER_CACHE`
+are set, it copies each TMDB poster into a public Supabase Storage bucket the
+first time a card renders it, and the grid serves the Storage copy from then
+on. Without it, cards use TMDB image URLs as before.
+
 ## Why Stub
 
 Letterboxd is a public diary. A group text is where "what should we watch" goes to die. Stub is the small private middle: one list that is yours, one that is ours, and a real catalogue to pull from, with no feed and no account required from anyone you are not already watching with.
@@ -64,7 +69,7 @@ npm install
 ### 2. Supabase
 
 1. Create a free project at https://supabase.com/dashboard.
-2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0004`), or `supabase link` and `supabase db push`.
+2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0005`), or `supabase link` and `supabase db push`.
 3. Auth, Providers, Email is on by default. For quick local testing, turn off "Confirm email" so new accounts can sign in right away; with it on, sign-up shows a "confirm your email" step.
 4. Project Settings, API: copy the Project URL and the `anon` public key.
 
@@ -86,10 +91,14 @@ cp .env.example .env
 | `TMDB_ACCESS_TOKEN` | server (`/api/*`) | yes | titles, artwork, discovery |
 | `OMDB_API_KEY` | server | no | IMDb / Rotten Tomatoes / Metacritic scores |
 | `GUARDIAN_API_KEY` | server | no | the "In the press" feed |
+| `SUPABASE_SERVICE_ROLE_KEY` | server | no | lets `/api/poster` write to Storage |
+| `VITE_POSTER_CACHE` | client | no | set to `1` to serve posters from Storage |
 
-The three server vars have **no `VITE_` prefix** on purpose, so they never
-reach the browser. On Vercel, add them as plain (not `VITE_`) environment
-variables; `vite dev` reads them from `.env` for the local `/api` plugin.
+The server vars have **no `VITE_` prefix** on purpose, so they never reach the
+browser. On Vercel, add them as plain (not `VITE_`) environment variables;
+`vite dev` reads them from `.env` for the local `/api` plugin. For the poster
+cache, also run `supabase/migrations/0005_posters_bucket.sql` and set
+`VITE_POSTER_CACHE=1`.
 
 ### 5. Run
 
@@ -133,8 +142,8 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on ever
 ## What's here now, and what's next
 
 - Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, an installable manifest, and an `/api/*` proxy that keeps the third-party keys server-side and caches their responses on the CDN.
+- Done (opt-in): `/api/poster` caches TMDB poster art into Supabase Storage so the grid does not depend on TMDB's CDN. Off until `SUPABASE_SERVICE_ROLE_KEY` and `VITE_POSTER_CACHE` are set.
 - Not yet: a native iOS client on the same Supabase API.
-- Not yet: caching posters into Supabase Storage so the grid does not depend on TMDB's CDN.
 - Not yet: an activity view (what a friend rated recently) and comparing two lists for overlap.
 - Not yet: spaces larger than two people, and a shared note per title.
 

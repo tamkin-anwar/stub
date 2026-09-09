@@ -15,6 +15,10 @@ function apiDev(env: Record<string, string>): Plugin {
       for (const [k, v] of Object.entries(env)) {
         if (!k.startsWith("VITE_") && v) process.env[k] = v;
       }
+      // The functions accept a plain SUPABASE_URL; in dev, mirror the client one.
+      if (env.VITE_SUPABASE_URL && !process.env.SUPABASE_URL) {
+        process.env.SUPABASE_URL = env.VITE_SUPABASE_URL;
+      }
       server.middlewares.use(async (req, res, next) => {
         if (!req.url?.startsWith("/api/")) return next();
         const name = req.url.split("?")[0].slice("/api/".length).replace(/[^a-z0-9_-]/gi, "");

@@ -8,6 +8,7 @@ import {
   fetchMySpaces,
   leaveSpace,
   removeFriendship,
+  renameSpace,
   searchProfiles,
   sendFriendRequest,
 } from "../data/social";
@@ -82,6 +83,11 @@ export function useSpaceActions(selfId: string) {
     create: useMutation({
       mutationFn: (args: { friendId: string; name: string }) =>
         createCoupleSpace(args.friendId, args.name),
+      onSuccess: () => qc.invalidateQueries({ queryKey: ["spaces", selfId] }),
+    }),
+    rename: useMutation({
+      mutationFn: (args: { spaceId: string; name: string }) =>
+        renameSpace(args.spaceId, args.name),
       onSuccess: () => qc.invalidateQueries({ queryKey: ["spaces", selfId] }),
     }),
     leave: useMutation({

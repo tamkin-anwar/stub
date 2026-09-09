@@ -3,7 +3,7 @@
 -- (pgTAP is enabled by the Supabase test harness.)
 
 begin;
-select plan(21);
+select plan(24);
 
 -- ---------------------------------------------------------------------------
 -- fixtures, as the migration/superuser role
@@ -118,6 +118,24 @@ select throws_ok(
   $$select public.create_couple_space('11111111-1111-1111-1111-111111111111')$$,
   'P0001', null,
   'u3 cannot pair with someone they are not friends with');
+
+-- ---------------------------------------------------------------------------
+-- rename_space: a member can rename, a non-member and a blank name cannot
+-- ---------------------------------------------------------------------------
+select pg_temp.login('11111111-1111-1111-1111-111111111111');
+select lives_ok(
+  format($$select public.rename_space(%L, 'Movie Nights')$$, current_setting('test.space_id')),
+  'a member can rename the shared list');
+select is(
+  (select name from public.spaces where id = current_setting('test.space_id')::uuid),
+  'Movie Nights',
+  'the new name stuck');
+
+select pg_temp.login('33333333-3333-3333-3333-333333333333');
+select throws_ok(
+  format($$select public.rename_space(%L, 'Hijacked')$$, current_setting('test.space_id')),
+  'P0001', null,
+  'a non-member cannot rename the list');
 
 -- ---------------------------------------------------------------------------
 -- friend_activity + list_compare: security definer, gated on friendship

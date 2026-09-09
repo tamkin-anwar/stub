@@ -134,6 +134,12 @@ export async function leaveSpace(spaceId: string, selfId: string): Promise<void>
   if (error) throw error;
 }
 
+export async function renameSpace(spaceId: string, name: string): Promise<void> {
+  const sb = requireSupabase();
+  const { error } = await sb.rpc("rename_space", { space: spaceId, new_name: name });
+  if (error) throw error;
+}
+
 // ---------------------------------------------------------------------------
 // Friend activity + list comparison (both backed by security-definer RPCs
 // that gate on an accepted friendship).

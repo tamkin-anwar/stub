@@ -9,8 +9,8 @@ Built by Anwar Creative Studio.
 ## What it does
 
 - **Your own list.** Watchlist, watching, and watched, each title with your star rating (half steps), a note, and the month you saw it. Filter by films or series and by status, search, and sort.
-- **A list together.** Pair with an accepted friend and get one shared list. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Your personal list stays yours.
-- **Friends.** Find people by username, send and accept requests, and choose who you share a list with. Compare your list against any friend's: what you both have, what only one of you has, and what you have both seen.
+- **A list together.** Pair with an accepted friend and get a shared list, one per friend, each with its own name you can rename any time. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Move an entry between your list and a shared one whenever you realise you watched it together. Your personal list stays yours.
+- **Friends.** Find people by username, send and accept requests, start a shared list with any of them, and compare your list against theirs: what you both have, what only one of you has, and what you have both seen.
 - **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Sort by rating, year or name. Add anything to any list in two clicks.
 - **Scores on every card.** IMDb, Rotten Tomatoes and Metacritic, pulled once per title from OMDb and cached, shown on list cards, library cards and title pages, with a small legend.
 - **A home page.** Recent film and TV coverage from The Guardian in an in-app reader, the latest ratings from your friends, what is coming, what is trending this week, and older films worth another look.
@@ -74,7 +74,7 @@ npm install
 ### 2. Supabase
 
 1. Create a free project at https://supabase.com/dashboard.
-2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0006`), or `supabase link` and `supabase db push`.
+2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0007`), or `supabase link` and `supabase db push`.
 3. Auth, Providers, Email is on by default. For quick local testing, turn off "Confirm email" so new accounts can sign in right away; with it on, sign-up shows a "confirm your email" step.
 4. Project Settings, API: copy the Project URL and the `anon` public key.
 

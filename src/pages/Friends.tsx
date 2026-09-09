@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useFriendActions, useFriends, useProfileSearch } from "../hooks/social";
+import {
+  useFriendActions,
+  useFriends,
+  useProfileSearch,
+  useSpaceActions,
+  useSpaces,
+} from "../hooks/social";
 import { Avatar } from "../components/Avatar";
 import { displayName } from "../lib/format";
 import { useToast } from "../components/Toast";
@@ -9,15 +15,35 @@ import { useToast } from "../components/Toast";
 export function Friends() {
   const { profile } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [term, setTerm] = useState("");
   const { data: friends } = useFriends(profile?.id);
   const { data: found } = useProfileSearch(term, profile?.id);
+  const { data: spaces } = useSpaces(profile?.id);
   const actions = useFriendActions(profile?.id ?? "");
+  const spaceActions = useSpaceActions(profile?.id ?? "");
 
   const fail = (err: unknown) =>
     toast(err instanceof Error ? err.message : "Something went wrong", { error: true });
 
   if (!profile) return null;
+
+  const sharedWith = new Set(
+    (spaces ?? []).flatMap((s) => s.members.map((m) => m.id)),
+  );
+
+  function startList(friend: { id: string; display_name: string; username: string }) {
+    spaceActions.create.mutate(
+      { friendId: friend.id, name: `${displayName(friend)} & you` },
+      {
+        onSuccess: () => {
+          toast("Shared list created");
+          navigate("/app/shared");
+        },
+        onError: fail,
+      },
+    );
+  }
 
   const incoming = (friends ?? []).filter((f) => f.direction === "incoming");
   const outgoing = (friends ?? []).filter((f) => f.direction === "outgoing");
@@ -115,6 +141,19 @@ export function Friends() {
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>
                   </div>
+                  {sharedWith.has(f.profile.id) ? (
+                    <Link to="/app/shared" className="btn ghost sm">
+                      Shared list
+                    </Link>
+                  ) : (
+                    <button
+                      className="btn ghost sm"
+                      disabled={spaceActions.create.isPending}
+                      onClick={() => startList(f.profile)}
+                    >
+                      Start list
+                    </button>
+                  )}
                   <Link to={`/app/compare/${f.profile.id}`} className="btn ghost sm">
                     Compare
                   </Link>

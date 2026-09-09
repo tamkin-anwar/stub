@@ -22,8 +22,12 @@ export default async function handler(req: Request): Promise<Response> {
   const publicUrl = `${BASE}/storage/v1/object/public/posters/${key}`;
 
   try {
-    const head = await fetch(publicUrl, { method: "HEAD" });
-    if (head.ok) return json({ url: publicUrl, cached: true }, WEEK);
+    // A one-byte ranged GET, not HEAD: Supabase's public endpoint answers HEAD
+    // inconsistently from a server context, but always serves a Range request.
+    const probe = await fetch(publicUrl, { headers: { range: "bytes=0-0" } });
+    if (probe.status === 206 || probe.ok) {
+      return json({ url: publicUrl, cached: true }, WEEK);
+    }
 
     const src = await fetch(`https://image.tmdb.org/t/p/w342${path}`);
     if (!src.ok) return json({ url: null }, HOUR);

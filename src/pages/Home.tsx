@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useArticles, useClassics, useTrending, useUpcoming } from "../hooks/library";
@@ -6,48 +6,11 @@ import { useSpaces } from "../hooks/social";
 import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
 import { ArticleCard } from "../components/ArticleCard";
+import { ActivityShelf } from "../components/ActivityShelf";
+import { Shelf } from "../components/Shelf";
 import { GridSkeleton, LoadError } from "../components/States";
 import { type AddTarget } from "../components/AddMenu";
 import type { TmdbTitle } from "../lib/types";
-
-function Shelf({
-  label,
-  title,
-  more,
-  children,
-}: {
-  label: string;
-  title: string;
-  more?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section style={{ marginBottom: 44 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          justifyContent: "space-between",
-          gap: 12,
-          paddingBottom: 12,
-          marginBottom: 20,
-          borderBottom: "1px solid var(--line)",
-        }}
-      >
-        <div>
-          <div className="eyebrow" style={{ marginBottom: 6 }}>
-            {label}
-          </div>
-          <h2 className="display" style={{ fontSize: 24 }}>
-            {title}
-          </h2>
-        </div>
-        {more}
-      </div>
-      {children}
-    </section>
-  );
-}
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "";
@@ -137,6 +100,8 @@ export function Home() {
           </div>
         </Shelf>
       )}
+
+      <ActivityShelf />
 
       <ScoreLegend />
 

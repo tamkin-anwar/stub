@@ -1,5 +1,12 @@
 import { requireSupabase } from "../lib/supabase";
-import type { FriendView, Friendship, Profile, SpaceWithMembers } from "../lib/types";
+import type {
+  FriendView,
+  Friendship,
+  ListStatus,
+  MediaType,
+  Profile,
+  SpaceWithMembers,
+} from "../lib/types";
 
 export async function searchProfiles(term: string, selfId: string): Promise<Profile[]> {
   // Strip characters that are special to PostgREST's filter grammar so a
@@ -125,4 +132,101 @@ export async function leaveSpace(spaceId: string, selfId: string): Promise<void>
     .eq("space_id", spaceId)
     .eq("user_id", selfId);
   if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Friend activity + list comparison (both backed by security-definer RPCs
+// that gate on an accepted friendship).
+// ---------------------------------------------------------------------------
+export interface ActivityItem {
+  actorId: string;
+  username: string;
+  displayName: string;
+  accent: string;
+  stars: number;
+  tmdbId: number;
+  mediaType: MediaType;
+  name: string;
+  year: number | null;
+  posterPath: string | null;
+  ratedAt: string;
+}
+
+interface ActivityRow {
+  actor_id: string;
+  username: string;
+  display_name: string;
+  accent: string;
+  stars: number | string;
+  tmdb_id: number;
+  media_type: MediaType;
+  name: string;
+  year: number | null;
+  poster_path: string | null;
+  rated_at: string;
+}
+
+export async function fetchFriendActivity(limit = 24): Promise<ActivityItem[]> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.rpc("friend_activity", { max_rows: limit });
+  if (error) throw error;
+  return ((data ?? []) as ActivityRow[]).map((r) => ({
+    actorId: r.actor_id,
+    username: r.username,
+    displayName: r.display_name,
+    accent: r.accent,
+    stars: Number(r.stars),
+    tmdbId: r.tmdb_id,
+    mediaType: r.media_type,
+    name: r.name,
+    year: r.year,
+    posterPath: r.poster_path,
+    ratedAt: r.rated_at,
+  }));
+}
+
+export type CompareBucket = "both" | "mine" | "theirs";
+
+export interface CompareItem {
+  bucket: CompareBucket;
+  tmdbId: number;
+  mediaType: MediaType;
+  name: string;
+  year: number | null;
+  posterPath: string | null;
+  myStatus: ListStatus | null;
+  theirStatus: ListStatus | null;
+  myStars: number | null;
+  theirStars: number | null;
+}
+
+interface CompareRow {
+  bucket: CompareBucket;
+  tmdb_id: number;
+  media_type: MediaType;
+  name: string;
+  year: number | null;
+  poster_path: string | null;
+  my_status: ListStatus | null;
+  their_status: ListStatus | null;
+  my_stars: number | string | null;
+  their_stars: number | string | null;
+}
+
+export async function fetchListCompare(friendId: string): Promise<CompareItem[]> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.rpc("list_compare", { friend: friendId });
+  if (error) throw error;
+  return ((data ?? []) as CompareRow[]).map((r) => ({
+    bucket: r.bucket,
+    tmdbId: r.tmdb_id,
+    mediaType: r.media_type,
+    name: r.name,
+    year: r.year,
+    posterPath: r.poster_path,
+    myStatus: r.my_status,
+    theirStatus: r.their_status,
+    myStars: r.my_stars == null ? null : Number(r.my_stars),
+    theirStars: r.their_stars == null ? null : Number(r.their_stars),
+  }));
 }

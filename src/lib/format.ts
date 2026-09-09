@@ -59,3 +59,19 @@ export function runtimeLabel(minutes: number | null, mediaType: "movie" | "tv"):
 export function statusLabel(status: ListEntry["status"]): string {
   return status === "watchlist" ? "Watchlist" : status === "watching" ? "Watching" : "Watched";
 }
+
+/** Short relative time: "just now", "5m", "3h", "2d", "3w", then a date. */
+export function timeAgo(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const s = Math.max(0, Math.round(ms / 1000));
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.round(h / 24);
+  if (d < 7) return `${d}d`;
+  const w = Math.round(d / 7);
+  if (w < 5) return `${w}w`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}

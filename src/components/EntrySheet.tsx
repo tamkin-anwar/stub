@@ -168,7 +168,9 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
           </div>
 
           <div className="field">
-            <label htmlFor={`note-${entry.id}`}>Notes</label>
+            <label htmlFor={`note-${entry.id}`}>
+              {owner.type === "space" ? "Shared note" : "Notes"}
+            </label>
             <textarea
               id={`note-${entry.id}`}
               value={note}
@@ -176,6 +178,9 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
               onChange={(e) => setNote(e.target.value)}
               onBlur={() => note !== entry.note && update.mutate({ entryId: entry.id, patch: { note } })}
             />
+            <p className="tiny muted" style={{ marginTop: 4 }}>
+              {owner.type === "space" ? "Both of you can see and edit this." : "Private to you."}
+            </p>
           </div>
 
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>

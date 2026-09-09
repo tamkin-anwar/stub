@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceptFriendRequest,
   createCoupleSpace,
+  fetchFriendActivity,
   fetchFriendViews,
+  fetchListCompare,
   fetchMySpaces,
   leaveSpace,
   removeFriendship,
@@ -46,6 +48,24 @@ export function useFriendActions(selfId: string) {
       onSuccess: invalidate,
     }),
   };
+}
+
+export function useFriendActivity(selfId: string | undefined) {
+  return useQuery({
+    queryKey: ["friend-activity", selfId],
+    queryFn: () => fetchFriendActivity(24),
+    enabled: !!selfId,
+    staleTime: 60_000,
+  });
+}
+
+export function useListCompare(friendId: string | undefined) {
+  return useQuery({
+    queryKey: ["list-compare", friendId],
+    queryFn: () => fetchListCompare(friendId as string),
+    enabled: !!friendId,
+    staleTime: 30_000,
+  });
 }
 
 export function useSpaces(selfId: string | undefined) {

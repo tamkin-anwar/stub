@@ -3,7 +3,7 @@
 -- (pgTAP is enabled by the Supabase test harness.)
 
 begin;
-select plan(17);
+select plan(21);
 
 -- ---------------------------------------------------------------------------
 -- fixtures, as the migration/superuser role
@@ -118,6 +118,29 @@ select throws_ok(
   $$select public.create_couple_space('11111111-1111-1111-1111-111111111111')$$,
   'P0001', null,
   'u3 cannot pair with someone they are not friends with');
+
+-- ---------------------------------------------------------------------------
+-- friend_activity + list_compare: security definer, gated on friendship
+-- ---------------------------------------------------------------------------
+select pg_temp.login('22222222-2222-2222-2222-222222222222');
+select is(
+  (select count(*)::int from public.friend_activity()),
+  1,
+  'friend_activity shows u2 the rating u1 left on their own list');
+select is(
+  (select bucket from public.list_compare('11111111-1111-1111-1111-111111111111') limit 1),
+  'theirs',
+  'list_compare buckets a title only u1 has as "theirs"');
+
+select pg_temp.login('33333333-3333-3333-3333-333333333333');
+select is(
+  (select count(*)::int from public.friend_activity()),
+  0,
+  'friend_activity is empty for someone with no friends');
+select throws_ok(
+  $$select * from public.list_compare('11111111-1111-1111-1111-111111111111')$$,
+  'P0001', null,
+  'list_compare refuses a non-friend');
 
 -- ---------------------------------------------------------------------------
 -- delete_own_account removes only the caller and their personal data

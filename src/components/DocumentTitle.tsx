@@ -11,6 +11,7 @@ const TITLES: [RegExp, string][] = [
   [/^\/app\/library/, "Library · Stub"],
   [/^\/app\/shared/, "Shared · Stub"],
   [/^\/app\/friends/, "Friends · Stub"],
+  [/^\/app\/compare/, "Compare · Stub"],
   [/^\/app\/settings/, "Settings · Stub"],
   [/^\/app\/title\//, "Stub"],
   [/^\/app/, "Home · Stub"],

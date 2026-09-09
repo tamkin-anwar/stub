@@ -8,6 +8,7 @@ import {
   ratingFor,
   runtimeLabel,
   statusLabel,
+  timeAgo,
 } from "./format";
 import type { ListEntry } from "./types";
 
@@ -111,5 +112,17 @@ describe("statusLabel", () => {
     expect(statusLabel("watchlist")).toBe("Watchlist");
     expect(statusLabel("watching")).toBe("Watching");
     expect(statusLabel("watched")).toBe("Watched");
+  });
+});
+
+describe("timeAgo", () => {
+  const iso = (msAgo: number) => new Date(Date.now() - msAgo).toISOString();
+  it("uses compact units up to a month, then falls back to a date", () => {
+    expect(timeAgo(iso(5_000))).toBe("just now");
+    expect(timeAgo(iso(5 * 60_000))).toBe("5m");
+    expect(timeAgo(iso(3 * 3_600_000))).toBe("3h");
+    expect(timeAgo(iso(2 * 86_400_000))).toBe("2d");
+    expect(timeAgo(iso(3 * 7 * 86_400_000))).toBe("3w");
+    expect(timeAgo("2020-01-15T00:00:00Z")).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/);
   });
 });

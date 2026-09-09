@@ -17,6 +17,7 @@ const MyList = lazy(() => import("./pages/MyList").then((m) => ({ default: m.MyL
 const Library = lazy(() => import("./pages/Library").then((m) => ({ default: m.Library })));
 const SharedList = lazy(() => import("./pages/SharedList").then((m) => ({ default: m.SharedList })));
 const Friends = lazy(() => import("./pages/Friends").then((m) => ({ default: m.Friends })));
+const Compare = lazy(() => import("./pages/Compare").then((m) => ({ default: m.Compare })));
 const Settings = lazy(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
 const TitlePage = lazy(() => import("./pages/TitlePage").then((m) => ({ default: m.TitlePage })));
 
@@ -76,6 +77,7 @@ export function App() {
               <Route path="library" element={<Library />} />
               <Route path="shared" element={<SharedList />} />
               <Route path="friends" element={<Friends />} />
+              <Route path="compare/:friendId" element={<Compare />} />
               <Route path="settings" element={<Settings />} />
               <Route path="title/:mediaType/:tmdbId" element={<TitlePage />} />
             </Route>

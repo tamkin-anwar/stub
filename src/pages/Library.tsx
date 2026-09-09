@@ -18,6 +18,17 @@ const FEEDS: { key: BrowseFeed; label: string }[] = [
   { key: "on_air", label: "On air" },
 ];
 
+type LibSort = "match" | "rating" | "year" | "title";
+
+function sortTitles(rows: TmdbTitle[], by: LibSort): TmdbTitle[] {
+  if (by === "match") return rows;
+  const out = [...rows];
+  if (by === "rating") out.sort((a, b) => (b.voteAverage ?? 0) - (a.voteAverage ?? 0));
+  else if (by === "year") out.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+  else out.sort((a, b) => a.name.localeCompare(b.name));
+  return out;
+}
+
 export function Library() {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -26,6 +37,7 @@ export function Library() {
   const [media, setMedia] = useState<MediaFilter>("all");
   const [feed, setFeed] = useState<BrowseFeed>("trending");
   const [genre, setGenre] = useState<string | null>(null);
+  const [sort, setSort] = useState<LibSort>("match");
 
   const genreOpt = genre ? GENRES.find((g) => g.name === genre) : undefined;
   // "In cinemas" is movies only, "On air" is series only.
@@ -62,6 +74,7 @@ export function Library() {
     seen.add(k);
     return true;
   });
+  const ordered = sortTitles(unique, sort);
 
   return (
     <div className="wrap page">
@@ -74,13 +87,36 @@ export function Library() {
 
       <ScoreLegend />
 
-      <div className="search-box" style={{ marginBottom: 16 }}>
+      <div className="search-box" style={{ marginBottom: 12 }}>
         <input
           type="search"
           placeholder="Search films and series"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 8,
+          marginBottom: searching ? 16 : 14,
+        }}
+      >
+        <span className="eyebrow">Sort</span>
+        <select
+          style={{ width: "auto" }}
+          value={sort}
+          onChange={(e) => setSort(e.target.value as LibSort)}
+          aria-label="Sort results"
+        >
+          <option value="match">Best match</option>
+          <option value="rating">Rating</option>
+          <option value="year">Newest</option>
+          <option value="title">A to Z</option>
+        </select>
       </div>
 
       {!searching && (
@@ -145,7 +181,7 @@ export function Library() {
       ) : (
         <>
           <div className="grid">
-            {unique.map((r) => (
+            {ordered.map((r) => (
               <DiscoverCard
                 key={`${r.mediaType}-${r.tmdbId}`}
                 r={r}

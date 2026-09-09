@@ -10,10 +10,10 @@ Built by Anwar Creative Studio.
 
 - **Your own list.** Watchlist, watching, and watched, each title with your star rating (half steps), a note, and the month you saw it. Filter by films or series and by status, search, and sort.
 - **A list together.** Pair with an accepted friend and get one shared list. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Your personal list stays yours.
-- **Friends.** Find people by username, send and accept requests, and choose who you share a list with.
-- **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Add anything to any list in two clicks.
+- **Friends.** Find people by username, send and accept requests, and choose who you share a list with. Compare your list against any friend's: what you both have, what only one of you has, and what you have both seen.
+- **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Sort by rating, year or name. Add anything to any list in two clicks.
 - **Scores on every card.** IMDb, Rotten Tomatoes and Metacritic, pulled once per title from OMDb and cached, shown on list cards, library cards and title pages, with a small legend.
-- **A home page.** What is coming, what is trending this week, older films worth another look, and a feed of recent film and TV coverage from The Guardian that opens in an in-app reader and links back to their site.
+- **A home page.** Recent film and TV coverage from The Guardian in an in-app reader, the latest ratings from your friends, what is coming, what is trending this week, and older films worth another look.
 - **Title pages.** Backdrop, synopsis, cast, runtime, all the scores, and a link out to the real IMDb page.
 - **Settings.** Theme (system, light, dark), a JSON export of your whole list, and account deletion behind a typed confirmation that also purges your personal rows.
 
@@ -74,7 +74,7 @@ npm install
 ### 2. Supabase
 
 1. Create a free project at https://supabase.com/dashboard.
-2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0005`), or `supabase link` and `supabase db push`.
+2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0006`), or `supabase link` and `supabase db push`.
 3. Auth, Providers, Email is on by default. For quick local testing, turn off "Confirm email" so new accounts can sign in right away; with it on, sign-up shows a "confirm your email" step.
 4. Project Settings, API: copy the Project URL and the `anon` public key.
 
@@ -141,7 +141,7 @@ npm run icons      # regenerate the PNG icons from the mark
 
 `npm test` covers the pure logic: OMDb score parsing, Guardian article mapping, TMDB normalisation and the upcoming/classic filters, list averages, and theme persistence.
 
-`supabase/tests/rls_test.sql` is a pgTAP suite that runs against a throwaway database (`supabase start && npm run test:db`, or the CI `database` job). It asserts that one user cannot read or write another's personal list or ratings or profile, that a couple space is visible only to its two members, and that `delete_own_account` removes exactly the caller and their personal rows.
+`supabase/tests/rls_test.sql` is a pgTAP suite that runs against a throwaway database (`supabase start && npm run test:db`, or the CI `database` job). It asserts that one user cannot read or write another's personal list or ratings or profile, that a couple space is visible only to its two members, that `friend_activity` and `list_compare` only return data between accepted friends, and that `delete_own_account` removes exactly the caller and their personal rows.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on every push, plus the database tests on a fresh Supabase stack.
 
@@ -150,9 +150,9 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on ever
 - Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, an installable manifest, and an `/api/*` proxy that keeps the third-party keys server-side and caches their responses on the CDN.
 - Done (opt-in): `/api/poster` caches TMDB poster art into Supabase Storage so the grid does not depend on TMDB's CDN. Off until `SUPABASE_SERVICE_ROLE_KEY` and `VITE_POSTER_CACHE` are set.
 - Done: a per-IP rate limit on every `/api/*` function, and crash reporting to Sentry when `VITE_SENTRY_DSN` is set.
+- Done: a friend activity feed on the home page, and list comparison between any two friends (both security-definer RPCs gated on an accepted friendship).
 - Not yet: a native iOS client on the same Supabase API.
-- Not yet: an activity view (what a friend rated recently) and comparing two lists for overlap.
-- Not yet: spaces larger than two people, and a shared note per title.
+- Not yet: spaces larger than two people.
 
 ## Prototype
 

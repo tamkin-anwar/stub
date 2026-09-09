@@ -917,6 +917,42 @@ select:focus {
   letter-spacing: -0.01em;
 }
 
+/* ---------- friend activity ---------- */
+.activity-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 5px;
+  transition: background 0.15s ease;
+}
+.activity-row:hover {
+  background: var(--surface-2);
+}
+.activity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.activity-line {
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+.activity-line strong {
+  font-weight: 600;
+}
+.activity-thumb {
+  width: 34px;
+  height: 51px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--line-2);
+  flex: none;
+}
+
 /* ---------- toast ---------- */
 .toast-wrap {
   position: fixed;

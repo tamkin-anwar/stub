@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useFriendActions, useFriends, useProfileSearch } from "../hooks/social";
 import { Avatar } from "../components/Avatar";
@@ -114,6 +115,9 @@ export function Friends() {
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>
                   </div>
+                  <Link to={`/app/compare/${f.profile.id}`} className="btn ghost sm">
+                    Compare
+                  </Link>
                   <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
                     Remove
                   </button>

@@ -44,8 +44,8 @@ describe("posterGradient", () => {
 
 describe("initials", () => {
   it("handles one word, two words, many words and blanks", () => {
-    expect(initials("Ridu")).toBe("Ri");
-    expect(initials("Tamkin Anwar")).toBe("TA");
+    expect(initials("Alex")).toBe("Al");
+    expect(initials("Alex Rivera")).toBe("AR");
     expect(initials("mary jane watson")).toBe("MW");
     expect(initials("   ")).toBe("?");
     expect(initials("x")).toBe("x");
@@ -54,9 +54,9 @@ describe("initials", () => {
 
 describe("displayName", () => {
   it("prefers a non-blank display name, else the username", () => {
-    expect(displayName({ display_name: "Ridu", username: "ridu99" })).toBe("Ridu");
-    expect(displayName({ display_name: "   ", username: "ridu99" })).toBe("ridu99");
-    expect(displayName({ display_name: "", username: "ridu99" })).toBe("ridu99");
+    expect(displayName({ display_name: "Alex", username: "alex99" })).toBe("Alex");
+    expect(displayName({ display_name: "   ", username: "alex99" })).toBe("alex99");
+    expect(displayName({ display_name: "", username: "alex99" })).toBe("alex99");
   });
 });
 

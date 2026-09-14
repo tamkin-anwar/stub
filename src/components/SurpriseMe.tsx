@@ -21,10 +21,23 @@ type Pick =
 
 const MEDIA_LABEL: Record<MediaFilter, string> = { all: "Either", movie: "Film", tv: "Series" };
 
+function DiceIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="8.2" cy="8.2" r="1.4" fill="currentColor" />
+      <circle cx="15.8" cy="8.2" r="1.4" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.4" fill="currentColor" />
+      <circle cx="8.2" cy="15.8" r="1.4" fill="currentColor" />
+      <circle cx="15.8" cy="15.8" r="1.4" fill="currentColor" />
+    </svg>
+  );
+}
+
 /** A page-head action for Home: pick a random title from a watchlist
  *  (yours or a shared one) or, for something new, TMDB's popular feed,
- *  filtered by film or series. A utility, not content, so it lives as a
- *  plain button in the header rather than a card in the feed. */
+ *  filtered by film or series. Styled as a primary action with a die glyph
+ *  so it reads as a distinct thing to try, not another ghost/nav button. */
 export function SurpriseMe() {
   const { profile } = useAuth();
   const [open, setOpen] = useState(false);
@@ -38,7 +51,8 @@ export function SurpriseMe() {
 
   return (
     <>
-      <button className="btn" onClick={() => setOpen(true)}>
+      <button className="btn primary" onClick={() => setOpen(true)}>
+        <DiceIcon />
         Surprise me
       </button>
 

@@ -88,6 +88,7 @@ export async function addToList(
   media: Pick<TmdbTitle, "tmdbId" | "mediaType">,
   status: ListStatus,
   addedBy: string,
+  note = "",
 ): Promise<{ entry: ListEntry; created: boolean }> {
   const sb = requireSupabase();
   const title = await cacheTitle(media.mediaType, media.tmdbId);
@@ -100,6 +101,7 @@ export async function addToList(
       title_id: title.id,
       status,
       added_by: addedBy,
+      note,
     })
     .select(ENTRY_SELECT)
     .single();
@@ -124,7 +126,7 @@ export async function addToList(
 
 export async function updateEntry(
   entryId: string,
-  patch: Partial<Pick<ListEntry, "status" | "note" | "watched_on">>,
+  patch: Partial<Pick<ListEntry, "status" | "note" | "watched_on" | "rewatch_count">>,
 ): Promise<void> {
   const sb = requireSupabase();
   const body = { ...patch };
@@ -133,6 +135,33 @@ export async function updateEntry(
   }
   const { error } = await sb.from("list_entries").update(body).eq("id", entryId);
   if (error) throw error;
+}
+
+/** Copy a note onto the same title on another list: overwrite its note if
+ *  it is already there, otherwise add it (on the watchlist) with this note.
+ *  Used to carry a personal note into a shared list without retyping it. */
+export async function copyNoteToOwner(
+  titleId: number,
+  note: string,
+  target: ListOwner,
+  media: Pick<TmdbTitle, "tmdbId" | "mediaType">,
+  addedBy: string,
+): Promise<{ created: boolean }> {
+  const sb = requireSupabase();
+  const { data: existing, error: findErr } = await sb
+    .from("list_entries")
+    .select("id")
+    .eq("owner_type", target.type)
+    .eq("owner_id", target.id)
+    .eq("title_id", titleId)
+    .maybeSingle();
+  if (findErr) throw findErr;
+  if (existing) {
+    await updateEntry(existing.id, { note });
+    return { created: false };
+  }
+  await addToList(target, media, "watchlist", addedBy, note);
+  return { created: true };
 }
 
 /** Move an entry to a different list, keeping its status, dates, note and

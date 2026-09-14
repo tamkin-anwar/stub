@@ -8,6 +8,7 @@ import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
 import { ArticleCard } from "../components/ArticleCard";
 import { ActivityShelf } from "../components/ActivityShelf";
+import { ShareNudge } from "../components/ShareNudge";
 import { SurpriseMe } from "../components/SurpriseMe";
 import { Shelf } from "../components/Shelf";
 import { GridSkeleton, LoadError } from "../components/States";
@@ -95,6 +96,8 @@ export function Home() {
         </div>
         <SurpriseMe />
       </div>
+
+      <ShareNudge selfId={profile.id} />
 
       {(articles.data?.length ?? 0) > 0 && (
         <Shelf label="Film & TV desk" title="In the press">

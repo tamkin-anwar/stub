@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -17,6 +17,7 @@ export function Friends() {
   const toast = useToast();
   const navigate = useNavigate();
   const [term, setTerm] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const { data: friends } = useFriends(profile?.id);
   const { data: found } = useProfileSearch(term, profile?.id);
   const { data: spaces } = useSpaces(profile?.id);
@@ -61,6 +62,7 @@ export function Friends() {
 
       <div className="search-box" style={{ maxWidth: 420, marginBottom: 22 }}>
         <input
+          ref={searchRef}
           placeholder="Search by @username or name"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
@@ -133,9 +135,14 @@ export function Friends() {
         </p>
         <div className="card">
           {accepted.length === 0 && outgoing.length === 0 ? (
-            <p className="muted" style={{ fontSize: 13.5, padding: "6px 4px" }}>
-              No friends yet. Search by username above to send your first request.
-            </p>
+            <div style={{ padding: "6px 4px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <p className="muted" style={{ fontSize: 13.5 }}>
+                No friends yet. Search by username to send your first request.
+              </p>
+              <button className="btn sm" onClick={() => searchRef.current?.focus()}>
+                Search for a friend
+              </button>
+            </div>
           ) : (
             <>
               {accepted.map((f) => (

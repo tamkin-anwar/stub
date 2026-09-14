@@ -1013,6 +1013,24 @@ select:focus {
   padding: 18px;
   box-shadow: var(--shadow-sm);
 }
+.share-nudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.share-nudge-title {
+  font-weight: 600;
+  font-size: 14.5px;
+  margin-bottom: 2px;
+}
+.share-nudge-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
 .row {
   display: flex;
   align-items: center;

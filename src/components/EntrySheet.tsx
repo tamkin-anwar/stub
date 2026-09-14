@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ListEntry, ListStatus, Profile } from "../lib/types";
 import type { ListOwner } from "../data/lists";
-import { moveEntry, updateEntry } from "../data/lists";
+import { copyNoteToOwner, moveEntry, updateEntry } from "../data/lists";
 import { entriesKey, useRemoveEntry, useSetRating, useUpdateEntry } from "../hooks/lists";
 import { useSpaces } from "../hooks/social";
 import { posterUrl } from "../lib/tmdb";
@@ -46,10 +46,13 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
   const [note, setNote] = useState(entry.note);
   const [status, setStatus] = useState<ListStatus>(entry.status);
   const [watchedOn, setWatchedOn] = useState(entry.watched_on ?? "");
+  const [rewatchCount, setRewatchCount] = useState(entry.rewatch_count);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [destIndex, setDestIndex] = useState(0);
   const [moving, setMoving] = useState(false);
   const [confirmMoveOut, setConfirmMoveOut] = useState<Destination | null>(null);
+  const [copyIndex, setCopyIndex] = useState(0);
+  const [copying, setCopying] = useState(false);
 
   const destinations = useMemo<Destination[]>(() => {
     const all: Destination[] = [
@@ -61,6 +64,13 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
     ];
     return all.filter((d) => !(d.owner.type === owner.type && d.owner.id === owner.id));
   }, [spaces, selfId, owner]);
+
+  // Copying a note only ever makes sense onto a shared list: a personal
+  // list has no one else to see it, so there is nothing to carry there.
+  const shareTargets = useMemo(
+    () => destinations.filter((d) => d.owner.type === "space"),
+    [destinations],
+  );
 
   useEffect(() => {
     const el = ref.current;
@@ -96,6 +106,25 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
     else void doMove(dest);
   }
 
+  async function copyNote(dest: Destination) {
+    setCopying(true);
+    try {
+      const { created } = await copyNoteToOwner(
+        entry.title.id,
+        note,
+        dest.owner,
+        { tmdbId: entry.title.tmdb_id, mediaType: entry.title.media_type },
+        selfId,
+      );
+      await qc.invalidateQueries({ queryKey: entriesKey(dest.owner) });
+      toast(created ? `Added to ${dest.label} with your note` : `Note copied to ${dest.label}`);
+    } catch {
+      toast("Could not copy the note", { error: true });
+    } finally {
+      setCopying(false);
+    }
+  }
+
   function close() {
     if (note !== entry.note) update.mutate({ entryId: entry.id, patch: { note } });
     ref.current?.close();
@@ -111,6 +140,14 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
       patch.watched_on = m;
     }
     update.mutate({ entryId: entry.id, patch });
+  }
+
+  function logRewatch() {
+    const today = new Date().toISOString().slice(0, 10);
+    const next = rewatchCount + 1;
+    setRewatchCount(next);
+    setWatchedOn(today);
+    update.mutate({ entryId: entry.id, patch: { rewatch_count: next, watched_on: today } });
   }
 
   const g = posterGradient(entry.title.name);
@@ -220,6 +257,18 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
                 update.mutate({ entryId: entry.id, patch: { watched_on: v || null } });
               }}
             />
+            {status === "watched" && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+                {rewatchCount > 0 && (
+                  <span className="muted" style={{ fontSize: 12 }}>
+                    Watched {rewatchCount + 1}×
+                  </span>
+                )}
+                <button type="button" className="btn ghost sm" onClick={logRewatch}>
+                  Log a rewatch
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="field">
@@ -236,6 +285,42 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
             <p className="tiny muted" style={{ marginTop: 4 }}>
               {owner.type === "space" ? "Both of you can see and edit this." : "Private to you."}
             </p>
+            {owner.type === "user" && note.trim() && shareTargets.length > 0 && (
+              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                {shareTargets.length === 1 ? (
+                  <button
+                    type="button"
+                    className="btn ghost sm"
+                    disabled={copying}
+                    onClick={() => void copyNote(shareTargets[0])}
+                  >
+                    Copy note to {shareTargets[0].label}
+                  </button>
+                ) : (
+                  <>
+                    <select
+                      value={copyIndex}
+                      onChange={(e) => setCopyIndex(Number(e.target.value))}
+                      style={{ width: "auto" }}
+                    >
+                      {shareTargets.map((d, i) => (
+                        <option key={`${d.owner.type}-${d.owner.id}`} value={i}>
+                          {d.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="btn ghost sm"
+                      disabled={copying}
+                      onClick={() => void copyNote(shareTargets[copyIndex])}
+                    >
+                      Copy note there
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {destinations.length > 0 && (

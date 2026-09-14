@@ -168,6 +168,7 @@ function EntrySub({ entry }: { entry: ListEntry }) {
           </span>
         )
       )}
+      {entry.rewatch_count > 0 && <span className="muted">{entry.rewatch_count + 1}×</span>}
     </>
   );
 }

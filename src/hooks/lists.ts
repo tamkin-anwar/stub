@@ -38,7 +38,7 @@ export function useUpdateEntry(owner: ListOwner) {
   return useMutation({
     mutationFn: (args: {
       entryId: string;
-      patch: Partial<Pick<ListEntry, "status" | "note" | "watched_on">>;
+      patch: Partial<Pick<ListEntry, "status" | "note" | "watched_on" | "rewatch_count">>;
     }) => updateEntry(args.entryId, args.patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: entriesKey(owner) }),
   });

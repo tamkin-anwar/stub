@@ -48,6 +48,7 @@ export interface ListEntryRow {
   status: ListStatus;
   added_by: string | null;
   watched_on: string | null;
+  rewatch_count: number;
   note: string;
   created_at: string;
   updated_at: string;

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useFriends, useListCompare } from "../hooks/social";
 import { PosterCard } from "../components/PosterCard";
@@ -97,6 +97,11 @@ export function Compare() {
         <EmptyState
           title="Nothing to compare yet"
           hint="Once you both have titles on your lists, they line up here."
+          action={
+            <Link to="/app/library" className="btn sm">
+              Go to Library
+            </Link>
+          }
         />
       ) : (
         <>

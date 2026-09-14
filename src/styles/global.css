@@ -593,10 +593,21 @@ dialog.surprise-dialog {
   display: inline-flex;
   align-items: center;
   height: 38px;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0 4px;
   background: var(--surface-2);
+  /* a seg with a long or dynamic label (a shared list's name, a friend's
+     name) scrolls within its own pill rather than overflowing the page,
+     which the app otherwise locks against moving sideways. */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.seg::-webkit-scrollbar {
+  display: none;
 }
 .seg button {
   border: 0;
@@ -1024,6 +1035,13 @@ select:focus {
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: -0.01em;
+}
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  white-space: nowrap;
 }
 
 /* ---------- friend activity ---------- */
@@ -1623,6 +1641,12 @@ dialog.confirm {
   grid-template-columns: 210px 1fr;
   gap: 30px;
 }
+/* the entry sheet's own, more compact column width and padding */
+.entry-grid {
+  grid-template-columns: 150px 1fr;
+  gap: 20px;
+  padding: 22px;
+}
 .d-body h2 {
   font-weight: 500;
 }
@@ -1810,7 +1834,23 @@ dialog.confirm {
   }
 
   .detail-grid,
-  dialog .detail-grid {
+  dialog .detail-grid,
+  .entry-grid {
     grid-template-columns: 1fr;
+  }
+  .entry-grid {
+    padding: 18px;
+  }
+
+  /* a row with two or three trailing actions (Friends) has no room for
+     them beside the name on a phone: drop them to their own line instead
+     of letting them wrap word-by-word into the name and handle. */
+  .row {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  .row-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
   }
 }

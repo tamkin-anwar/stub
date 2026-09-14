@@ -81,18 +81,20 @@ export function Friends() {
                     <div className="name">{displayName(p)}</div>
                     <div className="handle">@{p.username}</div>
                   </div>
-                  {knownIds.has(p.id) ? (
-                    <span className="muted" style={{ fontSize: 12.5 }}>Pending or friends</span>
-                  ) : (
-                    <button
-                      className="btn sm"
-                      onClick={() =>
-                        actions.request.mutate(p.id, { onSuccess: () => toast("Request sent"), onError: fail })
-                      }
-                    >
-                      Add friend
-                    </button>
-                  )}
+                  <div className="row-actions">
+                    {knownIds.has(p.id) ? (
+                      <span className="muted" style={{ fontSize: 12.5 }}>Pending or friends</span>
+                    ) : (
+                      <button
+                        className="btn sm"
+                        onClick={() =>
+                          actions.request.mutate(p.id, { onSuccess: () => toast("Request sent"), onError: fail })
+                        }
+                      >
+                        Add friend
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))
             )}
@@ -111,12 +113,14 @@ export function Friends() {
                   <div className="name">{displayName(f.profile)}</div>
                   <div className="handle">@{f.profile.username}</div>
                 </div>
-                <button className="btn primary sm" onClick={() => actions.accept.mutate(f.friendship.id, { onError: fail })}>
-                  Accept
-                </button>
-                <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
-                  Ignore
-                </button>
+                <div className="row-actions">
+                  <button className="btn primary sm" onClick={() => actions.accept.mutate(f.friendship.id, { onError: fail })}>
+                    Accept
+                  </button>
+                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
+                    Ignore
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -141,25 +145,27 @@ export function Friends() {
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>
                   </div>
-                  {sharedWith.has(f.profile.id) ? (
-                    <Link to="/app/shared" className="btn ghost sm">
-                      Shared list
+                  <div className="row-actions">
+                    {sharedWith.has(f.profile.id) ? (
+                      <Link to="/app/shared" className="btn ghost sm">
+                        Shared list
+                      </Link>
+                    ) : (
+                      <button
+                        className="btn ghost sm"
+                        disabled={spaceActions.create.isPending}
+                        onClick={() => startList(f.profile)}
+                      >
+                        Start list
+                      </button>
+                    )}
+                    <Link to={`/app/compare/${f.profile.id}`} className="btn ghost sm">
+                      Compare
                     </Link>
-                  ) : (
-                    <button
-                      className="btn ghost sm"
-                      disabled={spaceActions.create.isPending}
-                      onClick={() => startList(f.profile)}
-                    >
-                      Start list
+                    <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
+                      Remove
                     </button>
-                  )}
-                  <Link to={`/app/compare/${f.profile.id}`} className="btn ghost sm">
-                    Compare
-                  </Link>
-                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
-                    Remove
-                  </button>
+                  </div>
                 </div>
               ))}
               {outgoing.map((f) => (
@@ -169,10 +175,12 @@ export function Friends() {
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>
                   </div>
-                  <span className="muted" style={{ fontSize: 12.5 }}>Requested</span>
-                  <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
-                    Cancel
-                  </button>
+                  <div className="row-actions">
+                    <span className="muted" style={{ fontSize: 12.5 }}>Requested</span>
+                    <button className="btn ghost sm" onClick={() => actions.remove.mutate(f.friendship.id, { onError: fail })}>
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               ))}
             </>

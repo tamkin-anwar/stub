@@ -120,7 +120,7 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
   return (
     <>
     <dialog ref={ref} onCancel={close} onClick={(e) => e.target === ref.current && close()}>
-      <div className="detail-grid" style={{ padding: 22, gridTemplateColumns: "150px 1fr", gap: 20 }}>
+      <div className="detail-grid entry-grid">
         <div>
           <div className="poster" style={{ marginBottom: 10 }}>
             {poster ? (

@@ -21,9 +21,10 @@ type Pick =
 
 const MEDIA_LABEL: Record<MediaFilter, string> = { all: "Either", movie: "Film", tv: "Series" };
 
-/** A pick-something-for-me card for Home. Rolls a random title from a
- *  watchlist (yours or a shared one) or, for something new, TMDB's
- *  popular feed, filtered by film or series. */
+/** A page-head action for Home: pick a random title from a watchlist
+ *  (yours or a shared one) or, for something new, TMDB's popular feed,
+ *  filtered by film or series. A utility, not content, so it lives as a
+ *  plain button in the header rather than a card in the feed. */
 export function SurpriseMe() {
   const { profile } = useAuth();
   const [open, setOpen] = useState(false);
@@ -37,24 +38,9 @@ export function SurpriseMe() {
 
   return (
     <>
-      <div className="card surprise-card">
-        <div className="surprise-copy">
-          <span className="surprise-die" aria-hidden="true">
-            🎲
-          </span>
-          <div>
-            <h3 className="display" style={{ fontSize: 19, marginBottom: 2 }}>
-              Not sure what to watch?
-            </h3>
-            <p className="muted" style={{ fontSize: 13.5 }}>
-              Let Stub pick something for you.
-            </p>
-          </div>
-        </div>
-        <button className="btn primary sm" onClick={() => setOpen(true)}>
-          Surprise me
-        </button>
-      </div>
+      <button className="btn" onClick={() => setOpen(true)}>
+        Surprise me
+      </button>
 
       {open && (
         <SurpriseDialog
@@ -297,7 +283,7 @@ function SurpriseDialog({
 
         <div style={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
           <button className="btn primary" disabled={rolling || emptyPool} onClick={() => void roll()}>
-            {rolling ? "Rolling…" : pick ? "🎲 Try another" : "🎲 Surprise me"}
+            {rolling ? "Rolling…" : pick ? "Try another" : "Surprise me"}
           </button>
         </div>
       </div>

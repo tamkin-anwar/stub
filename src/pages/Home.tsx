@@ -93,9 +93,8 @@ export function Home() {
           <h1 className="page-title">Home</h1>
           <p className="page-sub">What is coming, what people are talking about, what to revisit.</p>
         </div>
+        <SurpriseMe />
       </div>
-
-      <SurpriseMe />
 
       {(articles.data?.length ?? 0) > 0 && (
         <Shelf label="Film & TV desk" title="In the press">

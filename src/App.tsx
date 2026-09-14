@@ -11,6 +11,7 @@ import { lazyRetry } from "./lib/lazyRetry";
 // Landing and auth are the first paint; the rest load on navigation.
 import { Landing } from "./pages/Landing";
 import { AuthPage } from "./pages/Auth";
+const Invite = lazyRetry(() => import("./pages/Invite").then((m) => ({ default: m.Invite })));
 const Privacy = lazyRetry(() => import("./pages/Legal").then((m) => ({ default: m.Privacy })));
 const Terms = lazyRetry(() => import("./pages/Legal").then((m) => ({ default: m.Terms })));
 const Home = lazyRetry(() => import("./pages/Home").then((m) => ({ default: m.Home })));
@@ -20,6 +21,7 @@ const SharedList = lazyRetry(() => import("./pages/SharedList").then((m) => ({ d
 const Friends = lazyRetry(() => import("./pages/Friends").then((m) => ({ default: m.Friends })));
 const Compare = lazyRetry(() => import("./pages/Compare").then((m) => ({ default: m.Compare })));
 const Settings = lazyRetry(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
+const Stats = lazyRetry(() => import("./pages/Stats").then((m) => ({ default: m.Stats })));
 const TitlePage = lazyRetry(() => import("./pages/TitlePage").then((m) => ({ default: m.TitlePage })));
 
 function Loading() {
@@ -70,6 +72,7 @@ export function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<AuthPage mode="login" />} />
             <Route path="/signup" element={<AuthPage mode="signup" />} />
+            <Route path="/invite/:username" element={<Invite />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/app" element={<AppLayout />}>
@@ -80,6 +83,7 @@ export function App() {
               <Route path="friends" element={<Friends />} />
               <Route path="compare/:friendId" element={<Compare />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="stats" element={<Stats />} />
               <Route path="title/:mediaType/:tmdbId" element={<TitlePage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ListView } from "../components/ListView";
 import { useEntries } from "../hooks/lists";
@@ -32,6 +33,9 @@ export function MyList() {
             {entries ? `${watched} watched · about ${hours} hours logged` : "Your personal watch history"}
           </p>
         </div>
+        <Link to="/app/stats" className="btn ghost sm">
+          Your year →
+        </Link>
       </div>
       <ListView owner={owner} members={[profile]} selfId={profile.id} />
     </div>

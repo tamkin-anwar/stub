@@ -33,6 +33,16 @@ export function Friends() {
     (spaces ?? []).flatMap((s) => s.members.map((m) => m.id)),
   );
 
+  async function copyInviteLink() {
+    const url = `${window.location.origin}/invite/${profile!.username}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("Invite link copied");
+    } catch {
+      toast(url);
+    }
+  }
+
   function startList(friend: { id: string; display_name: string; username: string }) {
     spaceActions.create.mutate(
       { friendId: friend.id, name: `${displayName(friend)} & you` },
@@ -58,6 +68,9 @@ export function Friends() {
           <h1 className="page-title">Friends</h1>
           <p className="page-sub">Find people by username, then pair up for a shared list.</p>
         </div>
+        <button className="btn sm" onClick={copyInviteLink}>
+          Copy invite link
+        </button>
       </div>
 
       <div className="search-box" style={{ maxWidth: 420, marginBottom: 22 }}>

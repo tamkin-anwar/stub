@@ -28,6 +28,19 @@ export async function searchProfiles(term: string, selfId: string): Promise<Prof
   return (data ?? []) as Profile[];
 }
 
+/** Exact lookup for an invite link: the whole username, not a substring
+ *  search. `username` is citext, so this is already case-insensitive. */
+export async function getProfileByUsername(username: string): Promise<Profile | null> {
+  const sb = requireSupabase();
+  const { data, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("username", username.trim().replace(/^@/, ""))
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Profile | null) ?? null;
+}
+
 export async function fetchFriendViews(selfId: string): Promise<FriendView[]> {
   const sb = requireSupabase();
   const { data: rows, error } = await sb

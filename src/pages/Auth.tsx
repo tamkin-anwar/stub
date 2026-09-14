@@ -1,10 +1,13 @@
 import { useId, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const { user, loading, signIn, signUp, resendConfirmation } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const invite = params.get("invite");
+  const dest = invite ? `/invite/${encodeURIComponent(invite)}` : "/app";
   const ids = { u: useId(), n: useId(), e: useId(), p: useId() };
 
   const [email, setEmail] = useState("");
@@ -16,7 +19,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
 
-  if (!loading && user) return <Navigate to="/app" replace />;
+  if (!loading && user) return <Navigate to={dest} replace />;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,10 +34,10 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
         }
         const { needsConfirmation } = await signUp({ email, password, username, displayName });
         if (needsConfirmation) setSentTo(email.trim());
-        else navigate("/app");
+        else navigate(dest);
       } else {
         await signIn({ email, password });
-        navigate("/app");
+        navigate(dest);
       }
     } catch (e2) {
       setErr(e2 instanceof Error ? e2.message : "Something went wrong.");
@@ -71,7 +74,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
             then sign in.
           </p>
           <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
-            <Link to="/login" className="btn primary sm">
+            <Link to={invite ? `/login?invite=${encodeURIComponent(invite)}` : "/login"} className="btn primary sm">
               Go to sign in
             </Link>
             <button className="btn sm" onClick={resend} disabled={resent}>
@@ -165,11 +168,15 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
           <p className="muted" style={{ fontSize: 13, marginTop: 16, textAlign: "center" }}>
             {mode === "signup" ? (
               <>
-                Already have one? <Link to="/login">Sign in</Link>
+                Already have one?{" "}
+                <Link to={invite ? `/login?invite=${encodeURIComponent(invite)}` : "/login"}>Sign in</Link>
               </>
             ) : (
               <>
-                New here? <Link to="/signup">Create an account</Link>
+                New here?{" "}
+                <Link to={invite ? `/signup?invite=${encodeURIComponent(invite)}` : "/signup"}>
+                  Create an account
+                </Link>
               </>
             )}
           </p>

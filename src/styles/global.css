@@ -1746,6 +1746,8 @@ dialog.confirm {
   border-radius: 9px;
   object-fit: cover;
   flex: none;
+  display: block;
+  transition: transform 0.12s ease, outline-color 0.12s ease;
 }
 .provider-fallback {
   width: 36px;
@@ -1759,6 +1761,22 @@ dialog.confirm {
   font-weight: 600;
   color: var(--dim);
   flex: none;
+}
+a:has(> .provider-logo),
+a:has(> .provider-fallback) {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: 9px;
+}
+a:has(> .provider-logo):hover .provider-logo,
+a:has(> .provider-fallback):hover .provider-fallback {
+  transform: scale(1.08);
+}
+a:has(> .provider-logo):hover,
+a:has(> .provider-fallback):hover,
+a:has(> .provider-logo):focus-visible,
+a:has(> .provider-fallback):focus-visible {
+  outline-color: var(--text);
 }
 @media (max-width: 640px) {
   .detail-grid {

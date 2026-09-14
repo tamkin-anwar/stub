@@ -1,7 +1,7 @@
 import type { WatchProviderOption, WatchProviders as WatchProvidersData } from "../lib/types";
 import { providerLogoUrl } from "../lib/tmdb";
 
-function Row({ label, items }: { label: string; items: WatchProviderOption[] }) {
+function Row({ label, items, link }: { label: string; items: WatchProviderOption[]; link: string | null }) {
   if (items.length === 0) return null;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
@@ -10,12 +10,24 @@ function Row({ label, items }: { label: string; items: WatchProviderOption[] }) 
       </span>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         {items.map((p) => {
-          const logo = providerLogoUrl(p.logoPath);
-          return logo ? (
-            <img key={p.id} className="provider-logo" src={logo} alt={p.name} title={p.name} />
+          // TMDB's free tier only hands back one link per region (JustWatch's
+          // own page for the title), not a deep link per provider — that
+          // needs a paid JustWatch partnership. So every logo opens the same
+          // page, which does have a real link out to each service from
+          // there: one extra click, but never a guessed URL.
+          const logo = providerLogoUrl(p.logoPath, "w92");
+          const inner = logo ? (
+            <img className="provider-logo" src={logo} alt={p.name} />
           ) : (
-            <span key={p.id} className="provider-fallback" title={p.name}>
-              {p.name.slice(0, 2).toUpperCase()}
+            <span className="provider-fallback">{p.name.slice(0, 2).toUpperCase()}</span>
+          );
+          return link ? (
+            <a key={p.id} href={link} target="_blank" rel="noreferrer" title={`${p.name} — see options`}>
+              {inner}
+            </a>
+          ) : (
+            <span key={p.id} title={p.name}>
+              {inner}
             </span>
           );
         })}
@@ -43,10 +55,10 @@ export function WatchProviders({ providers }: { providers: WatchProvidersData | 
         </p>
       ) : (
         <>
-          <Row label="Stream" items={flatrate} />
-          <Row label="Free" items={free} />
-          <Row label="Rent" items={rent} />
-          <Row label="Buy" items={buy} />
+          <Row label="Stream" items={flatrate} link={link} />
+          <Row label="Free" items={free} link={link} />
+          <Row label="Rent" items={rent} link={link} />
+          <Row label="Buy" items={buy} link={link} />
         </>
       )}
       <p className="tiny muted" style={{ marginTop: 4 }}>

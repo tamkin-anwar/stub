@@ -1,4 +1,4 @@
-import type { MediaType, TmdbDetail, TmdbTitle } from "./types";
+import type { MediaType, TmdbDetail, TmdbTitle, WatchProviderOption, WatchProviders } from "./types";
 
 const IMG = "https://image.tmdb.org/t/p";
 
@@ -9,6 +9,9 @@ export function backdropUrl(path: string | null, size: "w780" | "w1280" = "w1280
   return path ? `${IMG}/${size}${path}` : null;
 }
 export function profileUrl(path: string | null, size: "w185" = "w185") {
+  return path ? `${IMG}/${size}${path}` : null;
+}
+export function providerLogoUrl(path: string | null, size: "w45" | "w92" = "w45") {
   return path ? `${IMG}/${size}${path}` : null;
 }
 
@@ -241,6 +244,29 @@ export async function browseTitles(p: BrowseParams): Promise<BrowsePage> {
   return { items, page, totalPages };
 }
 
+interface RawProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority?: number;
+}
+
+interface RawProviderRegion {
+  link?: string;
+  flatrate?: RawProvider[];
+  free?: RawProvider[];
+  rent?: RawProvider[];
+  buy?: RawProvider[];
+}
+
+interface RawVideo {
+  key: string;
+  site: string;
+  type: string;
+  official?: boolean;
+  iso_639_1?: string;
+}
+
 interface RawDetail extends RawResult {
   runtime?: number;
   episode_run_time?: number[];
@@ -254,6 +280,55 @@ interface RawDetail extends RawResult {
   aggregate_credits?: {
     cast?: { name: string; roles?: { character?: string }[]; profile_path?: string | null }[];
   };
+  "watch/providers"?: { results?: Record<string, RawProviderRegion> };
+  videos?: { results?: RawVideo[] };
+  recommendations?: RawPage;
+}
+
+/** Best guess at the viewer's country, from the browser locale. Never
+ *  blended with another region's results: wrong is worse than none. */
+function detectRegion(): string {
+  try {
+    const locale = new Intl.Locale(navigator.language).maximize();
+    if (locale.region) return locale.region;
+  } catch {
+    /* Intl.Locale unsupported or language tag unparsable */
+  }
+  const tag = navigator.language?.split("-")[1];
+  return tag ? tag.toUpperCase() : "US";
+}
+
+function mapProviders(list: RawProvider[] | undefined): WatchProviderOption[] {
+  return (list ?? [])
+    .slice()
+    .sort((a, b) => (a.display_priority ?? 0) - (b.display_priority ?? 0))
+    .map((p) => ({ id: p.provider_id, name: p.provider_name, logoPath: p.logo_path }));
+}
+
+function watchProvidersFor(raw: RawDetail): WatchProviders | null {
+  const byRegion = raw["watch/providers"]?.results;
+  if (!byRegion) return null;
+  const region = detectRegion();
+  const r = byRegion[region] ?? byRegion.US;
+  if (!r) return null;
+  return {
+    region: byRegion[region] ? region : "US",
+    link: r.link ?? null,
+    flatrate: mapProviders(r.flatrate),
+    free: mapProviders(r.free),
+    rent: mapProviders(r.rent),
+    buy: mapProviders(r.buy),
+  };
+}
+
+function trailerKeyFor(raw: RawDetail): string | null {
+  const vids = raw.videos?.results ?? [];
+  const trailers = vids.filter((v) => v.site === "YouTube" && v.type === "Trailer");
+  const best =
+    trailers.find((v) => v.official && v.iso_639_1 === "en") ??
+    trailers.find((v) => v.iso_639_1 === "en") ??
+    trailers[0];
+  return best?.key ?? null;
 }
 
 /** Just the IMDb id for a title. A far smaller payload than titleDetail,
@@ -264,7 +339,8 @@ export async function imdbIdFor(mediaType: MediaType, tmdbId: number): Promise<s
 }
 
 export async function titleDetail(mediaType: MediaType, tmdbId: number): Promise<TmdbDetail> {
-  const append = mediaType === "movie" ? "credits,external_ids" : "aggregate_credits,external_ids";
+  const credits = mediaType === "movie" ? "credits" : "aggregate_credits";
+  const append = `${credits},external_ids,watch/providers,videos,recommendations`;
   const raw = await tmdb<RawDetail>(`/${mediaType}/${tmdbId}`, { append_to_response: append });
   const base = normalize(raw, mediaType)!;
 
@@ -288,12 +364,20 @@ export async function titleDetail(mediaType: MediaType, tmdbId: number): Promise
           profilePath: c.profile_path ?? null,
         }));
 
+  const recommendations = (raw.recommendations?.results ?? [])
+    .map((r) => normalize(r, mediaType))
+    .filter((x): x is TmdbTitle => x !== null)
+    .slice(0, 12);
+
   return {
     ...base,
     runtime,
     genres: (raw.genres ?? []).map((g) => g.name),
     imdbId: raw.external_ids?.imdb_id ?? raw.imdb_id ?? null,
     tagline: raw.tagline?.trim() || null,
+    trailerKey: trailerKeyFor(raw),
+    watchProviders: watchProvidersFor(raw),
+    recommendations,
     cast: castSource.slice(0, 12),
   };
 }

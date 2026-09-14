@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { posterUrl, backdropUrl, searchTitles, upcomingMovies } from "./tmdb";
+import { posterUrl, backdropUrl, searchTitles, titleDetail, upcomingMovies } from "./tmdb";
+
+function stubRegion(language: string) {
+  const original = Object.getOwnPropertyDescriptor(window.navigator, "language");
+  Object.defineProperty(window.navigator, "language", { value: language, configurable: true });
+  return () => {
+    if (original) Object.defineProperty(window.navigator, "language", original);
+  };
+}
 
 function mockFetch(body: unknown, ok = true) {
   return vi.fn().mockResolvedValue({
@@ -68,5 +76,127 @@ describe("upcomingMovies", () => {
     const out = await upcomingMovies();
     expect(out.map((t) => t.tmdbId).sort()).toEqual([10, 11]);
     expect(out.every((t) => t.mediaType === "movie")).toBe(true);
+  });
+});
+
+describe("titleDetail watch providers", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  const rawWithProviders = (byRegion: Record<string, unknown>) => ({
+    id: 603,
+    title: "The Matrix",
+    "watch/providers": { results: byRegion },
+  });
+
+  it("uses only the viewer's own region, never blending in another's", async () => {
+    const restore = stubRegion("en-GB");
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(
+        rawWithProviders({
+          US: { flatrate: [{ provider_id: 8, provider_name: "Netflix", logo_path: "/n.jpg" }] },
+          GB: { flatrate: [{ provider_id: 9, provider_name: "NOW", logo_path: "/g.jpg" }] },
+        }),
+      ),
+    );
+    const d = await titleDetail("movie", 603);
+    expect(d.watchProviders?.region).toBe("GB");
+    expect(d.watchProviders?.flatrate).toEqual([{ id: 9, name: "NOW", logoPath: "/g.jpg" }]);
+    restore();
+  });
+
+  it("falls back to US when the viewer's own region has no data", async () => {
+    const restore = stubRegion("en-DE");
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(
+        rawWithProviders({
+          US: { flatrate: [{ provider_id: 8, provider_name: "Netflix", logo_path: "/n.jpg" }] },
+        }),
+      ),
+    );
+    const d = await titleDetail("movie", 603);
+    expect(d.watchProviders?.region).toBe("US");
+    expect(d.watchProviders?.flatrate[0].name).toBe("Netflix");
+    restore();
+  });
+
+  it("returns null rather than guess when no region has data", async () => {
+    const restore = stubRegion("en-US");
+    vi.stubGlobal("fetch", mockFetch({ id: 603, title: "The Matrix" }));
+    const d = await titleDetail("movie", 603);
+    expect(d.watchProviders).toBeNull();
+    restore();
+  });
+
+  it("sorts providers by display priority", async () => {
+    const restore = stubRegion("en-US");
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(
+        rawWithProviders({
+          US: {
+            rent: [
+              { provider_id: 2, provider_name: "Second", logo_path: null, display_priority: 2 },
+              { provider_id: 1, provider_name: "First", logo_path: null, display_priority: 1 },
+            ],
+          },
+        }),
+      ),
+    );
+    const d = await titleDetail("movie", 603);
+    expect(d.watchProviders?.rent.map((p) => p.name)).toEqual(["First", "Second"]);
+    restore();
+  });
+});
+
+describe("titleDetail trailer", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("prefers an official English YouTube trailer over other videos", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({
+        id: 603,
+        title: "The Matrix",
+        videos: {
+          results: [
+            { key: "clip1", site: "YouTube", type: "Clip", official: true, iso_639_1: "en" },
+            { key: "fr-trailer", site: "YouTube", type: "Trailer", official: false, iso_639_1: "fr" },
+            { key: "official-en", site: "YouTube", type: "Trailer", official: true, iso_639_1: "en" },
+          ],
+        },
+      }),
+    );
+    const d = await titleDetail("movie", 603);
+    expect(d.trailerKey).toBe("official-en");
+  });
+
+  it("is null when there is no YouTube trailer", async () => {
+    vi.stubGlobal("fetch", mockFetch({ id: 603, title: "The Matrix", videos: { results: [] } }));
+    const d = await titleDetail("movie", 603);
+    expect(d.trailerKey).toBeNull();
+  });
+});
+
+describe("titleDetail recommendations", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("normalises recommended titles, forcing the parent's media type since TMDB's per-type recommendations endpoint omits it", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({
+        id: 603,
+        title: "The Matrix",
+        recommendations: {
+          page: 1,
+          total_pages: 1,
+          results: [{ id: 604, title: "The Matrix Reloaded", release_date: "2003-05-15" }],
+        },
+      }),
+    );
+    const d = await titleDetail("movie", 603);
+    expect(d.recommendations).toHaveLength(1);
+    expect(d.recommendations[0]).toMatchObject({ tmdbId: 604, mediaType: "movie", year: 2003 });
   });
 });

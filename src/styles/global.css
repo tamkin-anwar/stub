@@ -1721,6 +1721,26 @@ dialog.confirm {
   font-size: 11px;
   color: var(--dim);
 }
+.provider-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  object-fit: cover;
+  flex: none;
+}
+.provider-fallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dim);
+  flex: none;
+}
 @media (max-width: 640px) {
   .detail-grid {
     grid-template-columns: 1fr;

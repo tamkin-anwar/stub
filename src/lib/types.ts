@@ -102,10 +102,30 @@ export interface TmdbTitle {
   voteAverage: number | null;
 }
 
+export interface WatchProviderOption {
+  id: number;
+  name: string;
+  logoPath: string | null;
+}
+
+/** Where to watch, for one country only — never blend regions, since a
+ *  provider list from the wrong country is worse than none at all. */
+export interface WatchProviders {
+  region: string;
+  link: string | null;
+  flatrate: WatchProviderOption[];
+  free: WatchProviderOption[];
+  rent: WatchProviderOption[];
+  buy: WatchProviderOption[];
+}
+
 export interface TmdbDetail extends TmdbTitle {
   runtime: number | null;
   genres: string[];
   imdbId: string | null;
   tagline: string | null;
+  trailerKey: string | null;
+  watchProviders: WatchProviders | null;
+  recommendations: TmdbTitle[];
   cast: { name: string; character: string; profilePath: string | null }[];
 }

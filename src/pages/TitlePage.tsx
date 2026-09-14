@@ -3,12 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { useOmdb, useTitleDetail } from "../hooks/library";
-import { entriesKey, useEntries } from "../hooks/lists";
+import { entriesKey, useEntries, useMyEntryLookup } from "../hooks/lists";
 import { refreshTitleScores } from "../data/lists";
 import { useSpaces } from "../hooks/social";
 import { AddMenu, type AddTarget } from "../components/AddMenu";
+import { DiscoverCard } from "../components/DiscoverCard";
 import { EntrySheet } from "../components/EntrySheet";
 import { ScorePills } from "../components/ScorePills";
+import { WatchProviders } from "../components/WatchProviders";
 import { LoadError } from "../components/States";
 import { backdropUrl, posterUrl, profileUrl } from "../lib/tmdb";
 import { posterGradient, runtimeLabel } from "../lib/format";
@@ -23,6 +25,7 @@ export function TitlePage() {
   const { data: omdb } = useOmdb(detail?.imdbId);
   const { data: personal } = useEntries(profile ? { type: "user", id: profile.id } : null);
   const { data: spaces } = useSpaces(profile?.id);
+  const mine = useMyEntryLookup(profile?.id);
   const qc = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -110,8 +113,22 @@ export function TitlePage() {
               tmdb={detail.voteAverage}
               imdbId={detail.imdbId}
             />
+            {detail.trailerKey && (
+              <a
+                className="btn ghost sm"
+                href={`https://www.youtube.com/watch?v=${detail.trailerKey}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                ▶ Trailer
+              </a>
+            )}
           </div>
           <p style={{ fontSize: 15, lineHeight: 1.6, maxWidth: "62ch" }}>{detail.overview || "No synopsis yet."}</p>
+
+          <div style={{ marginTop: 20, maxWidth: 420 }}>
+            <WatchProviders providers={detail.watchProviders} />
+          </div>
 
           {detail.cast.length > 0 && (
             <>
@@ -138,6 +155,24 @@ export function TitlePage() {
           )}
         </div>
       </div>
+
+      {detail.recommendations.length > 0 && (
+        <div style={{ marginTop: 34 }}>
+          <p className="eyebrow" style={{ marginBottom: 12 }}>More like this</p>
+          <div className="grid">
+            {detail.recommendations.map((r) => (
+              <DiscoverCard
+                key={`${r.mediaType}-${r.tmdbId}`}
+                r={r}
+                targets={targets}
+                selfId={profile.id}
+                mine={mine.get(`${r.mediaType}-${r.tmdbId}`) ?? null}
+                onOpen={() => navigate(`/app/title/${r.mediaType}/${r.tmdbId}`)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {sheetOpen && onMyList && (
         <EntrySheet

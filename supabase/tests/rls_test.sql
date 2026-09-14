@@ -3,7 +3,7 @@
 -- (pgTAP is enabled by the Supabase test harness.)
 
 begin;
-select plan(24);
+select plan(31);
 
 -- ---------------------------------------------------------------------------
 -- fixtures, as the migration/superuser role
@@ -106,6 +106,9 @@ values ('space', current_setting('test.space_id')::uuid,
 select is((select count(*)::int from public.list_entries where owner_type = 'space'), 1,
   'u1 sees the shared entry');
 
+select set_config('test.shared_entry_id',
+  (select id::text from public.list_entries where owner_type = 'space' limit 1), true);
+
 select pg_temp.login('22222222-2222-2222-2222-222222222222');
 select is((select count(*)::int from public.list_entries where owner_type = 'space'), 1,
   'u2 sees the shared entry too');
@@ -136,6 +139,57 @@ select throws_ok(
   format($$select public.rename_space(%L, 'Hijacked')$$, current_setting('test.space_id')),
   'P0001', null,
   'a non-member cannot rename the list');
+
+-- ---------------------------------------------------------------------------
+-- notifications: a rating or a shared note tells the other space member,
+-- never the actor, and repeat activity refreshes one row instead of piling up
+-- ---------------------------------------------------------------------------
+select pg_temp.login('11111111-1111-1111-1111-111111111111');
+insert into public.ratings (entry_id, user_id, stars)
+values (current_setting('test.shared_entry_id')::uuid, '11111111-1111-1111-1111-111111111111', 4.5);
+
+select pg_temp.login('22222222-2222-2222-2222-222222222222');
+select is(
+  (select count(*)::int from public.notifications where kind = 'rating'),
+  1,
+  'u2 is notified of the rating u1 left on their shared entry');
+select is(
+  (select actor_id from public.notifications where kind = 'rating'),
+  '11111111-1111-1111-1111-111111111111',
+  'the notification is attributed to u1');
+
+select pg_temp.login('11111111-1111-1111-1111-111111111111');
+select is(
+  (select count(*)::int from public.notifications),
+  0,
+  'u1 is not notified of their own rating');
+update public.ratings set stars = 3.5
+  where entry_id = current_setting('test.shared_entry_id')::uuid
+    and user_id = '11111111-1111-1111-1111-111111111111';
+update public.list_entries set note = 'Loved this one'
+  where id = current_setting('test.shared_entry_id')::uuid;
+
+select pg_temp.login('22222222-2222-2222-2222-222222222222');
+select is(
+  (select count(*)::int from public.notifications where kind = 'rating'),
+  1,
+  'changing the rating again refreshes the same notification, not a second one');
+select is(
+  (select stars from public.notifications where kind = 'rating'),
+  3.5,
+  'the refreshed notification carries the latest rating');
+select is(
+  (select count(*)::int from public.notifications where kind = 'note'),
+  1,
+  'u2 is notified of the shared note u1 left');
+select throws_ok(
+  format(
+    $$insert into public.notifications (user_id, actor_id, space_id, entry_id, kind)
+      values (%L, %L, %L, %L, 'rating')$$,
+    '22222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222',
+    current_setting('test.space_id'), current_setting('test.shared_entry_id')),
+  '42501', null,
+  'a client cannot insert a notification directly');
 
 -- ---------------------------------------------------------------------------
 -- friend_activity + list_compare: security definer, gated on friendship

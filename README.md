@@ -9,7 +9,7 @@ Built by Anwar Creative Studio.
 ## What it does
 
 - **Your own list.** Watchlist, watching, and watched, each title with your star rating (half steps), a note, and the month you saw it. Filter by films or series and by status, search, and sort.
-- **A list together.** Pair with an accepted friend and get a shared list, one per friend, each with its own name you can rename any time. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Move an entry between your list and a shared one whenever you realise you watched it together. Your personal list stays yours.
+- **A list together.** Pair with an accepted friend and get a shared list, one per friend, each with its own name you can rename any time. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Move an entry between your list and a shared one whenever you realise you watched it together. A bell in the nav lights up the moment the other person rates or notes something there. Your personal list stays yours.
 - **Friends.** Find people by username, send and accept requests, start a shared list with any of them, and compare your list against theirs: what you both have, what only one of you has, and what you have both seen.
 - **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Sort by rating, year or name. Add anything to any list in two clicks.
 - **Scores on every card.** IMDb, Rotten Tomatoes and Metacritic, pulled once per title from OMDb and cached, shown on list cards, library cards and title pages, with a small legend.
@@ -74,7 +74,7 @@ npm install
 ### 2. Supabase
 
 1. Create a free project at https://supabase.com/dashboard.
-2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0007`), or `supabase link` and `supabase db push`.
+2. Open the SQL editor and run each file in `supabase/migrations/` in order (`0001` through `0008`), or `supabase link` and `supabase db push`.
 3. Auth, Providers, Email is on by default. For quick local testing, turn off "Confirm email" so new accounts can sign in right away; with it on, sign-up shows a "confirm your email" step.
 4. Project Settings, API: copy the Project URL and the `anon` public key.
 
@@ -124,6 +124,7 @@ Open the local URL Vite prints, create an account, and start adding titles from 
 | `ratings` | One row per person per entry. This is how a couple's two ratings live on one shared entry. |
 | `friendships` | Requester, addressee, and status (`pending` or `accepted`). |
 | `spaces` + `space_members` | A shared list and who belongs to it. `create_couple_space(friend)` pairs two accepted friends. |
+| `notifications` | One row per (recipient, entry, kind). Triggers on `ratings` and `list_entries.note` write these for the *other* space member; a repeat rating or note edit refreshes the row instead of adding another. Delivered live over Supabase realtime. |
 
 ## Scripts
 
@@ -151,6 +152,8 @@ CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on ever
 - Done (opt-in): `/api/poster` caches TMDB poster art into Supabase Storage so the grid does not depend on TMDB's CDN. Off until `SUPABASE_SERVICE_ROLE_KEY` and `VITE_POSTER_CACHE` are set.
 - Done: a per-IP rate limit on every `/api/*` function, and crash reporting to Sentry when `VITE_SENTRY_DSN` is set.
 - Done: a friend activity feed on the home page, and list comparison between any two friends (both security-definer RPCs gated on an accepted friendship).
+- Done: live in-app notifications when the other person on a shared list rates or notes a title.
+- Not yet: push notifications for when the app is closed (the in-app bell needs it open or freshly loaded).
 - Not yet: a native iOS client on the same Supabase API.
 - Not yet: spaces larger than two people.
 

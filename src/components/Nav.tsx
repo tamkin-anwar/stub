@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Avatar } from "./Avatar";
+import { NotificationBell } from "./NotificationBell";
 import { displayName } from "../lib/format";
 
 const LINKS: [string, string][] = [
@@ -33,6 +34,7 @@ export function Nav() {
         <div className="nav-user">
           {profile && (
             <>
+              <NotificationBell />
               <button
                 className="btn ghost sm"
                 onClick={() => navigate("/app/settings")}

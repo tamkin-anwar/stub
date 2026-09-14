@@ -7,7 +7,7 @@ export type AvatarStyle =
   | "waves"
   | "beanie"
   | "beret"
-  | "scarf";
+  | "glasses";
 
 export const CHARACTER_STYLES: { key: Exclude<AvatarStyle, "initials">; label: string }[] = [
   { key: "classic", label: "Classic" },
@@ -17,7 +17,7 @@ export const CHARACTER_STYLES: { key: Exclude<AvatarStyle, "initials">; label: s
   { key: "waves", label: "Waves" },
   { key: "beanie", label: "Beanie" },
   { key: "beret", label: "Beret" },
-  { key: "scarf", label: "Scarf" },
+  { key: "glasses", label: "Glasses" },
 ];
 
 export function isCharacterStyle(style: string): style is Exclude<AvatarStyle, "initials"> {

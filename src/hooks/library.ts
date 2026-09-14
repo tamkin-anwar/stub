@@ -5,6 +5,7 @@ import {
   classicFilms,
   imdbIdFor,
   nowPlayingMovies,
+  popularMovies,
   searchTitles,
   titleDetail,
   trendingTitles,
@@ -34,6 +35,14 @@ export function useUpcoming() {
 
 export function useClassics() {
   return useQuery({ queryKey: ["tmdb", "classics"], queryFn: classicFilms, staleTime: 12 * 60 * 60_000 });
+}
+
+export function usePopularMovies() {
+  return useQuery({
+    queryKey: ["tmdb", "popular-100"],
+    queryFn: () => popularMovies(100),
+    staleTime: 15 * 60_000,
+  });
 }
 
 export function useArticles() {

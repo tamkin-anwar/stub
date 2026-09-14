@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useBrowse, useTmdbSearch } from "../hooks/library";
 import { useMyEntryLookup } from "../hooks/lists";
@@ -85,6 +85,9 @@ export function Library() {
           <h1 className="page-title">Library</h1>
           <p className="page-sub">Search TMDB's whole catalogue, or browse by feed and genre.</p>
         </div>
+        <Link to="/app/top100" className="btn ghost sm">
+          Top 100 →
+        </Link>
       </div>
 
       <ScoreLegend />

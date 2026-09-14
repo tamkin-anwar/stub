@@ -1099,6 +1099,30 @@ select:focus {
   flex: none;
 }
 
+/* ---------- popularity chart ---------- */
+.chart-rank {
+  width: 28px;
+  flex: none;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--dim);
+}
+.chart-open {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
 /* ---------- toast ---------- */
 .toast-wrap {
   position: fixed;
@@ -1960,5 +1984,19 @@ a:has(> .provider-fallback):focus-visible {
   .row-actions {
     flex-basis: 100%;
     justify-content: flex-end;
+  }
+  /* the chart's row-actions is always a single compact button, not a
+     group, so it stays inline instead of dropping to its own full line
+     100 times in a row. */
+  .chart-row {
+    flex-wrap: nowrap;
+  }
+  .chart-row .row-actions {
+    flex-basis: auto;
+  }
+  .chart-open .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { posterUrl, backdropUrl, searchTitles, titleDetail, upcomingMovies } from "./tmdb";
+import { popularMovies, posterUrl, backdropUrl, searchTitles, titleDetail, upcomingMovies } from "./tmdb";
 
 function stubRegion(language: string) {
   const original = Object.getOwnPropertyDescriptor(window.navigator, "language");
@@ -76,6 +76,33 @@ describe("upcomingMovies", () => {
     const out = await upcomingMovies();
     expect(out.map((t) => t.tmdbId).sort()).toEqual([10, 11]);
     expect(out.every((t) => t.mediaType === "movie")).toBe(true);
+  });
+});
+
+describe("popularMovies", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("pages through discover until it has exactly `count` movies, in order", async () => {
+    const spy = vi.fn().mockImplementation((url: string) => {
+      const page = Number(new URL(url, "http://x").searchParams.get("page"));
+      const results = Array.from({ length: 20 }, (_, i) => {
+        const n = (page - 1) * 20 + i + 1;
+        return { id: n, title: `Movie ${n}`, media_type: "movie" };
+      });
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ page, total_pages: 10, results }),
+        text: () => Promise.resolve(""),
+      });
+    });
+    vi.stubGlobal("fetch", spy);
+
+    const out = await popularMovies(45);
+    expect(out).toHaveLength(45);
+    expect(out[0].tmdbId).toBe(1);
+    expect(out[44].tmdbId).toBe(45);
+    // 45 needs 3 pages of 20 (ceil(45/20) = 3), not 2 and not 5
+    expect(spy).toHaveBeenCalledTimes(3);
   });
 });
 

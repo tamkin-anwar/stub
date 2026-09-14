@@ -22,6 +22,7 @@ const Friends = lazyRetry(() => import("./pages/Friends").then((m) => ({ default
 const Compare = lazyRetry(() => import("./pages/Compare").then((m) => ({ default: m.Compare })));
 const Settings = lazyRetry(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
 const Stats = lazyRetry(() => import("./pages/Stats").then((m) => ({ default: m.Stats })));
+const Top100 = lazyRetry(() => import("./pages/Top100").then((m) => ({ default: m.Top100 })));
 const TitlePage = lazyRetry(() => import("./pages/TitlePage").then((m) => ({ default: m.TitlePage })));
 
 function Loading() {
@@ -84,6 +85,7 @@ export function App() {
               <Route path="compare/:friendId" element={<Compare />} />
               <Route path="settings" element={<Settings />} />
               <Route path="stats" element={<Stats />} />
+              <Route path="top100" element={<Top100 />} />
               <Route path="title/:mediaType/:tmdbId" element={<TitlePage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

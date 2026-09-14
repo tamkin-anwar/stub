@@ -244,6 +244,25 @@ export async function browseTitles(p: BrowseParams): Promise<BrowsePage> {
   return { items, page, totalPages };
 }
 
+/** The 100 movies TMDB's own popularity score ranks highest right now — a
+ *  live ranking, not a stored list, so it moves as TMDB's underlying signals
+ *  (views, watchlist adds, votes) do. Same metric and endpoint Library's
+ *  "Popular" feed already sorts by; this just takes a fixed top slice of it
+ *  instead of paging. IMDb's own chart isn't available through any API —
+ *  scraping it would be both against their terms and a step away from a
+ *  real, licensed metric this app can actually stand behind. */
+export async function popularMovies(count = 100): Promise<TmdbTitle[]> {
+  const pages = Math.ceil(count / 20);
+  const parts = await Promise.all(
+    Array.from({ length: pages }, (_, i) => discover("movie", i + 1, "popularity.desc", undefined, {})),
+  );
+  return parts
+    .flatMap((p) => p.results)
+    .map((r) => normalize(r, "movie"))
+    .filter((x): x is TmdbTitle => x !== null)
+    .slice(0, count);
+}
+
 interface RawProvider {
   provider_id: number;
   provider_name: string;

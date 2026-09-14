@@ -4,6 +4,7 @@ import {
   entryAverage,
   hashIndex,
   initials,
+  joinNames,
   posterGradient,
   ratingFor,
   runtimeLabel,
@@ -112,6 +113,16 @@ describe("statusLabel", () => {
     expect(statusLabel("watchlist")).toBe("Watchlist");
     expect(statusLabel("watching")).toBe("Watching");
     expect(statusLabel("watched")).toBe("Watched");
+  });
+});
+
+describe("joinNames", () => {
+  it("reads naturally for one, two, or a whole group", () => {
+    expect(joinNames([])).toBe("");
+    expect(joinNames(["Alex"])).toBe("Alex");
+    expect(joinNames(["Alex", "Sam"])).toBe("Alex and Sam");
+    expect(joinNames(["Alex", "Sam", "Jo"])).toBe("Alex, Sam and Jo");
+    expect(joinNames(["Alex", "Sam", "Jo", "Kim"])).toBe("Alex, Sam, Jo and Kim");
   });
 });
 

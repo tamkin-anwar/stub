@@ -60,6 +60,15 @@ export function statusLabel(status: ListEntry["status"]): string {
   return status === "watchlist" ? "Watchlist" : status === "watching" ? "Watching" : "Watched";
 }
 
+/** "Alex", "Alex and Sam", "Alex, Sam and Jo" — reads naturally whether a
+ *  shared list has one other person or a whole group of them. */
+export function joinNames(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 /** Short relative time: "just now", "5m", "3h", "2d", "3w", then a date. */
 export function timeAgo(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();

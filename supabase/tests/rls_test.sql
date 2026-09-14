@@ -3,7 +3,7 @@
 -- (pgTAP is enabled by the Supabase test harness.)
 
 begin;
-select plan(31);
+select plan(36);
 
 -- ---------------------------------------------------------------------------
 -- fixtures, as the migration/superuser role
@@ -213,6 +213,43 @@ select throws_ok(
   $$select * from public.list_compare('11111111-1111-1111-1111-111111111111')$$,
   'P0001', null,
   'list_compare refuses a non-friend');
+
+-- ---------------------------------------------------------------------------
+-- add_space_member: a shared list can grow past a pair, gated on the
+-- *actor's* own friendship with whoever they're adding, not any member's
+-- ---------------------------------------------------------------------------
+select pg_temp.logout();
+insert into public.friendships (requester, addressee, status)
+values ('11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333333', 'accepted');
+
+select pg_temp.login('22222222-2222-2222-2222-222222222222');
+select throws_ok(
+  format($$select public.add_space_member(%L, '33333333-3333-3333-3333-333333333333')$$,
+    current_setting('test.space_id')),
+  'P0001', null,
+  'u2 cannot add u3: u2 is not friends with u3, even though u1 (a fellow member) is');
+
+select pg_temp.login('11111111-1111-1111-1111-111111111111');
+select lives_ok(
+  format($$select public.add_space_member(%L, '33333333-3333-3333-3333-333333333333')$$,
+    current_setting('test.space_id')),
+  'u1 can add u3, a friend of theirs, to the shared list');
+
+select pg_temp.login('33333333-3333-3333-3333-333333333333');
+select is((select count(*)::int from public.list_entries where owner_type = 'space'), 1,
+  'u3 now sees the shared entry after being added as a third member');
+
+select pg_temp.login('11111111-1111-1111-1111-111111111111');
+select throws_ok(
+  format($$select public.add_space_member(%L, '33333333-3333-3333-3333-333333333333')$$,
+    current_setting('test.space_id')),
+  'P0001', null,
+  'u3 cannot be added twice');
+select throws_ok(
+  format($$select public.add_space_member(%L, '44444444-4444-4444-4444-444444444444')$$,
+    current_setting('test.space_id')),
+  'P0001', null,
+  'adding someone with no accepted friendship at all fails the same way');
 
 -- ---------------------------------------------------------------------------
 -- delete_own_account removes only the caller and their personal data

@@ -137,6 +137,12 @@ export async function createCoupleSpace(friendId: string, name: string): Promise
   return data as string;
 }
 
+export async function addSpaceMember(spaceId: string, friendId: string): Promise<void> {
+  const sb = requireSupabase();
+  const { error } = await sb.rpc("add_space_member", { space: spaceId, friend: friendId });
+  if (error) throw error;
+}
+
 export async function leaveSpace(spaceId: string, selfId: string): Promise<void> {
   const sb = requireSupabase();
   const { error } = await sb

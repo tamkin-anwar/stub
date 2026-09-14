@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceptFriendRequest,
+  addSpaceMember,
   createCoupleSpace,
   fetchFriendActivity,
   fetchFriendViews,
@@ -92,6 +93,11 @@ export function useSpaceActions(selfId: string) {
     }),
     leave: useMutation({
       mutationFn: (spaceId: string) => leaveSpace(spaceId, selfId),
+      onSuccess: () => qc.invalidateQueries({ queryKey: ["spaces", selfId] }),
+    }),
+    addMember: useMutation({
+      mutationFn: (args: { spaceId: string; friendId: string }) =>
+        addSpaceMember(args.spaceId, args.friendId),
       onSuccess: () => qc.invalidateQueries({ queryKey: ["spaces", selfId] }),
     }),
   };

@@ -7,7 +7,7 @@ import { copyNoteToOwner, moveEntry, updateEntry } from "../data/lists";
 import { entriesKey, useRemoveEntry, useSetRating, useUpdateEntry } from "../hooks/lists";
 import { useSpaces } from "../hooks/social";
 import { posterUrl } from "../lib/tmdb";
-import { displayName, entryAverage, posterGradient, ratingFor, runtimeLabel } from "../lib/format";
+import { displayName, entryAverage, joinNames, posterGradient, ratingFor, runtimeLabel } from "../lib/format";
 import { Stars } from "./Stars";
 import { ScorePills } from "./ScorePills";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -283,7 +283,11 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
               onBlur={() => note !== entry.note && update.mutate({ entryId: entry.id, patch: { note } })}
             />
             <p className="tiny muted" style={{ marginTop: 4 }}>
-              {owner.type === "space" ? "Both of you can see and edit this." : "Private to you."}
+              {owner.type === "space"
+                ? members.length > 2
+                  ? "Everyone on this list can see and edit this."
+                  : "Both of you can see and edit this."
+                : "Private to you."}
             </p>
             {owner.type === "user" && note.trim() && shareTargets.length > 0 && (
               <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
@@ -398,10 +402,8 @@ export function EntrySheet({ entry, owner, members, selfId, onClose }: Props) {
       <ConfirmDialog
         title={`Move "${entry.title.name}" to ${confirmMoveOut.label}?`}
         body={`It comes off the list you share with ${
-          members
-            .filter((m) => m.id !== selfId)
-            .map((m) => displayName(m))
-            .join(" and ") || "the other person"
+          joinNames(members.filter((m) => m.id !== selfId).map((m) => displayName(m))) ||
+          "the other person"
         }.`}
         confirmLabel="Move"
         onConfirm={() => void doMove(confirmMoveOut)}

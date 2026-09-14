@@ -75,6 +75,8 @@ export function SharedList() {
   const [friendId, setFriendId] = useState("");
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [addFriendId, setAddFriendId] = useState("");
 
   const acceptedFriends = (friends ?? []).filter((f) => f.direction === "friends");
   const current = useMemo(
@@ -87,6 +89,13 @@ export function SharedList() {
     const paired = new Set((spaces ?? []).flatMap((s) => s.members.map((m) => m.id)));
     return acceptedFriends.filter((f) => !paired.has(f.profile.id));
   }, [acceptedFriends, spaces]);
+
+  // Friends not already on this particular list, to grow it beyond a pair.
+  const addable = useMemo(() => {
+    if (!current) return [];
+    const already = new Set(current.members.map((m) => m.id));
+    return acceptedFriends.filter((f) => !already.has(f.profile.id));
+  }, [acceptedFriends, current]);
 
   if (!profile) return null;
 
@@ -105,12 +114,25 @@ export function SharedList() {
     }
   }
 
+  async function addMember() {
+    if (!current || !addFriendId) return;
+    const friend = addable.find((f) => f.profile.id === addFriendId)?.profile;
+    try {
+      await actions.addMember.mutateAsync({ spaceId: current.id, friendId: addFriendId });
+      setShowAdd(false);
+      setAddFriendId("");
+      toast(friend ? `Added ${displayName(friend)} to the list` : "Added to the list");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Could not add them", { error: true });
+    }
+  }
+
   return (
     <div className="wrap page">
       <div className="page-head">
         <div>
           <h1 className="page-title">Shared</h1>
-          <p className="page-sub">A list you keep together. Both of you add titles and rate them.</p>
+          <p className="page-sub">A list you keep together. Everyone on it adds titles and rates them.</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {(spaces ?? []).length > 1 && !showCreate && (
@@ -215,10 +237,49 @@ export function SharedList() {
                 ))}
               </div>
               <div style={{ flex: 1 }} />
+              {addable.length > 0 && !showAdd && (
+                <button className="btn ghost sm" onClick={() => setShowAdd(true)}>
+                  Add someone
+                </button>
+              )}
               <button className="btn ghost sm" onClick={() => setConfirmLeave(true)}>
                 Leave
               </button>
             </div>
+
+            {showAdd && (
+              <div className="card" style={{ marginBottom: 18, maxWidth: 460 }}>
+                <p className="eyebrow" style={{ marginBottom: 10 }}>Add someone to this list</p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <select
+                    value={addFriendId}
+                    onChange={(e) => setAddFriendId(e.target.value)}
+                    style={{ flex: 1, minWidth: 180 }}
+                  >
+                    <option value="">Choose a friend</option>
+                    {addable.map((f) => (
+                      <option key={f.profile.id} value={f.profile.id}>
+                        {displayName(f.profile)} (@{f.profile.username})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="btn primary sm"
+                    disabled={!addFriendId || actions.addMember.isPending}
+                    onClick={addMember}
+                  >
+                    Add
+                  </button>
+                  <button className="btn ghost sm" onClick={() => setShowAdd(false)}>
+                    Cancel
+                  </button>
+                </div>
+                <p className="tiny muted" style={{ marginTop: 8 }}>
+                  They'll see every title, note and rating already on this list.
+                </p>
+              </div>
+            )}
+
             <ListView
               owner={{ type: "space", id: current.id }}
               members={current.members}
@@ -232,7 +293,11 @@ export function SharedList() {
       {confirmLeave && current && (
         <ConfirmDialog
           title={`Leave "${current.name}"?`}
-          body="You will lose access to the shared list. The other person keeps it."
+          body={
+            current.members.length > 2
+              ? "You will lose access to the shared list. The others keep it."
+              : "You will lose access to the shared list. The other person keeps it."
+          }
           confirmLabel="Leave"
           danger
           onConfirm={() =>

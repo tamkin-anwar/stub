@@ -101,8 +101,33 @@ describe("popularMovies", () => {
     expect(out).toHaveLength(45);
     expect(out[0].tmdbId).toBe(1);
     expect(out[44].tmdbId).toBe(45);
-    // 45 needs 3 pages of 20 (ceil(45/20) = 3), not 2 and not 5
-    expect(spy).toHaveBeenCalledTimes(3);
+    // 45 needs 3 pages of 20 (ceil(45/20) = 3), plus one buffer page = 4
+    expect(spy).toHaveBeenCalledTimes(4);
+  });
+
+  it("drops a movie that shifted across a page boundary between requests instead of showing it twice", async () => {
+    // Simulates the real failure: movie 20's popularity score changed
+    // between the two nearly-simultaneous requests, so it appears at the
+    // tail of page 1 *and* the head of page 2, exactly as seen live.
+    const spy = vi.fn().mockImplementation((url: string) => {
+      const page = Number(new URL(url, "http://x").searchParams.get("page"));
+      const results =
+        page === 1
+          ? Array.from({ length: 20 }, (_, i) => ({ id: i + 1, title: `Movie ${i + 1}`, media_type: "movie" }))
+          : Array.from({ length: 20 }, (_, i) => ({ id: i + 20, title: `Movie ${i + 20}`, media_type: "movie" }));
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ page, total_pages: 10, results }),
+        text: () => Promise.resolve(""),
+      });
+    });
+    vi.stubGlobal("fetch", spy);
+
+    const out = await popularMovies(20);
+    const ids = out.map((t) => t.tmdbId);
+    expect(ids).toHaveLength(20);
+    expect(new Set(ids).size).toBe(20);
+    expect(ids.filter((id) => id === 20)).toHaveLength(1);
   });
 });
 

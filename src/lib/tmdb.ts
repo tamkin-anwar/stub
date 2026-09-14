@@ -252,15 +252,26 @@ export async function browseTitles(p: BrowseParams): Promise<BrowsePage> {
  *  scraping it would be both against their terms and a step away from a
  *  real, licensed metric this app can actually stand behind. */
 export async function popularMovies(count = 100): Promise<TmdbTitle[]> {
-  const pages = Math.ceil(count / 20);
+  // Each page is its own independent request against a live, continuously
+  // re-sorted ranking, not one atomic snapshot — a movie whose score
+  // shifts by a hair between two nearly-simultaneous requests can land at
+  // the tail of one page and the head of the next, showing up twice with
+  // something else silently missing. Fetch one page of buffer and dedupe
+  // by id so a boundary collision still leaves a full, unique `count`.
+  const pages = Math.ceil(count / 20) + 1;
   const parts = await Promise.all(
     Array.from({ length: pages }, (_, i) => discover("movie", i + 1, "popularity.desc", undefined, {})),
   );
-  return parts
-    .flatMap((p) => p.results)
-    .map((r) => normalize(r, "movie"))
-    .filter((x): x is TmdbTitle => x !== null)
-    .slice(0, count);
+  const seen = new Set<number>();
+  const unique: TmdbTitle[] = [];
+  for (const r of parts.flatMap((p) => p.results)) {
+    const t = normalize(r, "movie");
+    if (t && !seen.has(t.tmdbId)) {
+      seen.add(t.tmdbId);
+      unique.push(t);
+    }
+  }
+  return unique.slice(0, count);
 }
 
 interface RawProvider {

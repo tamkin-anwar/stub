@@ -8,6 +8,7 @@ import { DiscoverCard } from "../components/DiscoverCard";
 import { ScoreLegend } from "../components/ScoreLegend";
 import { ArticleCard } from "../components/ArticleCard";
 import { ActivityShelf } from "../components/ActivityShelf";
+import { SurpriseMe } from "../components/SurpriseMe";
 import { Shelf } from "../components/Shelf";
 import { GridSkeleton, LoadError } from "../components/States";
 import { type AddTarget } from "../components/AddMenu";
@@ -93,6 +94,8 @@ export function Home() {
           <p className="page-sub">What is coming, what people are talking about, what to revisit.</p>
         </div>
       </div>
+
+      <SurpriseMe />
 
       {(articles.data?.length ?? 0) > 0 && (
         <Shelf label="Film & TV desk" title="In the press">

@@ -531,6 +531,31 @@ h3 {
   margin-bottom: 18px;
 }
 
+/* ---------- surprise me ---------- */
+.surprise-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+.surprise-copy {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.surprise-die {
+  font-size: 28px;
+  line-height: 1;
+}
+dialog.surprise-dialog {
+  max-width: 460px;
+}
+.surprise-result {
+  margin: 8px 0 18px;
+}
+
 /* ---------- shared list header ---------- */
 .shared-bar {
   display: flex;

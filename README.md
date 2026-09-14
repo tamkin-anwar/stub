@@ -14,6 +14,7 @@ Built by Anwar Creative Studio.
 - **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Sort by rating, year or name. Add anything to any list in two clicks.
 - **Scores on every card.** IMDb, Rotten Tomatoes and Metacritic, pulled once per title from OMDb and cached, shown on list cards, library cards and title pages, with a small legend.
 - **A home page.** Recent film and TV coverage from The Guardian in an in-app reader, the latest ratings from your friends, what is coming, what is trending this week, and older films worth another look.
+- **Surprise me.** Can't decide? Roll a random pick, filtered to films or series, from your watchlist, a shared one, or TMDB's popular feed for something you have not come across yet.
 - **Title pages.** Backdrop, synopsis, cast, runtime, all the scores, and a link out to the real IMDb page.
 - **Settings.** Theme (system, light, dark), a JSON export of your whole list, and account deletion behind a typed confirmation that also purges your personal rows.
 

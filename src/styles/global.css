@@ -434,6 +434,7 @@ h3 {
   width: 30px;
   height: 30px;
   border-radius: 50%;
+  overflow: hidden;
   display: grid;
   place-items: center;
   font-family: var(--font-mono);
@@ -1400,6 +1401,38 @@ dialog.confirm {
 }
 .swatch[aria-pressed="true"] {
   outline-color: var(--text);
+}
+.character-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.character-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.12s ease, transform 0.12s ease;
+}
+.character-swatch:hover {
+  transform: scale(1.06);
+}
+.character-swatch[aria-pressed="true"] {
+  outline-color: var(--text);
+}
+.character-initials {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  text-transform: uppercase;
 }
 .settings-row {
   display: flex;

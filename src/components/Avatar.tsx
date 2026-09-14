@@ -1,4 +1,6 @@
 import { initials } from "../lib/format";
+import { isCharacterStyle } from "../lib/avatarStyles";
+import { CharacterGlyph } from "./CharacterGlyph";
 
 const ACCENTS: Record<string, string> = {
   amber: "#c9822f",
@@ -12,10 +14,12 @@ const ACCENTS: Record<string, string> = {
 export function Avatar({
   name,
   accent = "amber",
+  avatarStyle = "initials",
   size = "sm",
 }: {
   name: string;
   accent?: string;
+  avatarStyle?: string;
   size?: "sm" | "lg";
 }) {
   return (
@@ -24,7 +28,7 @@ export function Avatar({
       style={{ background: ACCENTS[accent] ?? ACCENTS.amber }}
       aria-hidden
     >
-      {initials(name)}
+      {isCharacterStyle(avatarStyle) ? <CharacterGlyph style={avatarStyle} /> : initials(name)}
     </span>
   );
 }

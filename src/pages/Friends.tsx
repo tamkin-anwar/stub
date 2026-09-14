@@ -76,7 +76,7 @@ export function Friends() {
             ) : (
               (found ?? []).map((p) => (
                 <div className="row" key={p.id}>
-                  <Avatar name={displayName(p)} accent={p.accent} />
+                  <Avatar name={displayName(p)} accent={p.accent} avatarStyle={p.avatar_style} />
                   <div className="grow">
                     <div className="name">{displayName(p)}</div>
                     <div className="handle">@{p.username}</div>
@@ -108,7 +108,7 @@ export function Friends() {
           <div className="card">
             {incoming.map((f) => (
               <div className="row" key={f.friendship.id}>
-                <Avatar name={displayName(f.profile)} accent={f.profile.accent} />
+                <Avatar name={displayName(f.profile)} accent={f.profile.accent} avatarStyle={f.profile.avatar_style} />
                 <div className="grow">
                   <div className="name">{displayName(f.profile)}</div>
                   <div className="handle">@{f.profile.username}</div>
@@ -140,7 +140,7 @@ export function Friends() {
             <>
               {accepted.map((f) => (
                 <div className="row" key={f.friendship.id}>
-                  <Avatar name={displayName(f.profile)} accent={f.profile.accent} />
+                  <Avatar name={displayName(f.profile)} accent={f.profile.accent} avatarStyle={f.profile.avatar_style} />
                   <div className="grow">
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>
@@ -170,7 +170,7 @@ export function Friends() {
               ))}
               {outgoing.map((f) => (
                 <div className="row" key={f.friendship.id}>
-                  <Avatar name={displayName(f.profile)} accent={f.profile.accent} />
+                  <Avatar name={displayName(f.profile)} accent={f.profile.accent} avatarStyle={f.profile.avatar_style} />
                   <div className="grow">
                     <div className="name">{displayName(f.profile)}</div>
                     <div className="handle">@{f.profile.username}</div>

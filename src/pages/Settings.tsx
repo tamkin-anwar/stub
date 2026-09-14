@@ -5,8 +5,10 @@ import { useEntries } from "../hooks/lists";
 import { requireSupabase } from "../lib/supabase";
 import { useToast } from "../components/Toast";
 import { Avatar } from "../components/Avatar";
-import { displayName, entryAverage, ratingFor } from "../lib/format";
+import { CharacterGlyph } from "../components/CharacterGlyph";
+import { displayName, entryAverage, initials, ratingFor } from "../lib/format";
 import { getTheme, setTheme, type Theme } from "../lib/theme";
+import { CHARACTER_STYLES, type AvatarStyle } from "../lib/avatarStyles";
 
 const ACCENTS: { key: string; hex: string }[] = [
   { key: "amber", hex: "#c9822f" },
@@ -36,6 +38,9 @@ export function Settings() {
 
   const [name, setName] = useState(profile?.display_name ?? "");
   const [accent, setAccent] = useState(profile?.accent ?? "amber");
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>(
+    (profile?.avatar_style as AvatarStyle) ?? "initials",
+  );
   const [theme, setThemeState] = useState<Theme>(getTheme());
   const [busy, setBusy] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
@@ -43,7 +48,9 @@ export function Settings() {
   if (!profile || !user) return null;
 
   const dirty =
-    name.trim() !== (profile.display_name ?? "").trim() || accent !== (profile.accent ?? "amber");
+    name.trim() !== (profile.display_name ?? "").trim() ||
+    accent !== (profile.accent ?? "amber") ||
+    avatarStyle !== (profile.avatar_style ?? "initials");
 
   const titles = entries?.length ?? 0;
   const rated = (entries ?? []).filter((e) => ratingFor(e, profile.id) != null).length;
@@ -58,7 +65,7 @@ export function Settings() {
       const sb = requireSupabase();
       const { error } = await sb
         .from("profiles")
-        .update({ display_name: name.trim(), accent })
+        .update({ display_name: name.trim(), accent, avatar_style: avatarStyle })
         .eq("id", profile!.id);
       if (error) throw error;
       await refreshProfile();
@@ -115,7 +122,12 @@ export function Settings() {
         <p className="eyebrow">Profile</p>
         <div className="card">
           <div className="settings-identity">
-            <Avatar name={displayName({ display_name: name, username: profile.username })} accent={accent} size="lg" />
+            <Avatar
+              name={displayName({ display_name: name, username: profile.username })}
+              accent={accent}
+              avatarStyle={avatarStyle}
+              size="lg"
+            />
             <div>
               <div className="settings-handle">@{profile.username}</div>
               <div className="muted" style={{ fontSize: 13 }}>{user.email}</div>
@@ -132,7 +144,7 @@ export function Settings() {
             />
           </div>
 
-          <div className="field" style={{ marginBottom: 4 }}>
+          <div className="field">
             <label>Avatar colour</label>
             <div className="swatches">
               {ACCENTS.map((a) => (
@@ -146,6 +158,37 @@ export function Settings() {
                   style={{ background: a.hex }}
                   onClick={() => setAccent(a.key)}
                 />
+              ))}
+            </div>
+          </div>
+
+          <div className="field" style={{ marginBottom: 4 }}>
+            <label>Character</label>
+            <div className="character-grid">
+              <button
+                type="button"
+                className="character-swatch"
+                aria-pressed={avatarStyle === "initials"}
+                title="Initials"
+                style={{ background: ACCENTS.find((a) => a.key === accent)?.hex }}
+                onClick={() => setAvatarStyle("initials")}
+              >
+                <span className="character-initials">
+                  {initials(displayName({ display_name: name, username: profile.username }))}
+                </span>
+              </button>
+              {CHARACTER_STYLES.map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  className="character-swatch"
+                  aria-pressed={avatarStyle === c.key}
+                  title={c.label}
+                  style={{ background: ACCENTS.find((a) => a.key === accent)?.hex }}
+                  onClick={() => setAvatarStyle(c.key)}
+                >
+                  <CharacterGlyph style={c.key} />
+                </button>
               ))}
             </div>
           </div>

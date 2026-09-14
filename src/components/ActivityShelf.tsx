@@ -49,7 +49,7 @@ export function ActivityShelf() {
               className="row activity-row"
               onClick={() => navigate(`/app/title/${a.mediaType}/${a.tmdbId}`)}
             >
-              <Avatar name={who} accent={a.accent} />
+              <Avatar name={who} accent={a.accent} avatarStyle={a.avatarStyle} />
               <span className="grow activity-text">
                 <span className="activity-line">
                   <strong>{who}</strong> rated <strong>{a.name}</strong>

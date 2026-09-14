@@ -7,6 +7,7 @@ export interface Profile {
   username: string;
   display_name: string;
   accent: string;
+  avatar_style: string;
   created_at: string;
 }
 

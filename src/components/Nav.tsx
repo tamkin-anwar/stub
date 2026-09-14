@@ -40,7 +40,7 @@ export function Nav() {
                 onClick={() => navigate("/app/settings")}
                 aria-label={`Settings, signed in as @${profile.username}`}
               >
-                <Avatar name={displayName(profile)} accent={profile.accent} />
+                <Avatar name={displayName(profile)} accent={profile.accent} avatarStyle={profile.avatar_style} />
                 <span className="nav-username">@{profile.username}</span>
               </button>
               <button className="btn ghost sm nav-signout" onClick={() => void signOut()}>

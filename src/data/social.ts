@@ -149,6 +149,7 @@ export interface ActivityItem {
   username: string;
   displayName: string;
   accent: string;
+  avatarStyle: string;
   stars: number;
   tmdbId: number;
   mediaType: MediaType;
@@ -163,6 +164,7 @@ interface ActivityRow {
   username: string;
   display_name: string;
   accent: string;
+  avatar_style: string;
   stars: number | string;
   tmdb_id: number;
   media_type: MediaType;
@@ -181,6 +183,7 @@ export async function fetchFriendActivity(limit = 24): Promise<ActivityItem[]> {
     username: r.username,
     displayName: r.display_name,
     accent: r.accent,
+    avatarStyle: r.avatar_style,
     stars: Number(r.stars),
     tmdbId: r.tmdb_id,
     mediaType: r.media_type,

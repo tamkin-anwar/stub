@@ -10,6 +10,7 @@ export interface NotificationItem {
   noteExcerpt: string | null;
   actorName: string;
   actorAccent: string;
+  actorAvatarStyle: string;
   spaceName: string;
   tmdbId: number;
   mediaType: MediaType;
@@ -25,7 +26,7 @@ interface NotificationRow {
   created_at: string;
   stars: number | string | null;
   note_excerpt: string | null;
-  actor: { username: string; display_name: string; accent: string } | null;
+  actor: { username: string; display_name: string; accent: string; avatar_style: string } | null;
   space: { name: string } | null;
   entry: {
     title: {
@@ -40,7 +41,7 @@ interface NotificationRow {
 
 const SELECT = `
   id, kind, read, created_at, stars, note_excerpt,
-  actor:profiles!actor_id(username, display_name, accent),
+  actor:profiles!actor_id(username, display_name, accent, avatar_style),
   space:spaces(name),
   entry:list_entries(title:titles(tmdb_id, media_type, name, year, poster_path))
 `;
@@ -65,6 +66,7 @@ export async function fetchNotifications(limit = 30): Promise<NotificationItem[]
       noteExcerpt: r.note_excerpt,
       actorName: r.actor!.display_name?.trim() || r.actor!.username,
       actorAccent: r.actor!.accent,
+      actorAvatarStyle: r.actor!.avatar_style,
       spaceName: r.space?.name ?? "your shared list",
       tmdbId: r.entry!.title!.tmdb_id,
       mediaType: r.entry!.title!.media_type,

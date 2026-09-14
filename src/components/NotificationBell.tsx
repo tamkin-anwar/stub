@@ -108,7 +108,7 @@ export function NotificationBell() {
                     className={`row activity-row${n.read ? "" : " notif-unread"}`}
                     onClick={() => openItem(n)}
                   >
-                    <Avatar name={n.actorName} accent={n.actorAccent} />
+                    <Avatar name={n.actorName} accent={n.actorAccent} avatarStyle={n.actorAvatarStyle} />
                     <span className="grow activity-text">
                       <span className="activity-line">
                         <strong>{n.actorName}</strong> {label(n)} <strong>{n.titleName}</strong>

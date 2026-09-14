@@ -207,7 +207,7 @@ export function SharedList() {
               <div className="shared-members">
                 {current.members.map((m) => (
                   <span key={m.id} className="shared-member">
-                    <Avatar name={displayName(m)} accent={m.accent} />
+                    <Avatar name={displayName(m)} accent={m.accent} avatarStyle={m.avatar_style} />
                     <span className="muted" style={{ fontSize: 13 }}>
                       {m.id === profile.id ? "You" : displayName(m)}
                     </span>

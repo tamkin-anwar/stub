@@ -166,8 +166,7 @@ h3 {
 .page-title,
 .brand,
 .hero h1,
-.detail-hero h1,
-.d-body h2 {
+.detail-hero h1 {
   font-family: var(--font-display);
   font-weight: 500;
   font-optical-sizing: auto;
@@ -225,6 +224,11 @@ h3 {
   line-height: 1.5;
 }
 .state-hint a {
+  color: var(--accent-text);
+}
+/* A link inside otherwise-muted body text that should still read as
+   clickable, without recoloring every link inside every .muted block. */
+.link-accent {
   color: var(--accent-text);
 }
 .state-action {
@@ -736,10 +740,6 @@ select:focus {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
   gap: 30px 18px;
 }
-.grid.tight {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
-  gap: 22px 14px;
-}
 .poster-card {
   border: 0;
   background: transparent;
@@ -864,9 +864,6 @@ select:focus {
   font-size: 13px;
   color: var(--accent-text);
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
-}
-.poster.is-list {
-  filter: saturate(0.85) brightness(0.94);
 }
 .pc-title {
   font-size: 13.5px;
@@ -1740,20 +1737,6 @@ dialog.confirm {
   grid-template-columns: 150px 1fr;
   gap: 20px;
   padding: 22px;
-}
-.d-body h2 {
-  font-weight: 500;
-}
-.d-meta {
-  color: var(--dim);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: -0.01em;
-}
-.d-blurb {
-  font-size: 15px;
-  line-height: 1.68;
-  max-width: 64ch;
 }
 .cast-grid {
   display: grid;

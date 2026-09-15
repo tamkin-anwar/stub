@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 // Swap in a real inbox once there is one; until then, GitHub issues are the
 // contact route and this stays blank so no address is published.
 const CONTACT_EMAIL = "";
-const UPDATED = "9 September 2026";
+const UPDATED = "15 September 2026";
 const REPO = "https://github.com/tamkin-anwar/stub/issues";
 
 function Shell({ title, children }: { title: string; children: ReactNode }) {
@@ -62,11 +62,12 @@ export function Privacy() {
       <ul>
         <li>
           <strong>Your account:</strong> the email you sign up with, your username, your display
-          name, your avatar colour, and the date you joined.
+          name, your avatar colour and character, and the date you joined.
         </li>
         <li>
           <strong>Your lists:</strong> the films and shows you add, their status (watchlist,
-          watching, watched), any watch dates, your ratings, and your notes.
+          watching, watched), any watch dates, how many times you have logged a rewatch, your
+          ratings, and your notes.
         </li>
         <li>
           <strong>Your connections:</strong> friend requests you send or accept, and any shared
@@ -149,7 +150,7 @@ export function Terms() {
       <ul>
         <li>Do not scrape, hammer, or try to break the service or its rate limits.</li>
         <li>Do not put unlawful, hateful, or harassing content in notes or names.</li>
-        <li>Be decent to the people you connect with. Shared lists take two.</li>
+        <li>Be decent to the people you connect with on a shared list.</li>
       </ul>
       <p>Accounts that abuse the service can be suspended or removed.</p>
 

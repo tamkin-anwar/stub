@@ -88,7 +88,7 @@ export function Invite() {
       <div className="wrap page">
         <p className="center-note">
           That invite link isn't valid anymore.{" "}
-          <Link to="/app/friends">Find them by username instead.</Link>
+          <Link to="/app/friends" className="link-accent">Find them by username instead.</Link>
         </p>
       </div>
     );

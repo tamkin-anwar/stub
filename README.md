@@ -1,6 +1,6 @@
 # Stub
 
-A watch tracker you keep with the people you watch with. Every film and series you have seen or mean to, with your own rating and notes, plus a second list you share with a partner where you both add titles and both rate them. Real posters, cast, and runtimes come from TMDB; accounts and data live on Supabase.
+A watch tracker you keep with the people you watch with. Every film and series you have seen or mean to, with your own rating and notes, plus a second list you share with a friend (or a few) where everyone adds titles and rates them. Real posters, cast, and runtimes come from TMDB; accounts and data live on Supabase.
 
 Web first (React), with the backend kept as a plain API so a native iOS client can reuse it later. Every user's data is isolated at the database level, so this runs as a real multi-user app, not a single-owner tool.
 
@@ -8,15 +8,15 @@ Built by Anwar Creative Studio.
 
 ## What it does
 
-- **Your own list.** Watchlist, watching, and watched, each title with your star rating (half steps), a note, and the month you saw it. Filter by films or series and by status, search, and sort.
-- **A list together.** Pair with an accepted friend and get a shared list, one per friend, each with its own name you can rename any time. Both of you add titles, and each entry carries a rating per person, so "his and hers" scores sit side by side with the average. Move an entry between your list and a shared one whenever you realise you watched it together. A bell in the nav lights up the moment the other person rates or notes something there. Your personal list stays yours.
-- **Friends.** Find people by username, send and accept requests, start a shared list with any of them, and compare your list against theirs: what you both have, what only one of you has, and what you have both seen.
-- **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Sort by rating, year or name. Add anything to any list in two clicks.
+- **Your own list.** Watchlist, watching, and watched, each title with your star rating (half steps), a note, and the month you saw it. Log a rewatch without losing the original date. Filter by films or series and by status, search, and sort. A year-in-review page turns it into what you actually watched, not what you meant to: hours, top genres, your highest-rated title, your busiest month.
+- **A list together, with room to grow.** Pair with an accepted friend and get a shared list, one per friend, each with its own name you can rename any time. Everyone on it adds titles, and each entry carries a rating per person, so scores sit side by side with the average. A list isn't capped at two: any member can add another of their own friends to it, up to eight people. Move an entry between your list and a shared one whenever you realise you watched it together, or copy a personal note onto a shared entry instead of retyping it. A bell in the nav lights up the moment someone else rates or notes something there. Your personal list stays yours.
+- **Friends.** Find people by username or send them your invite link, accept requests, start a shared list with any of them, and compare your list against theirs: what you both have, what only one of you has, and what you have both seen.
+- **A living library.** Search the full catalogue, or browse what is trending, in cinemas, and on air this week. Sort by rating, year or name. Add anything to any list in two clicks. A Top 100 chart tracks TMDB's own popularity ranking live, no stored list to go stale.
 - **Scores on every card.** IMDb, Rotten Tomatoes and Metacritic, pulled once per title from OMDb and cached, shown on list cards, library cards and title pages, with a small legend.
 - **A home page.** Recent film and TV coverage from The Guardian in an in-app reader, the latest ratings from your friends, what is coming, what is trending this week, and older films worth another look.
 - **Surprise me.** Can't decide? Roll a random pick, filtered to films or series, from your watchlist, a shared one, or TMDB's popular feed for something you have not come across yet.
-- **Title pages.** Backdrop, synopsis, cast, runtime, all the scores, and a link out to the real IMDb page.
-- **Settings.** Theme (system, light, dark), a JSON export of your whole list, and account deletion behind a typed confirmation that also purges your personal rows.
+- **Title pages.** Backdrop, synopsis, cast, runtime, all the scores, a trailer link, where to stream, rent or buy it in your own region, similar titles to try next, and a link out to the real IMDb page.
+- **Settings.** Theme (system, light, dark), a choice of illustrated character avatars, a JSON export of your whole list, and account deletion behind a typed confirmation that also purges your personal rows.
 
 ## How it works
 
@@ -24,7 +24,7 @@ A list entry has an `owner_type` of either `user` or `space`. A personal list an
 
 Titles are cached in a local `titles` table when first added, so a list points at a stable row and your history does not shift if TMDB changes.
 
-Postgres row level security does the access control. A signed-in user can read and write their own `user` entries and any `space` entry for a space they belong to. Ratings are readable by anyone who can see the parent entry and writable only for your own row. Pairing two people into a shared space goes through a `security definer` function that first checks the friendship is accepted.
+Postgres row level security does the access control. A signed-in user can read and write their own `user` entries and any `space` entry for a space they belong to. Ratings are readable by anyone who can see the parent entry and writable only for your own row. Neither `list_entries` nor `ratings` nor the RLS policies that gate them cap a space's membership; the two `security definer` functions that grow one do that instead. Starting a space (`create_couple_space`) and adding another member to an existing one (`add_space_member`) both first check the friendship being relied on is accepted — and specifically the *acting* user's own friendship with whoever is being added, not any existing member's.
 
 ## Tech stack
 
@@ -122,9 +122,9 @@ Open the local URL Vite prints, create an account, and start adding titles from 
 | `profiles` | One row per auth user, created by a trigger on sign up. Holds the username and display name. |
 | `titles` | Local cache of TMDB media so lists reference a stable row. |
 | `list_entries` | A title on a list. `owner_type` is `user` or `space`; carries status, note, and watched date. |
-| `ratings` | One row per person per entry. This is how a couple's two ratings live on one shared entry. |
+| `ratings` | One row per person per entry. This is how everyone's ratings on a shared entry sit side by side. |
 | `friendships` | Requester, addressee, and status (`pending` or `accepted`). |
-| `spaces` + `space_members` | A shared list and who belongs to it. `create_couple_space(friend)` pairs two accepted friends. |
+| `spaces` + `space_members` | A shared list and who belongs to it. `create_couple_space(friend)` starts one between two accepted friends; `add_space_member(space, friend)` grows an existing one, up to 8 people, gated on the adder's own friendship with whoever they're adding. |
 | `notifications` | One row per (recipient, entry, kind). Triggers on `ratings` and `list_entries.note` write these for the *other* space member; a repeat rating or note edit refreshes the row instead of adding another. Delivered live over Supabase realtime. |
 
 ## Scripts
@@ -143,20 +143,22 @@ npm run icons      # regenerate the PNG icons from the mark
 
 `npm test` covers the pure logic: OMDb score parsing, Guardian article mapping, TMDB normalisation and the upcoming/classic filters, list averages, and theme persistence.
 
-`supabase/tests/rls_test.sql` is a pgTAP suite that runs against a throwaway database (`supabase start && npm run test:db`, or the CI `database` job). It asserts that one user cannot read or write another's personal list or ratings or profile, that a couple space is visible only to its two members, that `friend_activity` and `list_compare` only return data between accepted friends, and that `delete_own_account` removes exactly the caller and their personal rows.
+`supabase/tests/rls_test.sql` is a pgTAP suite that runs against a throwaway database (`supabase start && npm run test:db`, or the CI `database` job). It asserts that one user cannot read or write another's personal list or ratings or profile, that a shared space is visible only to its members, that a space can grow past a pair but only when the *acting* member has their own accepted friendship with whoever they're adding (not merely riding on a fellow member's), that `friend_activity` and `list_compare` only return data between accepted friends, and that `delete_own_account` removes exactly the caller and their personal rows.
 
 CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and the build on every push, plus the database tests on a fresh Supabase stack.
 
 ## What's here now, and what's next
 
-- Done: accounts with email confirmation, personal list, shared couple list with per-person ratings, friends, TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a theme switch, list export, account deletion, privacy and terms pages, a mobile layout, an installable manifest, and an `/api/*` proxy that keeps the third-party keys server-side and caches their responses on the CDN.
+- Done: accounts with email confirmation, personal list, shared lists (starting as a pair, growable to a group) with per-person ratings, friends (by username or an invite link), TMDB search and discovery feeds, IMDb / RT / Metacritic scores, a home page with a Guardian press feed, title pages with cast, a trailer link, where to watch in the viewer's own region, and similar titles, a theme switch, illustrated character avatars, list export, account deletion, privacy and terms pages, a mobile layout, an installable manifest, and an `/api/*` proxy that keeps the third-party keys server-side and caches their responses on the CDN.
+- Done: rewatch tracking on a watched entry, and a year-in-review stats page computed entirely client-side from data already on the list.
+- Done: a Top 100 chart driven live by TMDB's own popularity ranking, not a stored or scraped list.
 - Done (opt-in): `/api/poster` caches TMDB poster art into Supabase Storage so the grid does not depend on TMDB's CDN. Off until `SUPABASE_SERVICE_ROLE_KEY` and `VITE_POSTER_CACHE` are set.
 - Done: a per-IP rate limit on every `/api/*` function, and crash reporting to Sentry when `VITE_SENTRY_DSN` is set.
 - Done: a friend activity feed on the home page, and list comparison between any two friends (both security-definer RPCs gated on an accepted friendship).
-- Done: live in-app notifications when the other person on a shared list rates or notes a title.
-- Not yet: push notifications for when the app is closed (the in-app bell needs it open or freshly loaded).
+- Done: live in-app notifications when someone else on a shared list rates or notes a title.
+- Not yet: push notifications for when the app is closed (the in-app bell needs it open or freshly loaded) — needs a service worker, VAPID keys, and a server-side trigger, not just client code.
 - Not yet: a native iOS client on the same Supabase API.
-- Not yet: spaces larger than two people.
+- Not yet: importing an existing Letterboxd or IMDb history.
 
 ## Prototype
 

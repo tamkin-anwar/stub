@@ -5,6 +5,7 @@ const TITLES: [RegExp, string][] = [
   [/^\/$/, "Stub"],
   [/^\/login/, "Sign in · Stub"],
   [/^\/signup/, "Create account · Stub"],
+  [/^\/invite\//, "You're invited · Stub"],
   [/^\/privacy/, "Privacy · Stub"],
   [/^\/terms/, "Terms · Stub"],
   [/^\/app\/list/, "My list · Stub"],
@@ -13,6 +14,8 @@ const TITLES: [RegExp, string][] = [
   [/^\/app\/friends/, "Friends · Stub"],
   [/^\/app\/compare/, "Compare · Stub"],
   [/^\/app\/settings/, "Settings · Stub"],
+  [/^\/app\/stats/, "Your year · Stub"],
+  [/^\/app\/top100/, "Top 100 · Stub"],
   [/^\/app\/title\//, "Stub"],
   [/^\/app/, "Home · Stub"],
 ];

@@ -9,14 +9,15 @@ import { dismissShareNudge, isShareNudgeDismissed } from "../lib/shareNudge";
  *  experience on its own, this is a suggestion, not a nag. */
 export function ShareNudge({ selfId }: { selfId: string | undefined }) {
   const { data: friends } = useFriends(selfId);
-  const [dismissed, setDismissed] = useState(isShareNudgeDismissed);
+  const [dismissed, setDismissed] = useState(() => !selfId || isShareNudgeDismissed(selfId));
 
+  if (!selfId) return null;
   if (dismissed) return null;
   if (friends === undefined) return null;
   if (friends.some((f) => f.direction === "friends")) return null;
 
   function close() {
-    dismissShareNudge();
+    dismissShareNudge(selfId!);
     setDismissed(true);
   }
 

@@ -1,5 +1,5 @@
 import { Suspense, useEffect } from "react";
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./components/Toast";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -31,6 +31,7 @@ function Loading() {
 
 function AppLayout() {
   const { loading, user, profile, profileChecked, signOut } = useAuth();
+  const location = useLocation();
 
   // A session whose profile row is gone (account deleted, or the sign-up trigger
   // never ran) is unusable. Clear it and send the person back to sign in.
@@ -49,7 +50,10 @@ function AppLayout() {
       </a>
       <Nav />
       <main id="main">
-        <ErrorBoundary>
+        {/* Keyed by route so a crash on one page doesn't poison every page
+            navigated to afterward: a route change remounts the boundary,
+            clearing its error state along with it. */}
+        <ErrorBoundary key={location.pathname}>
           <Suspense fallback={<Loading />}>
             <Outlet />
           </Suspense>
@@ -61,13 +65,14 @@ function AppLayout() {
 
 export function App() {
   const { configured } = useAuth();
+  const location = useLocation();
 
   if (!configured) return <SetupScreen />;
 
   return (
     <ToastProvider>
       <DocumentTitle />
-      <ErrorBoundary>
+      <ErrorBoundary key={location.pathname}>
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Landing />} />

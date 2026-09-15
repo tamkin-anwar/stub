@@ -168,11 +168,12 @@ export function SharedList() {
           </p>
           {acceptedFriends.length === 0 ? (
             <p className="muted" style={{ fontSize: 13.5 }}>
-              You need a friend first. <Link to="/app/friends">Find people</Link>.
+              You need a friend first. <Link to="/app/friends" className="link-accent">Find people</Link>.
             </p>
           ) : pairable.length === 0 ? (
             <p className="muted" style={{ fontSize: 13.5 }}>
-              You already share a list with everyone. <Link to="/app/friends">Add more friends</Link> to
+              You already share a list with everyone.{" "}
+              <Link to="/app/friends" className="link-accent">Add more friends</Link> to
               start another.
             </p>
           ) : (

@@ -11,10 +11,11 @@ export interface NotificationItem {
   actorName: string;
   actorAccent: string;
   actorAvatarStyle: string;
-  spaceName: string;
-  tmdbId: number;
-  mediaType: MediaType;
-  titleName: string;
+  /** null for a friend_request notification: it isn't tied to a shared list. */
+  spaceName: string | null;
+  tmdbId: number | null;
+  mediaType: MediaType | null;
+  titleName: string | null;
   year: number | null;
   posterPath: string | null;
 }
@@ -56,7 +57,9 @@ export async function fetchNotifications(limit = 30): Promise<NotificationItem[]
   if (error) throw error;
 
   return ((data ?? []) as unknown as NotificationRow[])
-    .filter((r) => r.entry?.title && r.actor)
+    // A friend request has no entry/title to speak of; every other kind
+    // does, so only those need one to render sensibly.
+    .filter((r) => r.actor && (r.kind === "friend_request" || r.entry?.title))
     .map((r) => ({
       id: r.id,
       kind: r.kind,
@@ -67,12 +70,12 @@ export async function fetchNotifications(limit = 30): Promise<NotificationItem[]
       actorName: r.actor!.display_name?.trim() || r.actor!.username,
       actorAccent: r.actor!.accent,
       actorAvatarStyle: r.actor!.avatar_style,
-      spaceName: r.space?.name ?? "your shared list",
-      tmdbId: r.entry!.title!.tmdb_id,
-      mediaType: r.entry!.title!.media_type,
-      titleName: r.entry!.title!.name,
-      year: r.entry!.title!.year,
-      posterPath: r.entry!.title!.poster_path,
+      spaceName: r.space?.name ?? null,
+      tmdbId: r.entry?.title?.tmdb_id ?? null,
+      mediaType: r.entry?.title?.media_type ?? null,
+      titleName: r.entry?.title?.name ?? null,
+      year: r.entry?.title?.year ?? null,
+      posterPath: r.entry?.title?.poster_path ?? null,
     }));
 }
 

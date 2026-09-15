@@ -32,7 +32,9 @@ function BellIcon() {
 }
 
 function label(n: NotificationItem): string {
-  return n.kind === "rating" ? "rated" : "left a note on";
+  if (n.kind === "rating") return "rated";
+  if (n.kind === "note") return "left a note on";
+  return "sent you a friend request";
 }
 
 /** A bell in the nav that lights up when someone you share a list with
@@ -54,7 +56,7 @@ export function NotificationBell() {
   function openItem(n: NotificationItem) {
     if (!n.read) markRead.mutate(n.id);
     setOpen(false);
-    navigate("/app/shared");
+    navigate(n.kind === "friend_request" ? "/app/friends" : "/app/shared");
   }
 
   return (
@@ -99,7 +101,10 @@ export function NotificationBell() {
               </p>
             ) : (
               items.map((n) => {
-                const poster = storedPosterUrl(n.posterPath) ?? posterUrl(n.posterPath, "w185");
+                const poster =
+                  n.kind === "friend_request"
+                    ? null
+                    : storedPosterUrl(n.posterPath) ?? posterUrl(n.posterPath, "w185");
                 return (
                   <button
                     key={n.id}
@@ -111,11 +116,12 @@ export function NotificationBell() {
                     <Avatar name={n.actorName} accent={n.actorAccent} avatarStyle={n.actorAvatarStyle} />
                     <span className="grow activity-text">
                       <span className="activity-line">
-                        <strong>{n.actorName}</strong> {label(n)} <strong>{n.titleName}</strong>
+                        <strong>{n.actorName}</strong> {label(n)}
+                        {n.kind !== "friend_request" && <strong> {n.titleName}</strong>}
                         {n.kind === "rating" && n.stars ? ` · ★${n.stars.toFixed(1)}` : ""}
                       </span>
                       <span className="handle">
-                        {n.spaceName} · {timeAgo(n.createdAt)}
+                        {n.kind === "friend_request" ? timeAgo(n.createdAt) : `${n.spaceName} · ${timeAgo(n.createdAt)}`}
                       </span>
                     </span>
                     {poster && <img className="activity-thumb" src={poster} alt="" loading="lazy" />}

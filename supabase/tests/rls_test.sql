@@ -3,7 +3,7 @@
 -- (pgTAP is enabled by the Supabase test harness.)
 
 begin;
-select plan(48);
+select plan(53);
 
 -- ---------------------------------------------------------------------------
 -- fixtures, as the migration/superuser role
@@ -295,6 +295,44 @@ select is(
      and addressee = '22222222-2222-2222-2222-222222222222'),
   'pending',
   'the request landed as a pending row');
+
+-- ---------------------------------------------------------------------------
+-- friend request notifications, and the mutual-request-becomes-accept path
+-- ---------------------------------------------------------------------------
+select pg_temp.login('22222222-2222-2222-2222-222222222222');
+select is(
+  (select count(*)::int from public.notifications
+   where user_id = '22222222-2222-2222-2222-222222222222'
+     and actor_id = '33333333-3333-3333-3333-333333333333'
+     and kind = 'friend_request'),
+  1,
+  'u2 was notified of u3''s friend request');
+
+select lives_ok(
+  $$select public.send_friend_request('33333333-3333-3333-3333-333333333333')$$,
+  'u2 sending a request back to u3, who already asked, does not error');
+
+select is(
+  (select status from public.friendships
+   where requester = '33333333-3333-3333-3333-333333333333'
+     and addressee = '22222222-2222-2222-2222-222222222222'),
+  'accepted',
+  'the mutual request auto-accepted the original row instead of creating a duplicate');
+
+select is(
+  (select count(*)::int from public.friendships
+   where (requester = '22222222-2222-2222-2222-222222222222' and addressee = '33333333-3333-3333-3333-333333333333')
+      or (requester = '33333333-3333-3333-3333-333333333333' and addressee = '22222222-2222-2222-2222-222222222222')),
+  1,
+  'still only one friendship row between u2 and u3, not a mirrored pair');
+
+select is(
+  (select count(*)::int from public.notifications
+   where user_id = '22222222-2222-2222-2222-222222222222'
+     and actor_id = '33333333-3333-3333-3333-333333333333'
+     and kind = 'friend_request'),
+  0,
+  'accepting clears the friend request notification');
 
 select isnt(
   (select count(*)::int from public.search_profiles('user')),

@@ -87,7 +87,7 @@ export interface SpaceWithMembers extends Space {
   members: Profile[];
 }
 
-export type NotificationKind = "rating" | "note";
+export type NotificationKind = "rating" | "note" | "friend_request";
 
 /** Normalized TMDB search / discover result. */
 export interface TmdbTitle {

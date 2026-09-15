@@ -29,6 +29,16 @@ export function lazyRetry<T extends ComponentType<unknown>>(
         /* private mode: fall through and rethrow */
       }
       if (!reloaded) {
+        // A stale service worker can still hand back the same old shell on
+        // reload, wasting the one retry this guards with. Poke it to check
+        // for a new version first so the reload actually lands on fresh
+        // chunks instead of racing the same failure again.
+        try {
+          const reg = await navigator.serviceWorker?.getRegistration();
+          await reg?.update();
+        } catch {
+          /* no SW, or the check itself failed: reload anyway */
+        }
         window.location.reload();
         // Hold Suspense until the page navigates away.
         return new Promise<{ default: T }>(() => {});

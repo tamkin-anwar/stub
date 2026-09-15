@@ -30,7 +30,7 @@ export function Stars({ value, onChange, readOnly, size = 22 }: StarsProps) {
   function onKeyDown(e: React.KeyboardEvent) {
     if (!editable) return;
     const cur = value ?? 0;
-    let next: number | null = null;
+    let next: number | null;
     if (e.key === "ArrowRight" || e.key === "ArrowUp") next = clamp(cur + 0.5);
     else if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = cur <= 0.5 ? null : clamp(cur - 0.5);
     else if (e.key === "Home") next = 0.5;

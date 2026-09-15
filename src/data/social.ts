@@ -8,22 +8,13 @@ import type {
   SpaceWithMembers,
 } from "../lib/types";
 
-export async function searchProfiles(term: string, selfId: string): Promise<Profile[]> {
-  // Strip characters that are special to PostgREST's filter grammar so a
-  // stray comma or paren in the query can't break (or bend) the request.
-  const q = term
-    .trim()
-    .replace(/^@/, "")
-    .replace(/[%,()"'\\*]/g, " ")
-    .trim();
-  if (q.length < 2) return [];
+/** Both this and getProfileByUsername go through a rate-limited RPC rather
+ *  than a raw table select: neither goes through /api/*, so nothing else
+ *  stands between the anon key and someone scripting a username scrape. */
+export async function searchProfiles(term: string): Promise<Profile[]> {
+  if (term.trim().replace(/^@/, "").length < 2) return [];
   const sb = requireSupabase();
-  const { data, error } = await sb
-    .from("profiles")
-    .select("*")
-    .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
-    .neq("id", selfId)
-    .limit(12);
+  const { data, error } = await sb.rpc("search_profiles", { term });
   if (error) throw error;
   return (data ?? []) as Profile[];
 }
@@ -32,13 +23,9 @@ export async function searchProfiles(term: string, selfId: string): Promise<Prof
  *  search. `username` is citext, so this is already case-insensitive. */
 export async function getProfileByUsername(username: string): Promise<Profile | null> {
   const sb = requireSupabase();
-  const { data, error } = await sb
-    .from("profiles")
-    .select("*")
-    .eq("username", username.trim().replace(/^@/, ""))
-    .maybeSingle();
+  const { data, error } = await sb.rpc("get_profile_by_username", { uname: username });
   if (error) throw error;
-  return (data as Profile | null) ?? null;
+  return ((data as Profile[] | null) ?? [])[0] ?? null;
 }
 
 export async function fetchFriendViews(selfId: string): Promise<FriendView[]> {
@@ -72,11 +59,9 @@ export async function fetchFriendViews(selfId: string): Promise<FriendView[]> {
     .filter((x): x is FriendView => x !== null);
 }
 
-export async function sendFriendRequest(selfId: string, targetId: string): Promise<void> {
+export async function sendFriendRequest(targetId: string): Promise<void> {
   const sb = requireSupabase();
-  const { error } = await sb
-    .from("friendships")
-    .insert({ requester: selfId, addressee: targetId, status: "pending" });
+  const { error } = await sb.rpc("send_friend_request", { target: targetId });
   if (error && error.code !== "23505") throw error;
 }
 

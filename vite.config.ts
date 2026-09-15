@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 
 /**
  * Run the /api/* Edge functions during `vite dev`. Vercel runs them in
@@ -44,7 +45,31 @@ export default defineConfig(({ mode }) => {
   // Stamp the build with the deploy's commit so error reports name a version.
   const commit = env.VITE_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || "";
   return {
-    plugins: [react(), apiDev(env)],
+    plugins: [
+      react(),
+      apiDev(env),
+      // Precaches the built app shell only — never /api/*, never Supabase —
+      // so the SPA still boots offline (or on a stale connection) and can
+      // show its own "you're offline" state, instead of a network error
+      // for data that was never going to be safe to serve stale anyway.
+      VitePWA({
+        registerType: "autoUpdate",
+        injectRegister: null,
+        manifest: false,
+        includeAssets: [
+          "favicon.svg",
+          "favicon-32.png",
+          "favicon-192.png",
+          "favicon-512.png",
+          "apple-touch-icon.png",
+          "icon-maskable-512.png",
+        ],
+        workbox: {
+          navigateFallbackDenylist: [/^\/api\//],
+          globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        },
+      }),
+    ],
     define: { "import.meta.env.VITE_COMMIT_SHA": JSON.stringify(commit) },
     server: { port: 5173 },
     build: {

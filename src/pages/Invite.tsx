@@ -32,7 +32,7 @@ export function Invite() {
           setState("invalid");
           return;
         }
-        await sendFriendRequest(profile.id, target.id);
+        await sendFriendRequest(target.id);
         toast(`Friend request sent to ${target.display_name?.trim() || target.username}`);
         navigate("/app/friends", { replace: true });
       } catch {

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDebouncedValue } from "./useDebouncedValue";
 import {
   acceptFriendRequest,
   addSpaceMember,
@@ -23,10 +24,13 @@ export function useFriends(selfId: string | undefined) {
 }
 
 export function useProfileSearch(term: string, selfId: string | undefined) {
+  // One query per keystroke would burn through the search rate limit fast;
+  // real typing pauses for a beat, a script hammering the box does not.
+  const debounced = useDebouncedValue(term, 350);
   return useQuery({
-    queryKey: ["profile-search", term, selfId],
-    queryFn: () => searchProfiles(term, selfId as string),
-    enabled: !!selfId && term.trim().length >= 2,
+    queryKey: ["profile-search", debounced, selfId],
+    queryFn: () => searchProfiles(debounced),
+    enabled: !!selfId && debounced.trim().length >= 2,
   });
 }
 
@@ -38,7 +42,7 @@ export function useFriendActions(selfId: string) {
   };
   return {
     request: useMutation({
-      mutationFn: (targetId: string) => sendFriendRequest(selfId, targetId),
+      mutationFn: (targetId: string) => sendFriendRequest(targetId),
       onSuccess: invalidate,
     }),
     accept: useMutation({

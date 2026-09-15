@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./components/Toast";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { DocumentTitle } from "./components/DocumentTitle";
+import { OfflineBanner } from "./components/OfflineBanner";
 import { Nav } from "./components/Nav";
 import { SetupScreen } from "./pages/SetupScreen";
 import { lazyRetry } from "./lib/lazyRetry";
@@ -72,6 +73,7 @@ export function App() {
   return (
     <ToastProvider>
       <DocumentTitle />
+      <OfflineBanner />
       <ErrorBoundary key={location.pathname}>
         <Suspense fallback={<Loading />}>
           <Routes>

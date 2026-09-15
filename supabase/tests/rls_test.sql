@@ -3,7 +3,7 @@
 -- (pgTAP is enabled by the Supabase test harness.)
 
 begin;
-select plan(36);
+select plan(48);
 
 -- ---------------------------------------------------------------------------
 -- fixtures, as the migration/superuser role
@@ -250,6 +250,60 @@ select throws_ok(
     current_setting('test.space_id')),
   'P0001', null,
   'adding someone with no accepted friendship at all fails the same way');
+
+-- ---------------------------------------------------------------------------
+-- check_rate_limit: the gate behind send_friend_request and search_profiles,
+-- since neither goes through the /api/* proxy's per-IP limiter
+-- ---------------------------------------------------------------------------
+select pg_temp.login('22222222-2222-2222-2222-222222222222');
+
+select lives_ok($$select public.check_rate_limit('rl_test_a', 3, 60)$$, 'call 1 of 3 is fine');
+select lives_ok($$select public.check_rate_limit('rl_test_a', 3, 60)$$, 'call 2 of 3 is fine');
+select lives_ok($$select public.check_rate_limit('rl_test_a', 3, 60)$$, 'call 3 of 3 is fine');
+select throws_ok(
+  $$select public.check_rate_limit('rl_test_a', 3, 60)$$,
+  '42901', 'Too many requests. Wait a few minutes and try again.',
+  'the 4th call inside the window is refused');
+
+select lives_ok(
+  $$select public.check_rate_limit('rl_test_b', 1, 1)$$,
+  'a fresh bucket with its own 1-second window is unaffected by rl_test_a');
+select throws_ok(
+  $$select public.check_rate_limit('rl_test_b', 1, 1)$$,
+  '42901', null,
+  'immediately over that bucket''s own limit');
+select pg_sleep(1.1); -- plain statement, not a TAP assertion: just clears the 1-second window
+select lives_ok(
+  $$select public.check_rate_limit('rl_test_b', 1, 1)$$,
+  'the window has rolled over, so this one is allowed again');
+
+-- ---------------------------------------------------------------------------
+-- send_friend_request and search_profiles: same RLS-visible data as before,
+-- just gated on rate now, and self-targeting is refused outright
+-- ---------------------------------------------------------------------------
+select pg_temp.login('33333333-3333-3333-3333-333333333333');
+select throws_ok(
+  $$select public.send_friend_request('33333333-3333-3333-3333-333333333333')$$,
+  'P0001', null,
+  'cannot send a friend request to yourself');
+select lives_ok(
+  $$select public.send_friend_request('22222222-2222-2222-2222-222222222222')$$,
+  'u3 can send u2 a friend request');
+select is(
+  (select status from public.friendships
+   where requester = '33333333-3333-3333-3333-333333333333'
+     and addressee = '22222222-2222-2222-2222-222222222222'),
+  'pending',
+  'the request landed as a pending row');
+
+select isnt(
+  (select count(*)::int from public.search_profiles('user')),
+  0,
+  'search_profiles finds the fixture users by a substring of their username');
+select is(
+  (select count(*)::int from public.search_profiles('user') where id = '33333333-3333-3333-3333-333333333333'),
+  0,
+  'search_profiles never returns the caller themselves');
 
 -- ---------------------------------------------------------------------------
 -- delete_own_account removes only the caller and their personal data

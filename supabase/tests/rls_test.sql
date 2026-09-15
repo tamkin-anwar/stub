@@ -334,6 +334,7 @@ select is(
   0,
   'accepting clears the friend request notification');
 
+select pg_temp.login('33333333-3333-3333-3333-333333333333');
 select isnt(
   (select count(*)::int from public.search_profiles('user')),
   0,

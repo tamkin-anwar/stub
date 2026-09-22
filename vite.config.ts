@@ -71,7 +71,9 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     define: { "import.meta.env.VITE_COMMIT_SHA": JSON.stringify(commit) },
-    server: { port: 5173 },
+    // Honour an assigned PORT (e.g. when 5173 is already taken by another
+    // project's dev server) instead of always fighting over the same port.
+    server: { port: Number(process.env.PORT) || 5173 },
     build: {
       // Split the heavy, rarely-changing libraries out of the app bundle so a
       // first visit doesn't pull one big file, and repeat visits keep the

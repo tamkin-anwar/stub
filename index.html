@@ -6,7 +6,11 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- "black-translucent" lets content scroll under the status bar, but iOS then
+         renders its own blur/vibrancy over that region on every app that uses it —
+         that's the haze at the very top, not app CSS. Opaque "black" matches our
+         near-black dark theme with no translucency, so there's nothing to blur. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Stub" />
     <meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f5f3ef" media="(prefers-color-scheme: light)" />

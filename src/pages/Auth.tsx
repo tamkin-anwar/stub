@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { authErrorMessage } from "../lib/authError";
 
 export function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const { user, loading, signIn, signUp, resendConfirmation } = useAuth();
@@ -40,7 +41,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
         navigate(dest);
       }
     } catch (e2) {
-      setErr(e2 instanceof Error ? e2.message : "Something went wrong.");
+      setErr(authErrorMessage(e2));
     } finally {
       setBusy(false);
     }
@@ -53,7 +54,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
       await resendConfirmation(sentTo);
       setResent(true);
     } catch (e2) {
-      setErr(e2 instanceof Error ? e2.message : "Could not resend the email.");
+      setErr(authErrorMessage(e2, "Could not resend the email."));
     }
   }
 

@@ -76,7 +76,7 @@ export function Landing() {
         <span className="site-foot-by">
           by{" "}
           <a
-            href="https://tamkin-anwar.github.io/anwar-creative-studio-portfolio/"
+            href="https://anwarcreativestudio.com/"
             target="_blank"
             rel="noreferrer"
           >

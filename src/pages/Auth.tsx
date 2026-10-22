@@ -187,7 +187,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
       <p className="auth-by">
         by{" "}
         <a
-          href="https://tamkin-anwar.github.io/anwar-creative-studio-portfolio/"
+          href="https://anwarcreativestudio.com/"
           target="_blank"
           rel="noreferrer"
         >
